@@ -50,7 +50,7 @@ if (messaging) {
     if (payload.notification) {
       new Notification(payload.notification.title ?? "", {
         body: payload.notification.body ?? "",
-        icon: "/icons/icon-192x192.png",
+        icon: "vercel.svg",
       });
     } else {
       console.error("Received message without notification payload");
