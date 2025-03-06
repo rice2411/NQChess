@@ -3,6 +3,10 @@ import { requestNotificationPermission } from "@/lib/firebase";
 import TestFirestore from "./test";
 import { useEffect } from "react";
 export default function Home() {
+  const handleGetToken = async () => {
+    const token = await requestNotificationPermission();
+    localStorage.setItem("token", JSON.stringify(token));
+  };
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -14,10 +18,8 @@ export default function Home() {
           console.error("Service Worker registration failed:", error);
         });
     }
-
+    handleGetToken();
     // Yêu cầu quyền nhận thông báo
-    const token = requestNotificationPermission();
-    localStorage.setItem("token", JSON.stringify(token));
   }, []);
   return (
     <div>
