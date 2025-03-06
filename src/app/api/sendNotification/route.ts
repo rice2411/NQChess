@@ -23,7 +23,10 @@ export async function POST(req: NextRequest) {
     // Gửi thông báo đến FCM
     const response = await admin.messaging().send(message);
     return NextResponse.json({ success: true, response });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: (error as Error).message },
+      { status: 500 }
+    );
   }
 }

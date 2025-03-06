@@ -2,7 +2,12 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import {
+  getMessaging,
+  getToken,
+  MessagePayload,
+  onMessage,
+} from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -41,11 +46,14 @@ export const requestNotificationPermission = async () => {
 
 // Lắng nghe tin nhắn FCM khi ứng dụng đang mở
 if (messaging) {
-  onMessage(messaging, (payload: any) => {
-    console.log("Message received. ", payload);
-    new Notification(payload.notification.title, {
-      body: payload.notification.body,
-      icon: "/icons/icon-192x192.png",
-    });
+  onMessage(messaging, (payload: MessagePayload) => {
+    if (payload.notification) {
+      new Notification(payload.notification.title ?? "", {
+        body: payload.notification.body ?? "",
+        icon: "/icons/icon-192x192.png",
+      });
+    } else {
+      console.error("Received message without notification payload");
+    }
   });
 }
