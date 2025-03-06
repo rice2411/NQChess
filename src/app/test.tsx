@@ -1,15 +1,12 @@
 "use client";
 
 import { db } from "@/lib/firebase";
+import { DocumentData } from "firebase-admin/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useState } from "react";
 
-interface FirestoreData {
-  message: string;
-  timestamp: Date;
-}
 export default function TestFirestore() {
-  const [data, setData] = useState<FirestoreData[]>([]);
+  const [data, setData] = useState<DocumentData[]>([]);
 
   const saveData = async () => {
     try {
