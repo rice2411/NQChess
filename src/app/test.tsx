@@ -1,8 +1,5 @@
 "use client";
 
-import { DocumentData } from "firebase-admin/firestore";
-import { useState } from "react";
-
 export default function TestFirestore() {
   const saveData = async () => {
     try {
