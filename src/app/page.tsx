@@ -16,7 +16,8 @@ export default function Home() {
     }
 
     // Yêu cầu quyền nhận thông báo
-    requestNotificationPermission();
+    const token = requestNotificationPermission();
+    localStorage.setItem("token", JSON.stringify(token));
   }, []);
   return (
     <div>
