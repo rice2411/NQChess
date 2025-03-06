@@ -33,7 +33,20 @@ export const requestNotificationPermission = async () => {
       const token = await getToken(messaging, {
         vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
       });
-      console.log("FCM Token:", token);
+      fetch("https://nq-chess.vercel.app/api/sendNotification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: token,
+          title: "🚀 Thông báo từ Next.js",
+          body: "Bạn vừa nhận được một thông báo từ server!",
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => console.log("Response:", data))
+        .catch((err) => console.error("Error:", err));
       return token;
     } else {
       console.error("Permission not granted");
