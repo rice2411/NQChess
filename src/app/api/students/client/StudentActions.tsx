@@ -20,6 +20,9 @@ export function StudentActions({ selectedStudents }: StudentActionsProps) {
         fullName: "New Student",
         dateOfBirth: "2000-01-01",
         phoneNumber: "123456789",
+        avatar: "https://via.placeholder.com/150",
+        gender: "Nam",
+        classes: ["Lớp 1", "Lớp 2"],
       };
       await StudentService.createOrUpdateStudent(newStudent);
       router.refresh();

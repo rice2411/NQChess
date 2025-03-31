@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StudentService } from "@/services/students";
-
+import Link from "next/link"; // Import Link
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
@@ -36,10 +36,10 @@ export default function StudentsPage() {
   const handleSearch = async () => {
     try {
       setIsLoading(true);
-      const results = await StudentService.searchStudents(searchCriteria);
-      setStudents(results);
+      const foundStudent = await StudentService.searchStudent(searchCriteria);
+      setStudents(foundStudent ? [foundStudent] : []);
     } catch (error) {
-      console.error("Error searching students:", error);
+      console.error("Error searching student:", error);
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +53,9 @@ export default function StudentsPage() {
         fullName: "Nguyễn Văn A",
         dateOfBirth: "2000-01-01",
         phoneNumber: "0123456789",
+        avatar: "https://via.placeholder.com/150",
+        gender: "Nam",
+        classes: ["Lớp 1", "Lớp 2"],
       };
       await StudentService.createOrUpdateStudent(newStudent);
       handleGetList(); // Refresh list after create
@@ -129,6 +132,9 @@ export default function StudentsPage() {
     <div className="container mx-auto p-4 space-y-4">
       <Card className="p-4">
         <h1 className="text-2xl font-bold mb-4">Quản lý học sinh</h1>
+        <Link href="/" className="text-blue-500 mb-4 inline-block">
+          Về trang chính
+        </Link>
 
         {/* Search Form */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

@@ -51,36 +51,32 @@ export const StudentService = {
     }
   },
 
-  // Search students by criteria
-  searchStudents: async (searchCriteria: {
+  // Search for a single student by criteria
+  searchStudent: async (searchCriteria: {
     fullName?: string;
     dateOfBirth?: string;
     phoneNumber?: string;
-  }) => {
+  }): Promise<Student | null> => {
     try {
       const allStudents = (await readDocument(COLLECTION_NAME)) as Student[];
-      const filteredStudents = allStudents.filter((student) => {
-        if (
-          searchCriteria.fullName &&
-          student.fullName !== searchCriteria.fullName
-        )
-          return false;
-        if (
-          searchCriteria.dateOfBirth &&
-          student.dateOfBirth !== searchCriteria.dateOfBirth
-        )
-          return false;
-        if (
-          searchCriteria.phoneNumber &&
-          student.phoneNumber !== searchCriteria.phoneNumber
-        )
-          return false;
-        return true;
+      const foundStudent = allStudents.find((student: Student) => {
+        const matchesFullName = searchCriteria.fullName
+          ? student.fullName === searchCriteria.fullName
+          : true;
+        const matchesDateOfBirth = searchCriteria.dateOfBirth
+          ? student.dateOfBirth === searchCriteria.dateOfBirth
+          : true;
+        const matchesPhoneNumber = searchCriteria.phoneNumber
+          ? student.phoneNumber === searchCriteria.phoneNumber
+          : true;
+
+        return matchesFullName && matchesDateOfBirth && matchesPhoneNumber;
       });
-      return filteredStudents as Student[];
+
+      return foundStudent || null; // Trả về học sinh tìm thấy hoặc null nếu không có
     } catch (error) {
-      console.error("Error searching students:", error);
-      throw error;
+      console.error("Error searching student:", error);
+      return null; // Trả về null nếu có lỗi
     }
   },
 };
