@@ -30,13 +30,25 @@ export const ClassService = {
     }
   },
 
-  // Đọc danh sách lớp học
+  // Lấy danh sách lớp học
   getClasses: async () => {
     try {
-      const results = await readDocument(COLLECTION_NAME);
-      return results as Class[];
+      const data = await readDocument(COLLECTION_NAME);
+      return data as Class[];
     } catch (error) {
-      console.error("Error reading classes:", error);
+      console.error("Error getting classes:", error);
+      throw error;
+    }
+  },
+
+  // Lấy thông tin một lớp học
+  getClass: async (id: string) => {
+    try {
+      const data = await readDocument(COLLECTION_NAME);
+      const classes = data as Class[];
+      return classes.find((cls) => cls.id === id);
+    } catch (error) {
+      console.error("Error getting class:", error);
       throw error;
     }
   },
@@ -103,7 +115,7 @@ export const ClassService = {
         const amount = 500000; // Giả sử học phí cố định là 500,000đ/tháng
 
         // Tạo học phí cho từng tháng từ ngày bắt đầu đến ngày kết thúc
-        let currentDate = new Date(startDate);
+        const currentDate = new Date(startDate);
         while (currentDate <= endDate) {
           const month = currentDate.toISOString().slice(0, 7); // Format: YYYY-MM
 

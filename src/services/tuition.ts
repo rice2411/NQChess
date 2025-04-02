@@ -50,7 +50,7 @@ export const TuitionService = {
       const amount = 500000; // Giả sử học phí cố định là 500,000đ/tháng
 
       // Tạo học phí cho từng tháng từ ngày bắt đầu đến ngày kết thúc
-      let currentDate = new Date(startDate);
+      const currentDate = new Date(startDate);
       while (currentDate <= endDate) {
         const month = currentDate.toISOString().slice(0, 7); // Format: YYYY-MM
 
