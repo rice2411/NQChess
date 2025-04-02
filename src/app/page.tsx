@@ -15,6 +15,11 @@ export default function Home() {
             Quản lý lớp
           </Link>
         </li>
+        <li>
+          <Link href="/api/tuitions" className="text-blue-500">
+            Quản lý học phí
+          </Link>
+        </li>
         {/* Thêm các URL khác ở đây */}
       </ul>
     </div>

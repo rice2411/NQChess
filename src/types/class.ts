@@ -5,5 +5,5 @@ export interface Class {
   endDate: string;
   students: string[];
   schedule: string;
-  status: "closed" | "open" | "finished";
+  status: "not_started" | "in_progress" | "completed";
 }
