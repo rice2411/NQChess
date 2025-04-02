@@ -21,7 +21,7 @@ export const StudentService = {
   },
 
   // Read
-  readStudents: async () => {
+  getStudents: async () => {
     try {
       const results = await readDocument(COLLECTION_NAME);
       return results as Student[];

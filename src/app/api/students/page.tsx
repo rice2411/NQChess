@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { StudentService } from "@/services/students";
+import { StudentService } from "@/services/student";
 import Link from "next/link"; // Import Link
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -23,7 +23,7 @@ export default function StudentsPage() {
   const handleGetList = async () => {
     try {
       setIsLoading(true);
-      const results = await StudentService.readStudents();
+      const results = await StudentService.getStudents();
       setStudents(results);
     } catch (error) {
       console.error("Error getting students:", error);

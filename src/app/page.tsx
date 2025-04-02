@@ -11,13 +11,8 @@ export default function Home() {
           </Link>
         </li>
         <li>
-          <Link href="/api/anotherPage" className="text-blue-500">
-            Trang khác
-          </Link>
-        </li>
-        <li>
-          <Link href="/api/someOtherPage" className="text-blue-500">
-            Trang khác nữa
+          <Link href="/api/classes" className="text-blue-500">
+            Quản lý lớp
           </Link>
         </li>
         {/* Thêm các URL khác ở đây */}
