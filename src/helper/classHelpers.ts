@@ -1,11 +1,12 @@
-import { Class } from "@/types/class.interface";
+import { EClassStatus } from "@/enum";
+import { IClass } from "@/types/class.interface";
 
 /**
  * Helper function to calculate the status of a class based on its start and end dates
  * @param cls The class to calculate status for
  * @returns The calculated status of the class
  */
-export function calculateClassStatus(cls: Class): Class["status"] {
+export function calculateClassStatus(cls: IClass): EClassStatus {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -17,16 +18,16 @@ export function calculateClassStatus(cls: Class): Class["status"] {
 
   // If start date is in the future -> not_started
   if (startDate > today) {
-    return "not_started";
+    return EClassStatus.NOT_STARTED;
   }
 
   // If end date is in the past -> completed
   if (endDate < today) {
-    return "completed";
+    return EClassStatus.COMPLETED;
   }
 
   // Otherwise -> in_progress
-  return "in_progress";
+  return EClassStatus.IN_PROGRESS;
 }
 
 /**
@@ -34,7 +35,7 @@ export function calculateClassStatus(cls: Class): Class["status"] {
  * @param cls The class to update
  * @returns The updated class with new status
  */
-export function updateClassStatus(cls: Class): Class {
+export function updateClassStatus(cls: IClass): IClass {
   return {
     ...cls,
     status: calculateClassStatus(cls),
@@ -46,6 +47,6 @@ export function updateClassStatus(cls: Class): Class {
  * @param classes Array of classes to update
  * @returns Array of updated classes with new statuses
  */
-export function updateClassesStatus(classes: Class[]): Class[] {
+export function updateClassesStatus(classes: IClass[]): IClass[] {
   return classes.map((cls) => updateClassStatus(cls));
 }
