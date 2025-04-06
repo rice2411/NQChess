@@ -1,71 +1,195 @@
 import {
   deleteDoc,
   doc,
-  setDoc,
   updateDoc,
   collection,
   getDocs,
+  getDoc,
+  query,
+  addDoc,
+  serverTimestamp,
+  DocumentData,
+  QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./clientConfig";
+import { IErrorResponse, ISuccessResponse } from "@/types/response.interface";
+import { formatFirestoreData } from "@/helpers/date.helper";
 
 // Create or Update
-export async function createOrUpdateDocument(
+export async function createOrUpdateDocument<T extends DocumentData>(
   collectionName: string,
-  data: object
-) {
+  data: T,
+  isBeutifyDate: boolean = true
+): Promise<ISuccessResponse<T> | IErrorResponse> {
   try {
-    const docRef = doc(collection(db, collectionName));
-    await setDoc(docRef, data);
-    console.log("Document successfully written!");
-    return {
-      id: docRef.id,
+    const docRef = await addDoc(collection(db, collectionName), {
       ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        errorCode: "DOCUMENT_NOT_FOUND",
+        message: "Document not found after creation",
+      };
+    }
+
+    const formattedData = formatFirestoreData(
+      { ...docSnap.data(), id: docSnap.id } as unknown as T,
+      isBeutifyDate
+    );
+
+    return {
+      success: true,
+      message: "Document created successfully",
+      data: formattedData as T,
     };
-  } catch (error) {
-    console.error("Error writing document: ", error);
-    throw error;
+  } catch (err) {
+    console.error("Error creating document: ", err);
+    return {
+      success: false,
+      errorCode: "CREATE_ERROR",
+      message: "Failed to create document",
+    };
   }
 }
 
-// Read
-export async function readDocument(collectionName: string) {
-  const collectionRef = collection(db, collectionName);
-  const querySnapshot = await getDocs(collectionRef);
-  const documents = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  console.log("Documents data:", documents);
-  return documents;
+// Read single document
+export async function readDocument<T extends DocumentData>(
+  collectionName: string,
+  id: string,
+  isBeutifyDate: boolean = true
+): Promise<ISuccessResponse<T> | IErrorResponse> {
+  try {
+    const docRef = doc(db, collectionName, id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        errorCode: "DOCUMENT_NOT_FOUND",
+        message: "Document not found",
+      };
+    }
+
+    const formattedData = formatFirestoreData(
+      { ...docSnap.data(), id: docSnap.id } as unknown as T,
+      isBeutifyDate
+    );
+
+    return {
+      success: true,
+      message: "Document retrieved successfully",
+      data: formattedData as T,
+    };
+  } catch (err) {
+    console.error("Error reading document: ", err);
+    return {
+      success: false,
+      errorCode: "READ_ERROR",
+      message: "Failed to read document",
+    };
+  }
+}
+
+// Read multiple documents
+export async function readDocuments<T extends DocumentData>(
+  collectionName: string,
+  constraints: QueryConstraint[] = [],
+  isBeutifyDate: boolean = true
+): Promise<ISuccessResponse<T[]> | IErrorResponse> {
+  try {
+    const q = query(collection(db, collectionName), ...constraints);
+    const querySnapshot = await getDocs(q);
+
+    const documents = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as unknown as T[];
+
+    const formattedData = formatFirestoreData(documents, isBeutifyDate) as T[];
+
+    return {
+      success: true,
+      message: "Documents retrieved successfully",
+      data: formattedData,
+    };
+  } catch (err) {
+    console.error("Error reading documents: ", err);
+    return {
+      success: false,
+      errorCode: "READ_ERROR",
+      message: "Failed to read documents",
+    };
+  }
 }
 
 // Update
-export async function updateDocument(
+export async function updateDocument<T extends DocumentData>(
   collectionName: string,
-  documentId: string,
-  data: object
-) {
-  const docRef = doc(db, collectionName, documentId);
+  id: string,
+  data: Partial<T>,
+  isBeutifyDate: boolean = true
+): Promise<ISuccessResponse<T> | IErrorResponse> {
   try {
-    await updateDoc(docRef, data);
-    console.log("Document successfully updated!");
-  } catch (error) {
-    console.error("Error updating document: ", error);
-    throw error;
+    const docRef = doc(db, collectionName, id);
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: serverTimestamp(),
+    });
+
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        errorCode: "DOCUMENT_NOT_FOUND",
+        message: "Document not found after update",
+      };
+    }
+
+    const formattedData = formatFirestoreData(
+      { ...docSnap.data(), id: docSnap.id } as unknown as T,
+      isBeutifyDate
+    );
+
+    return {
+      success: true,
+      message: "Document updated successfully",
+      data: formattedData as T,
+    };
+  } catch (err) {
+    console.error("Error updating document: ", err);
+    return {
+      success: false,
+      errorCode: "UPDATE_ERROR",
+      message: "Failed to update document",
+    };
   }
 }
 
 // Delete
 export async function deleteDocument(
   collectionName: string,
-  documentId: string
-) {
-  const docRef = doc(db, collectionName, documentId);
+  id: string
+): Promise<ISuccessResponse<null> | IErrorResponse> {
   try {
+    const docRef = doc(db, collectionName, id);
     await deleteDoc(docRef);
-    console.log("Document successfully deleted!");
-  } catch (error) {
-    console.error("Error deleting document: ", error);
-    throw error;
+
+    return {
+      success: true,
+      message: "Document deleted successfully",
+      data: null,
+    };
+  } catch (err) {
+    console.error("Error deleting document: ", err);
+    return {
+      success: false,
+      errorCode: "DELETE_ERROR",
+      message: "Failed to delete document",
+    };
   }
 }

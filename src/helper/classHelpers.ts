@@ -1,4 +1,4 @@
-import { Class } from "@/types/class";
+import { Class } from "@/types/class.interface";
 
 /**
  * Helper function to calculate the status of a class based on its start and end dates
