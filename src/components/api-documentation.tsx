@@ -4,16 +4,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  IErrorResponse,
-  ISuccessResponse,
-} from "@/types/api/response.interface";
 import { Textarea } from "@/components/ui/textarea";
 import { CopyIcon } from "lucide-react";
 import {
   IApiDocumentationProps,
   IEndpoint,
-  IParrameter,
+  IParameter,
 } from "@/types/api/api.endpoints.interface";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -35,7 +31,6 @@ const getMethodColor = (method: string) => {
 export default function ApiDocumentation({
   title,
   endpoints,
-  service,
   onExecute,
 }: IApiDocumentationProps) {
   const [selectedEndpoint, setSelectedEndpoint] = useState<IEndpoint | null>(
@@ -80,7 +75,7 @@ export default function ApiDocumentation({
     }
   };
 
-  const renderParameters = (parameters: Record<string, IParrameter>) => {
+  const renderParameters = (parameters: Record<string, IParameter>) => {
     return Object.entries(parameters).map(([name, param]) => (
       <tr key={name} className="border-t">
         <td className="px-4 py-2">{name}</td>

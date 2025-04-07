@@ -7,7 +7,6 @@ import {
   deleteDocument,
   readDocuments,
 } from "@/lib/firebase/FSD";
-import { TuitionService } from "../tuition.service";
 import { IClass } from "@/types/domain/class/class.interface";
 import {
   IErrorResponse,

@@ -5,7 +5,7 @@ import {
   IEndpoint,
   IApiDocumentationProps,
 } from "@/types/api/api.endpoints.interface";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   ISuccessResponse,
   IErrorResponse,
@@ -18,8 +18,6 @@ import {
 } from "@/services/auth/auth.service";
 
 export default function AuthApiDocumentation() {
-  const queryClient = useQueryClient();
-
   // Mutation để đăng nhập
   const loginMutation = useMutation<
     ISuccessResponse<LoginResponse> | IErrorResponse,
