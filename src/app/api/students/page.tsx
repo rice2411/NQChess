@@ -12,7 +12,7 @@ import {
   IErrorResponse,
 } from "@/types/api/response.interface";
 import { IStudent } from "@/types/domain/student/student.interface";
-import { STUDENT_ENDPOINTS } from "@/services/student/student.endpoint";
+import { STUDENT_ENDPOINTS } from "@/services/student/student.endpoint.sample";
 
 export default function StudentsApiDocumentation() {
   const queryClient = useQueryClient();

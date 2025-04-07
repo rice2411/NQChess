@@ -2,6 +2,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StudentsApiDocumentation from "./students/page";
+import ClassesApiDocumentation from "./classes/page";
+import AuthApiDocumentation from "./auth/page";
 
 export default function ApiDocumentation() {
   return (
@@ -14,14 +16,22 @@ export default function ApiDocumentation() {
       <Tabs defaultValue="students" className="space-y-4">
         <TabsList>
           <TabsTrigger value="students">Students</TabsTrigger>
+          <TabsTrigger value="classes">Classes</TabsTrigger>
+          <TabsTrigger value="auth">Auth</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students">
           <StudentsApiDocumentation />
         </TabsContent>
+
+        <TabsContent value="classes">
+          <ClassesApiDocumentation />
+        </TabsContent>
+
+        <TabsContent value="auth">
+          <AuthApiDocumentation />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-
-// *isBeutifyDate*: Nếu true, sẽ format lại các trường timestamp thành chuỗi ngày tháng đẹp

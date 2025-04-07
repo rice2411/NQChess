@@ -9,9 +9,9 @@ import {
   ISuccessResponse,
 } from "@/types/api/response.interface";
 import { ITuition } from "@/types/domain/tuition/tuition.interface";
-import { ETuitionStatus } from "@/types/enum";
 import { IClass } from "@/types/domain/class/class.interface";
 import { serverTimestamp } from "firebase/firestore";
+import { ETuitionStatus } from "@/types/domain/tuition/tuition.enum";
 
 const COLLECTION_NAME = "tuitions";
 
