@@ -11,16 +11,13 @@ import {
   IErrorResponse,
 } from "@/types/api/response.interface";
 import { AUTH_ENDPOINTS } from "@/services/auth/auth.endpoint.sample";
-import {
-  AuthService,
-  LoginCredentials,
-  LoginResponse,
-} from "@/services/auth/auth.service";
+import { AuthService, LoginCredentials } from "@/services/auth/auth.service";
+import { IUser } from "@/types/domain/user/user.interface";
 
 export default function AuthApiDocumentation() {
   // Mutation để đăng nhập
   const loginMutation = useMutation<
-    ISuccessResponse<LoginResponse> | IErrorResponse,
+    ISuccessResponse<IUser> | IErrorResponse,
     Error,
     LoginCredentials
   >({
