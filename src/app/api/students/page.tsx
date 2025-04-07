@@ -1,119 +1,131 @@
 "use client";
 
-import { StudentService } from "@/services/student.service";
+import { StudentService } from "@/services/student/student.service";
 import ApiDocumentation from "@/components/api-documentation";
-import { EGender } from "@/enum";
-import { IEndpoint } from "@/types/api_document.interface";
-
-const STUDENT_ENDPOINTS: IEndpoint[] = [
-  {
-    method: "GET",
-    service: "getStudents",
-    description: "Lấy danh sách tất cả học sinh",
-    parameters: {
-      isBeutifyDate: {
-        type: "boolean",
-        required: false,
-        description: "Có định dạng lại ngày tháng hay không",
-        value: true,
-      },
-    },
-  },
-  {
-    method: "POST",
-    service: "createOrUpdateStudent",
-    description: "Tạo mới hoặc cập nhật học sinh",
-    parameters: {
-      isBeutifyDate: {
-        type: "boolean",
-        required: false,
-        description: "Có định dạng lại ngày tháng hay không",
-        value: true,
-      },
-      phoneNumber: {
-        type: "string",
-        required: true,
-        description: "Số điện thoại",
-        value: "0776750418",
-      },
-      fullName: {
-        type: "string",
-        required: true,
-        description: "Họ và tên học sinh",
-        value: "Tôn Thất Anh Minh",
-      },
-      dateOfBirth: {
-        type: "string",
-        required: true,
-        description: "Ngày sinh",
-        value: "24/11/2001",
-      },
-      avatar: {
-        type: "string",
-        required: true,
-        description: "Ảnh đại diện",
-        value: "https://picsum.photos/200/300",
-      },
-      gender: {
-        type: "string",
-        required: true,
-        description: "Giới tính",
-        value: EGender.FEMALE,
-      },
-    },
-  },
-  {
-    method: "GET",
-    service: "searchStudent",
-    description: "Tìm kiếm học sinh theo tiêu chí",
-    parameters: {
-      fullName: {
-        type: "string",
-        required: true,
-        description: "Họ và tên học sinh",
-        value: "Tôn Thất Anh Minh",
-      },
-      dateOfBirth: {
-        type: "string",
-        required: true,
-        description: "Ngày sinh",
-        value: "24/11/2001",
-      },
-      isBeutifyDate: {
-        type: "boolean",
-        required: false,
-        description: "Có định dạng lại ngày tháng hay không",
-        value: true,
-      },
-      phoneNumber: {
-        type: "string",
-        required: true,
-        description: "Số điện thoại",
-        value: "0776750418",
-      },
-    },
-  },
-  {
-    method: "DELETE",
-    service: "deleteStudent",
-    description: "Xóa học sinh",
-    parameters: {
-      id: {
-        type: "string",
-        required: true,
-        description: "ID của học sinh",
-        value: "123",
-      },
-    },
-  },
-];
+import {
+  IEndpoint,
+  IApiDocumentationProps,
+} from "@/types/api/api.endpoints.interface";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ISuccessResponse,
+  IErrorResponse,
+} from "@/types/api/response.interface";
+import { IStudent } from "@/types/domain/student/student.interface";
+import { STUDENT_ENDPOINTS } from "@/services/student/student.endpoint";
 
 export default function StudentsApiDocumentation() {
-  return (
-    <ApiDocumentation
-      title="Students API"
-      endpoints={STUDENT_ENDPOINTS}
-      service={StudentService}
-    />
-  );
+  const queryClient = useQueryClient();
+
+  // Query để lấy danh sách học sinh
+  const getStudentsQuery = useQuery<
+    ISuccessResponse<IStudent[]> | IErrorResponse
+  >({
+    queryKey: ["students", "list"],
+    queryFn: () => StudentService.getStudents(true),
+    enabled: false, // Chỉ thực hiện khi được gọi
+  });
+
+  // Query để tìm kiếm học sinh
+  const searchStudentQuery = useQuery<
+    ISuccessResponse<IStudent | null> | IErrorResponse
+  >({
+    queryKey: ["students", "search"],
+    queryFn: () => {
+      const params = queryClient.getQueryData<Record<string, any>>([
+        "students",
+        "search",
+        "params",
+      ]);
+      if (!params) {
+        return Promise.reject(new Error("Missing search parameters"));
+      }
+      return StudentService.searchStudent(
+        params.fullName,
+        params.dateOfBirth,
+        params.phoneNumber,
+        params.isBeutifyDate
+      );
+    },
+    enabled: false, // Chỉ thực hiện khi được gọi
+  });
+
+  // Mutation để tạo/cập nhật học sinh
+  const createOrUpdateMutation = useMutation<
+    ISuccessResponse<IStudent> | IErrorResponse,
+    Error,
+    any
+  >({
+    mutationFn: (data: any) => StudentService.createOrUpdateStudent(data, true),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+  });
+
+  // Mutation để xóa học sinh
+  const deleteMutation = useMutation<
+    ISuccessResponse<void> | IErrorResponse,
+    Error,
+    string
+  >({
+    mutationFn: (id: string) => StudentService.deleteStudent(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+  });
+
+  const handleExecute = async (
+    endpoint: IEndpoint,
+    params: Record<string, any>
+  ): Promise<ISuccessResponse<any> | IErrorResponse> => {
+    try {
+      switch (endpoint.service) {
+        case "getStudents":
+          const getStudentsResult = await getStudentsQuery.refetch();
+          return (
+            getStudentsResult.data || {
+              success: false,
+              errorCode: "API_ERROR",
+              message: "Failed to fetch students",
+            }
+          );
+        case "createOrUpdateStudent":
+          return await createOrUpdateMutation.mutateAsync(params);
+        case "searchStudent":
+          queryClient.setQueryData(["students", "search", "params"], params);
+          const searchResult = await searchStudentQuery.refetch();
+          return (
+            searchResult.data || {
+              success: false,
+              errorCode: "API_ERROR",
+              message: "Failed to search students",
+            }
+          );
+        case "deleteStudent":
+          return await deleteMutation.mutateAsync(params.id);
+        default:
+          return {
+            success: false,
+            errorCode: "INVALID_ENDPOINT",
+            message: "Invalid endpoint",
+          };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        errorCode: "API_ERROR",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  };
+
+  const props: IApiDocumentationProps = {
+    title: "Students API",
+    endpoints: STUDENT_ENDPOINTS,
+    service: StudentService,
+    onExecute: handleExecute,
+  };
+
+  return <ApiDocumentation {...props} />;
 }

@@ -1,5 +1,5 @@
-import { ETuitionStatus } from "@/enum";
-import { IBaseEntity } from "./entity.interface";
+import { IBaseEntity } from "../../common/entity.interface";
+import { ETuitionStatus } from "./tuition.enum";
 
 export interface ITuition extends Omit<IBaseEntity, "id"> {
   id?: string;

@@ -4,10 +4,13 @@ import {
   deleteDocument,
   readDocuments,
 } from "@/lib/firebase/FSD";
-import { IErrorResponse, ISuccessResponse } from "@/types/response.interface";
-import { ITuition } from "@/types/tuition.interface";
-import { ETuitionStatus } from "@/enum";
-import { IClass } from "@/types/class.interface";
+import {
+  IErrorResponse,
+  ISuccessResponse,
+} from "@/types/api/response.interface";
+import { ITuition } from "@/types/domain/tuition/tuition.interface";
+import { ETuitionStatus } from "@/types/enum";
+import { IClass } from "@/types/domain/class/class.interface";
 import { serverTimestamp } from "firebase/firestore";
 
 const COLLECTION_NAME = "tuitions";

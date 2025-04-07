@@ -4,14 +4,18 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { IErrorResponse, ISuccessResponse } from "@/types/response.interface";
+import {
+  IErrorResponse,
+  ISuccessResponse,
+} from "@/types/api/response.interface";
 import { Textarea } from "@/components/ui/textarea";
 import { CopyIcon } from "lucide-react";
 import {
   IApiDocumentationProps,
   IEndpoint,
   IParrameter,
-} from "@/types/api_document.interface";
+} from "@/types/api/api.endpoints.interface";
+import { useQueryClient } from "@tanstack/react-query";
 
 const getMethodColor = (method: string) => {
   switch (method) {
@@ -32,6 +36,7 @@ export default function ApiDocumentation({
   title,
   endpoints,
   service,
+  onExecute,
 }: IApiDocumentationProps) {
   const [selectedEndpoint, setSelectedEndpoint] = useState<IEndpoint | null>(
     null
@@ -39,85 +44,29 @@ export default function ApiDocumentation({
   const [jsonData, setJsonData] = useState<string>("");
   const [response, setResponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleExecute = async () => {
     if (!selectedEndpoint) return;
 
     setIsLoading(true);
     try {
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
-      let result: ISuccessResponse<any> | IErrorResponse;
-
-      if (!service[selectedEndpoint.service]) {
-        result = {
-          success: false,
-          errorCode: "INVALID_ENDPOINT",
-          message: `Method ${selectedEndpoint.service} not found in service`,
-        };
-      } else {
-        let data;
-        try {
-          data = jsonData ? JSON.parse(jsonData) : {};
-        } catch {
-          result = {
-            success: false,
-            errorCode: "INVALID_JSON",
-            message: "Invalid JSON data",
-          };
-          setResponse(JSON.stringify(result, null, 2));
-          return;
-        }
-
-        try {
-          if (selectedEndpoint.method === "GET") {
-            if (selectedEndpoint.service === "searchStudent") {
-              const { fullName, dateOfBirth, phoneNumber, isBeutifyDate } =
-                data;
-              result = await service[selectedEndpoint.service](
-                fullName,
-                dateOfBirth,
-                phoneNumber,
-                isBeutifyDate
-              );
-            } else {
-              const params = Object.keys(selectedEndpoint.parameters).reduce(
-                (acc, key) => {
-                  if (data[key] !== undefined) {
-                    acc[key] = data[key];
-                  }
-                  return acc;
-                },
-                {} as Record<string, any>
-              );
-              result = await service[selectedEndpoint.service](params);
-            }
-          } else if (selectedEndpoint.method === "DELETE") {
-            const id = data.id;
-            if (!id) {
-              result = {
-                success: false,
-                errorCode: "MISSING_ID",
-                message: "ID is required for DELETE operation",
-              };
-            } else {
-              result = await service[selectedEndpoint.service](id);
-            }
-          } else {
-            result = await service[selectedEndpoint.service](data);
-          }
-        } catch (error) {
-          result = {
+      const result = await onExecute(selectedEndpoint, JSON.parse(jsonData));
+      setResponse(JSON.stringify(result, null, 2));
+      queryClient.invalidateQueries({ queryKey: [selectedEndpoint.service] });
+    } catch (error) {
+      setResponse(
+        JSON.stringify(
+          {
             success: false,
             errorCode: "API_ERROR",
             message:
               error instanceof Error ? error.message : "Unknown error occurred",
-          };
-        }
-      }
-
-      setResponse(JSON.stringify(result, null, 2));
-    } catch (error) {
-      setResponse(JSON.stringify(error, null, 2));
+          },
+          null,
+          2
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +133,6 @@ export default function ApiDocumentation({
                     }
                     return acc;
                   },
-                  /* eslint-disable  @typescript-eslint/no-explicit-any */
                   {} as Record<string, any>
                 );
                 setJsonData(JSON.stringify(sampleData, null, 2));

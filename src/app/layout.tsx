@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
+import QueryProvider from "@/providers/query-provider";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -31,7 +32,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${beVietnamPro.variable} font-sans antialiased`}
       >
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

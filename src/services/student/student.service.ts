@@ -4,8 +4,11 @@ import {
   deleteDocument,
   readDocuments,
 } from "@/lib/firebase/FSD";
-import { IErrorResponse, ISuccessResponse } from "@/types/response.interface";
-import { IStudent } from "@/types/student.interface";
+import {
+  IErrorResponse,
+  ISuccessResponse,
+} from "@/types/api/response.interface";
+import { IStudent } from "@/types/domain/student/student.interface";
 import { serverTimestamp } from "firebase/firestore";
 
 const COLLECTION_NAME = "students";

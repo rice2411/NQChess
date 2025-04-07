@@ -1,5 +1,5 @@
-import { EGender } from "@/enum";
-import { IBaseEntity } from "./entity.interface";
+import { IBaseEntity } from "../../common/entity.interface";
+import { EGender } from "./student.enum";
 
 export interface IStudent extends IBaseEntity {
   phoneNumber: string;

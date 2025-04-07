@@ -12,7 +12,10 @@ import {
   QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./clientConfig";
-import { IErrorResponse, ISuccessResponse } from "@/types/response.interface";
+import {
+  IErrorResponse,
+  ISuccessResponse,
+} from "@/types/api/response.interface";
 import { formatFirestoreData } from "@/helpers/date.helper";
 
 // Create or Update

@@ -1,5 +1,5 @@
-import { EClassStatus } from "@/enum";
-import { IClass } from "@/types/class.interface";
+import { EClassStatus } from "@/types/enum";
+import { IClass } from "@/types/domain/class/class.interface";
 
 /**
  * Helper function to calculate the status of a class based on its start and end dates

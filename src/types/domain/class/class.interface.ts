@@ -1,5 +1,5 @@
-import { IBaseEntity } from "./entity.interface";
-import { EClassStatus } from "@/enum";
+import { IBaseEntity } from "../../common/entity.interface";
+import { EClassStatus } from "./class.enum";
 export interface IClass extends Omit<IBaseEntity, "id"> {
   id?: string;
   name: string;

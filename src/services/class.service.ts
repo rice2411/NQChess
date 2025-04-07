@@ -8,10 +8,13 @@ import {
   readDocuments,
 } from "@/lib/firebase/FSD";
 import { TuitionService } from "./tuition.service";
-import { IClass } from "@/types/class.interface";
-import { IErrorResponse, ISuccessResponse } from "@/types/response.interface";
+import { IClass } from "@/types/domain/class/class.interface";
+import {
+  IErrorResponse,
+  ISuccessResponse,
+} from "@/types/api/response.interface";
 import { serverTimestamp } from "firebase/firestore";
-import { EClassStatus } from "@/enum";
+import { EClassStatus } from "@/types/domain/class/class.enum";
 
 const COLLECTION_NAME = "classes";
 
