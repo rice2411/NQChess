@@ -1,11 +1,18 @@
 import { IBaseEntity } from "../../common/entity.interface";
-import { EClassStatus } from "./class.enum";
-export interface IClass extends Omit<IBaseEntity, "id"> {
-  id?: string;
+import { EClassStatus, EStudentClassStatus } from "./class.enum";
+
+export interface IStudentClass {
+  studentId: string;
+  joinDate: Date;
+  status: EStudentClassStatus;
+}
+
+export interface IClass extends IBaseEntity {
   name: string;
   startDate: string;
   endDate: string;
-  students: string[];
-  schedule: string;
+  students: IStudentClass[];
+  schedules: string[];
   status: EClassStatus;
+  tuition: number;
 }

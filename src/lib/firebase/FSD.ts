@@ -16,7 +16,7 @@ import {
   IErrorResponse,
   ISuccessResponse,
 } from "@/types/api/response.interface";
-import { formatFirestoreData } from "@/helpers/date.helper";
+import { formatFirestoreData } from "@/helpers/time-firestore.helper";
 
 // Create or Update
 export async function createOrUpdateDocument<T extends DocumentData>(

@@ -7,42 +7,31 @@ import {
   deleteDocument,
   readDocuments,
 } from "@/lib/firebase/FSD";
-import { IClass } from "@/types/domain/class/class.interface";
+import { IClass, IStudentClass } from "@/types/domain/class/class.interface";
 import {
   IErrorResponse,
   ISuccessResponse,
 } from "@/types/api/response.interface";
 import { serverTimestamp } from "firebase/firestore";
-import { EClassStatus } from "@/types/domain/class/class.enum";
+import {
+  EClassStatus,
+  EStudentClassStatus,
+} from "@/types/domain/class/class.enum";
+import { TuitionService } from "../tuition/tuition.service";
+import { ETuitionStatus } from "@/types/domain/tuition/tuition.enum";
+import { calculateTuitionMonths } from "@/helpers/tuition.helper";
 
 const COLLECTION_NAME = "classes";
 
 export const ClassService = {
-  // Create or Update
-  createOrUpdateClass: async (
-    data: Partial<IClass> & { id?: string },
+  // Create
+  createClass: async (
+    data: Omit<IClass, "id">,
     isBeutifyDate: boolean = true
   ) => {
     try {
-      // Nếu có id, thực hiện update
-      if (data.id) {
-        const result = await updateDocument<IClass>(
-          COLLECTION_NAME,
-          data.id,
-          {
-            ...data,
-            updatedAt: serverTimestamp(),
-          },
-          isBeutifyDate
-        );
-        if (!result.success) {
-          return result as IErrorResponse;
-        }
-        return result as ISuccessResponse<IClass>;
-      }
-
       // Kiểm tra các trường bắt buộc khi tạo mới
-      if (!data.name || !data.startDate || !data.endDate || !data.schedule) {
+      if (!data.name || !data.startDate || !data.endDate || !data.schedules) {
         return {
           success: false,
           errorCode: "MISSING_REQUIRED_FIELDS",
@@ -51,20 +40,20 @@ export const ClassService = {
         } as IErrorResponse;
       }
 
-      // Nếu không có id, thực hiện create
-      const newClass: IClass = {
-        ...data,
+      // Tạo dữ liệu mới
+      const newClass: Omit<IClass, "id"> = {
         name: data.name,
         startDate: data.startDate,
         endDate: data.endDate,
-        schedule: data.schedule,
+        schedules: data.schedules,
         students: data.students || [],
         status: data.status || EClassStatus.INACTIVE,
+        tuition: data.tuition || 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      const result = await createOrUpdateDocument<IClass>(
+      const result = await createOrUpdateDocument<Omit<IClass, "id">>(
         COLLECTION_NAME,
         newClass,
         isBeutifyDate
@@ -75,32 +64,20 @@ export const ClassService = {
       }
       return result as ISuccessResponse<IClass>;
     } catch (error: any) {
-      console.error("Create or update class error:", error);
+      console.error("Create class error:", error);
 
       if (error.code === "permission-denied") {
         return {
           success: false,
           errorCode: "PERMISSION_DENIED",
-          message: "You don't have permission to perform this action",
-        } as IErrorResponse;
-      } else if (error.code === "not-found") {
-        return {
-          success: false,
-          errorCode: "NOT_FOUND",
-          message: "Class not found",
-        } as IErrorResponse;
-      } else if (error.code === "already-exists") {
-        return {
-          success: false,
-          errorCode: "ALREADY_EXISTS",
-          message: "Class with this name already exists",
+          message: "You don't have permission to create class",
         } as IErrorResponse;
       }
 
       return {
         success: false,
         errorCode: "INTERNAL_ERROR",
-        message: "Failed to create or update class",
+        message: "Failed to create class",
       } as IErrorResponse;
     }
   },
@@ -116,6 +93,7 @@ export const ClassService = {
       if (!result.success) {
         return result as IErrorResponse;
       }
+
       return result as ISuccessResponse<IClass[]>;
     } catch (error: any) {
       console.error("Get classes error:", error);
@@ -172,7 +150,7 @@ export const ClassService = {
   // Get class by id
   getClassById: async (
     id: string,
-    isBeutifyDate: boolean = true
+    isBeutifyDate: boolean
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
     try {
       const result = await readDocument<IClass>(
@@ -210,10 +188,9 @@ export const ClassService = {
   },
 
   // Add or remove student from class
-  updateClassStudents: async (
+  addStudentsToClass: async (
     classId: string,
-    studentId: string,
-    isAdd: boolean,
+    studentIds: string[],
     isBeutifyDate: boolean = true
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
     try {
@@ -237,30 +214,39 @@ export const ClassService = {
 
       const students = classData.students || [];
 
-      if (isAdd) {
-        if (!students.includes(studentId)) {
-          students.push(studentId);
-        }
-      } else {
-        const index = students.indexOf(studentId);
-        if (index !== -1) {
-          students.splice(index, 1);
-        }
-      }
+      studentIds.forEach(async (id) => {
+        const newStudent: IStudentClass = {
+          studentId: id,
+          joinDate: new Date(),
+          status: EStudentClassStatus.ONLINE,
+        };
+        const months = calculateTuitionMonths(
+          classData.startDate,
+          classData.endDate,
+          newStudent.joinDate.toISOString()
+        );
+
+        months.forEach(async (month) => {
+          await TuitionService.createTuitionForStudent(
+            {
+              classId,
+              studentId: newStudent.studentId,
+              amount: classData.tuition || 0,
+              month: month,
+              status: ETuitionStatus.PENDING,
+            },
+            isBeutifyDate
+          );
+        });
+      });
 
       const result = await updateDocument<IClass>(
         COLLECTION_NAME,
         classId,
-        {
-          students,
-          updatedAt: serverTimestamp(),
-        },
+        { students },
         isBeutifyDate
       );
 
-      if (!result.success) {
-        return result as IErrorResponse;
-      }
       return result as ISuccessResponse<IClass>;
     } catch (error: any) {
       console.error("Update class students error:", error);
@@ -283,51 +269,6 @@ export const ClassService = {
         success: false,
         errorCode: "INTERNAL_ERROR",
         message: "Failed to update class students",
-      } as IErrorResponse;
-    }
-  },
-
-  // Update class
-  updateClass: async (
-    id: string,
-    data: Partial<IClass>,
-    isBeutifyDate: boolean = true
-  ) => {
-    try {
-      const result = await updateDocument<IClass>(
-        COLLECTION_NAME,
-        id,
-        {
-          ...data,
-          updatedAt: serverTimestamp(),
-        },
-        isBeutifyDate
-      );
-      if (!result.success) {
-        return result as IErrorResponse;
-      }
-      return result as ISuccessResponse<IClass>;
-    } catch (error: any) {
-      console.error("Update class error:", error);
-
-      if (error.code === "permission-denied") {
-        return {
-          success: false,
-          errorCode: "PERMISSION_DENIED",
-          message: "You don't have permission to update this class",
-        } as IErrorResponse;
-      } else if (error.code === "not-found") {
-        return {
-          success: false,
-          errorCode: "NOT_FOUND",
-          message: "Class not found",
-        } as IErrorResponse;
-      }
-
-      return {
-        success: false,
-        errorCode: "INTERNAL_ERROR",
-        message: "Failed to update class",
       } as IErrorResponse;
     }
   },

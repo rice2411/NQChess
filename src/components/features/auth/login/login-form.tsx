@@ -19,7 +19,7 @@ import {
 } from "@/types/api/response.interface";
 import { useRouter } from "next/navigation";
 
-import { useFormWithSchema } from "@/hooks/use-form";
+import { useFormWithSchema } from "@/hooks/useReactHookForm";
 import {
   LoginFormData,
   loginSchema,

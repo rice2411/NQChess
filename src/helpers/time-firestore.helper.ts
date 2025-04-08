@@ -18,6 +18,10 @@ export const formatFirestoreData = <T extends TimestampFields>(
   if (!data) return data;
 
   if (Array.isArray(data)) {
+    // Nếu là mảng chuỗi, giữ nguyên
+    if (data.length > 0 && typeof data[0] === "string") {
+      return data;
+    }
     return data.map((item) => formatFirestoreData(item, isBeutifyDate)) as T[];
   }
 
@@ -34,18 +38,18 @@ export const formatFirestoreData = <T extends TimestampFields>(
         formattedData.updatedAt
       ) as unknown as Timestamp;
     }
-  }
 
-  // Format nested objects
-  Object.keys(formattedData).forEach((key) => {
-    const value = formattedData[key as keyof T];
-    if (value && typeof value === "object" && !(value instanceof Timestamp)) {
-      formattedData[key as keyof T] = formatFirestoreData(
-        value as T,
-        isBeutifyDate
-      ) as T[keyof T];
-    }
-  });
+    // Chỉ xử lý các đối tượng lồng nhau khi isBeutifyDate là true
+    Object.keys(formattedData).forEach((key) => {
+      const value = formattedData[key as keyof T];
+      if (value && typeof value === "object" && !(value instanceof Timestamp)) {
+        formattedData[key as keyof T] = formatFirestoreData(
+          value as T,
+          isBeutifyDate
+        ) as T[keyof T];
+      }
+    });
+  }
 
   return formattedData;
 };

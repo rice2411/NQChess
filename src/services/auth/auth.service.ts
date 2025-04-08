@@ -11,8 +11,8 @@ export interface LoginCredentials {
   password: string;
 }
 
-export class AuthService {
-  static async login(
+export const AuthService = {
+  async login(
     credentials: LoginCredentials
   ): Promise<ISuccessResponse<IUser> | IErrorResponse> {
     try {
@@ -38,9 +38,9 @@ export class AuthService {
         message: "Invalid username or password",
       };
     }
-  }
+  },
 
-  static async logout(): Promise<ISuccessResponse<null> | IErrorResponse> {
+  async logout(): Promise<ISuccessResponse<null> | IErrorResponse> {
     try {
       await signOut(auth);
       return {
@@ -56,5 +56,5 @@ export class AuthService {
         message: "Failed to logout",
       };
     }
-  }
-}
+  },
+};

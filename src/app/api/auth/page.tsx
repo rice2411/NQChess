@@ -1,36 +1,20 @@
 "use client";
 
-import { AuthService } from "@/services/auth/auth.service";
 import ApiDocumentation from "@/components/api-documentation";
 import {
   IEndpoint,
   IApiDocumentationProps,
 } from "@/types/api/api.endpoints.interface";
-import { useMutation } from "@tanstack/react-query";
 import {
   ISuccessResponse,
   IErrorResponse,
 } from "@/types/api/response.interface";
 import { AUTH_ENDPOINTS } from "@/services/auth/auth.endpoint.sample";
-import { IUser } from "@/types/domain/user/user.interface";
+import { useAuthQueries } from "@/hooks/react-query/auth/useAuthQueries";
+import { AuthService } from "@/services/auth/auth.service";
 
 export default function AuthApiDocumentation() {
-  // Mutation để đăng nhập
-  const loginMutation = useMutation<
-    ISuccessResponse<IUser> | IErrorResponse,
-    Error,
-    { username: string; password: string }
-  >({
-    mutationFn: (credentials) => AuthService.login(credentials),
-  });
-
-  // Mutation để đăng xuất
-  const logoutMutation = useMutation<
-    ISuccessResponse<null> | IErrorResponse,
-    Error
-  >({
-    mutationFn: () => AuthService.logout(),
-  });
+  const { loginMutation, logoutMutation } = useAuthQueries();
 
   const handleExecute = async (
     endpoint: IEndpoint,
@@ -65,10 +49,7 @@ export default function AuthApiDocumentation() {
   const props: IApiDocumentationProps = {
     title: "Auth API",
     endpoints: AUTH_ENDPOINTS,
-    service: {
-      login: (credentials) => AuthService.login(credentials),
-      logout: () => AuthService.logout(),
-    },
+    service: AuthService,
     onExecute: handleExecute,
   };
 

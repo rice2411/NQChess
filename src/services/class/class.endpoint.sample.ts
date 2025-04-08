@@ -17,7 +17,7 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
   },
   {
     method: "POST",
-    service: "createOrUpdateClass",
+    service: "createClass",
     description: "Tạo mới hoặc cập nhật lớp học",
     parameters: {
       id: {
@@ -36,23 +36,19 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
         type: "string",
         required: true,
         description: "Ngày bắt đầu",
-        value: "2024-01-01",
+        value: "2025-01-01",
       },
       endDate: {
         type: "string",
         required: true,
         description: "Ngày kết thúc",
-        value: "2024-12-31",
+        value: "2025-03-01",
       },
-      schedule: {
-        type: "object",
+      schedules: {
+        type: "array",
         required: true,
         description: "Lịch học",
-        value: {
-          days: ["MONDAY", "WEDNESDAY"],
-          startTime: "18:00",
-          endTime: "19:30",
-        },
+        value: ["19:00 - 20:30 Thứ 3", "20:30 - 22:00 Thứ 5"],
       },
       students: {
         type: "array",
@@ -72,6 +68,12 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
         description: "Có định dạng lại ngày tháng hay không",
         value: true,
       },
+      tuition: {
+        type: "number",
+        required: false,
+        description: "Học phí lớp học",
+        value: 1000000,
+      },
     },
   },
   {
@@ -84,31 +86,6 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
         required: true,
         description: "ID của lớp học",
         value: "",
-      },
-      isBeutifyDate: {
-        type: "boolean",
-        required: false,
-        description: "Có định dạng lại ngày tháng hay không",
-        value: true,
-      },
-    },
-  },
-  {
-    method: "PUT",
-    service: "updateClass",
-    description: "Cập nhật thông tin lớp học",
-    parameters: {
-      id: {
-        type: "string",
-        required: true,
-        description: "ID của lớp học cần cập nhật",
-        value: "",
-      },
-      data: {
-        type: "object",
-        required: true,
-        description: "Dữ liệu cập nhật",
-        value: {},
       },
       isBeutifyDate: {
         type: "boolean",
@@ -133,8 +110,8 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
   },
   {
     method: "PUT",
-    service: "updateClassStudents",
-    description: "Thêm hoặc xóa học sinh khỏi lớp học",
+    service: "addStudentsToClass",
+    description: "Thêm  học sinh khỏi lớp học",
     parameters: {
       classId: {
         type: "string",
@@ -145,14 +122,8 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
       studentId: {
         type: "string",
         required: true,
-        description: "ID của học sinh",
-        value: "",
-      },
-      isAdd: {
-        type: "boolean",
-        required: true,
-        description: "Thêm (true) hoặc xóa (false) học sinh",
-        value: true,
+        description: "danh sách ID của học sinh",
+        value: [],
       },
       isBeutifyDate: {
         type: "boolean",
