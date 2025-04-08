@@ -1,37 +1,37 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/common/ui/card";
-import { Button } from "@/components/common/ui/button";
-import { Label } from "@/components/common/ui/label";
-import { Textarea } from "@/components/common/ui/textarea";
-import { CopyIcon } from "lucide-react";
+} from "@/components/common/ui/card"
+import { Button } from "@/components/common/ui/button"
+import { Label } from "@/components/common/ui/label"
+import { Textarea } from "@/components/common/ui/textarea"
+import { CopyIcon } from "lucide-react"
 import {
   IApiDocumentationProps,
   IEndpoint,
   IParameter,
-} from "@/types/api/api.endpoints.interface";
-import { useQueryClient } from "@tanstack/react-query";
+} from "@/types/api/api.endpoints.interface"
+import { useQueryClient } from "@tanstack/react-query"
 
 const getMethodColor = (method: string) => {
   switch (method) {
     case "GET":
-      return "bg-green-100 text-green-800";
+      return "bg-green-100 text-green-800"
     case "POST":
-      return "bg-blue-100 text-blue-800";
+      return "bg-blue-100 text-blue-800"
     case "PUT":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-yellow-100 text-yellow-800"
     case "DELETE":
-      return "bg-red-100 text-red-800";
+      return "bg-red-100 text-red-800"
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-100 text-gray-800"
   }
-};
+}
 
 export default function ApiDocumentation({
   title,
@@ -40,20 +40,20 @@ export default function ApiDocumentation({
 }: IApiDocumentationProps) {
   const [selectedEndpoint, setSelectedEndpoint] = useState<IEndpoint | null>(
     null
-  );
-  const [jsonData, setJsonData] = useState<string>("");
-  const [response, setResponse] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const queryClient = useQueryClient();
+  )
+  const [jsonData, setJsonData] = useState<string>("")
+  const [response, setResponse] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
   const handleExecute = async () => {
-    if (!selectedEndpoint) return;
+    if (!selectedEndpoint) return
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const result = await onExecute(selectedEndpoint, JSON.parse(jsonData));
-      setResponse(JSON.stringify(result, null, 2));
-      queryClient.invalidateQueries({ queryKey: [selectedEndpoint.service] });
+      const result = await onExecute(selectedEndpoint, JSON.parse(jsonData))
+      setResponse(JSON.stringify(result, null, 2))
+      queryClient.invalidateQueries({ queryKey: [selectedEndpoint.service] })
     } catch (error) {
       setResponse(
         JSON.stringify(
@@ -66,19 +66,19 @@ export default function ApiDocumentation({
           null,
           2
         )
-      );
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text)
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      console.error("Failed to copy text: ", err)
     }
-  };
+  }
 
   const renderParameters = (parameters: Record<string, IParameter>) => {
     return Object.entries(parameters).map(([name, param]) => (
@@ -88,8 +88,8 @@ export default function ApiDocumentation({
         <td className="px-4 py-2">{param.required ? "Yes" : "No"}</td>
         <td className="px-4 py-2">{param.description}</td>
       </tr>
-    ));
-  };
+    ))
+  }
 
   return (
     <div className="space-y-4">
@@ -105,38 +105,38 @@ export default function ApiDocumentation({
                   : ""
               }`}
               onClick={() => {
-                setSelectedEndpoint(endpoint);
+                setSelectedEndpoint(endpoint)
                 const sampleData = Object.entries(endpoint.parameters).reduce(
                   (acc, [key, param]) => {
                     if (param.value !== undefined) {
-                      acc[key] = param.value;
+                      acc[key] = param.value
                     } else {
                       switch (param.type.toLowerCase()) {
                         case "string":
-                          acc[key] = "";
-                          break;
+                          acc[key] = ""
+                          break
                         case "number":
-                          acc[key] = 0;
-                          break;
+                          acc[key] = 0
+                          break
                         case "boolean":
-                          acc[key] = false;
-                          break;
+                          acc[key] = false
+                          break
                         case "array":
-                          acc[key] = [];
-                          break;
+                          acc[key] = []
+                          break
                         case "object":
-                          acc[key] = {};
-                          break;
+                          acc[key] = {}
+                          break
                         default:
-                          acc[key] = null;
+                          acc[key] = null
                       }
                     }
-                    return acc;
+                    return acc
                   },
                   {} as Record<string, any>
-                );
-                setJsonData(JSON.stringify(sampleData, null, 2));
-                setResponse("");
+                )
+                setJsonData(JSON.stringify(sampleData, null, 2))
+                setResponse("")
               }}
             >
               <CardHeader>
@@ -155,8 +155,8 @@ export default function ApiDocumentation({
                     variant="ghost"
                     size="icon"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      copyToClipboard(endpoint.service);
+                      e.stopPropagation()
+                      copyToClipboard(endpoint.service)
                     }}
                   >
                     <CopyIcon className="h-4 w-4" />
@@ -236,5 +236,5 @@ export default function ApiDocumentation({
         )}
       </div>
     </div>
-  );
+  )
 }
