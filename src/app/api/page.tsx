@@ -1,6 +1,11 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/common/ui/tabs";
 import StudentsApiDocumentation from "./students/page";
 import ClassesApiDocumentation from "./classes/page";
 import AuthApiDocumentation from "./auth/page";

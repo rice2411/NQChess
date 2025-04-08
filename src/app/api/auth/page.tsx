@@ -1,6 +1,6 @@
 "use client";
 
-import ApiDocumentation from "@/components/api-documentation";
+import ApiDocumentation from "@/components/features/api-documentation";
 import {
   IEndpoint,
   IApiDocumentationProps,

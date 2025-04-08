@@ -1,8 +1,23 @@
 "use client";
 
+<<<<<<< Updated upstream
 import ApiDocumentation from "@/components/api-documentation";
 import { IApiDocumentationProps } from "@/types/api/api.endpoints.interface";
 
+=======
+import { StudentService } from "@/services/student/student.service";
+import ApiDocumentation from "@/components/features/api-documentation";
+import {
+  IEndpoint,
+  IApiDocumentationProps,
+} from "@/types/api/api.endpoints.interface";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ISuccessResponse,
+  IErrorResponse,
+} from "@/types/api/response.interface";
+import { IStudent } from "@/types/domain/student/student.interface";
+>>>>>>> Stashed changes
 import { STUDENT_ENDPOINTS } from "@/services/student/student.endpoint.sample";
 import { useStudentQueries } from "@/hooks/react-query/student/useStudentQueries";
 import { StudentService } from "@/services/student/student.service";
