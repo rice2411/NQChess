@@ -1,3 +1,5 @@
+"use client";
+
 import { CLASS_ENDPOINTS } from "@/services/class/class.endpoint.sample";
 import { ClassService } from "@/services/class/class.service";
 import { useClassQueries } from "@/hooks/react-query/class/useClassQueries";
