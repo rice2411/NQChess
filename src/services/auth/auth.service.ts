@@ -1,6 +1,10 @@
 import { IUser } from "@/types/domain/user/user.interface";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import {
+  IErrorResponse,
+  ISuccessResponse,
+} from "@/types/api/response.interface";
 
 export interface LoginCredentials {
   username: string;
@@ -8,7 +12,9 @@ export interface LoginCredentials {
 }
 
 export class AuthService {
-  static async login(credentials: LoginCredentials): Promise<IUser> {
+  static async login(
+    credentials: LoginCredentials
+  ): Promise<ISuccessResponse<IUser> | IErrorResponse> {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -17,14 +23,38 @@ export class AuthService {
       );
 
       return {
-        id: userCredential.user.uid,
-        email: userCredential.user.email || "",
+        success: true,
+        message: "Login successful",
+        data: {
+          id: userCredential.user.uid,
+          email: userCredential.user.email || "",
+        },
       };
     } catch (error) {
-      console.log(credentials);
-
       console.error("Login error:", error);
-      throw error;
+      return {
+        success: false,
+        errorCode: "LOGIN_ERROR",
+        message: "Invalid username or password",
+      };
+    }
+  }
+
+  static async logout(): Promise<ISuccessResponse<null> | IErrorResponse> {
+    try {
+      await signOut(auth);
+      return {
+        success: true,
+        message: "Logout successful",
+        data: null,
+      };
+    } catch (error) {
+      console.error("Logout error:", error);
+      return {
+        success: false,
+        errorCode: "LOGOUT_ERROR",
+        message: "Failed to logout",
+      };
     }
   }
 }

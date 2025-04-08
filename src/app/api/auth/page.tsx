@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthService } from "@/services/auth/auth.service";
 import ApiDocumentation from "@/components/api-documentation";
 import {
   IEndpoint,
@@ -11,7 +12,6 @@ import {
   IErrorResponse,
 } from "@/types/api/response.interface";
 import { AUTH_ENDPOINTS } from "@/services/auth/auth.endpoint.sample";
-import { AuthService, LoginCredentials } from "@/services/auth/auth.service";
 import { IUser } from "@/types/domain/user/user.interface";
 
 export default function AuthApiDocumentation() {
@@ -19,16 +19,17 @@ export default function AuthApiDocumentation() {
   const loginMutation = useMutation<
     ISuccessResponse<IUser> | IErrorResponse,
     Error,
-    LoginCredentials
+    { username: string; password: string }
   >({
-    mutationFn: async (credentials) => {
-      const response = await AuthService.login(credentials);
-      return {
-        success: true,
-        message: "Đăng nhập thành công",
-        data: response,
-      };
-    },
+    mutationFn: (credentials) => AuthService.login(credentials),
+  });
+
+  // Mutation để đăng xuất
+  const logoutMutation = useMutation<
+    ISuccessResponse<null> | IErrorResponse,
+    Error
+  >({
+    mutationFn: () => AuthService.logout(),
   });
 
   const handleExecute = async (
@@ -42,6 +43,8 @@ export default function AuthApiDocumentation() {
             username: params.username,
             password: params.password,
           });
+        case "logout":
+          return await logoutMutation.mutateAsync();
         default:
           return {
             success: false,
@@ -63,14 +66,8 @@ export default function AuthApiDocumentation() {
     title: "Auth API",
     endpoints: AUTH_ENDPOINTS,
     service: {
-      login: async (credentials: LoginCredentials) => {
-        const response = await AuthService.login(credentials);
-        return {
-          success: true,
-          message: "Đăng nhập thành công",
-          data: response,
-        };
-      },
+      login: (credentials) => AuthService.login(credentials),
+      logout: () => AuthService.logout(),
     },
     onExecute: handleExecute,
   };

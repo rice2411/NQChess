@@ -4,7 +4,7 @@ export const AUTH_ENDPOINTS: IEndpoint[] = [
   {
     method: "POST",
     service: "login",
-    description: "Đăng nhập bằng email và password",
+    description: "Đăng nhập vào hệ thống",
     parameters: {
       username: {
         type: "string",
@@ -19,5 +19,11 @@ export const AUTH_ENDPOINTS: IEndpoint[] = [
         value: "Pass123@",
       },
     },
+  },
+  {
+    method: "POST",
+    service: "logout",
+    description: "Đăng xuất khỏi hệ thống",
+    parameters: {},
   },
 ];
