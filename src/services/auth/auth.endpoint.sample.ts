@@ -1,4 +1,4 @@
-import { IEndpoint } from "@/types/api/api.endpoints.interface";
+import { IEndpoint } from "@/types/api/api.endpoints.interface"
 
 export const AUTH_ENDPOINTS: IEndpoint[] = [
   {
@@ -7,12 +7,14 @@ export const AUTH_ENDPOINTS: IEndpoint[] = [
     description: "Đăng nhập vào hệ thống",
     parameters: {
       username: {
+        name: "username",
         type: "string",
         required: true,
         description: "Tên đăng nhập",
         value: "admin",
       },
       password: {
+        name: "password",
         type: "string",
         required: true,
         description: "Mật khẩu",
@@ -26,4 +28,4 @@ export const AUTH_ENDPOINTS: IEndpoint[] = [
     description: "Đăng xuất khỏi hệ thống",
     parameters: {},
   },
-];
+]
