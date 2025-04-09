@@ -1,68 +1,63 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ClassService } from "@/services/class/class.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { ClassService } from "@/services/class/class.service"
 import {
   ISuccessResponse,
   IErrorResponse,
-} from "@/types/api/response.interface";
-import { IClass } from "@/types/domain/class/class.interface";
+} from "@/types/api/response.interface"
+import { IClass } from "@/types/domain/class/class.interface"
+import { CLASS_QUERY_KEYS } from "./class-query-key"
 
 export const useClassQueries = () => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   // Query để lấy danh sách lớp học
   const getClassesQuery = useQuery<ISuccessResponse<IClass[]> | IErrorResponse>(
     {
-      queryKey: ["classes", "list"],
+      queryKey: CLASS_QUERY_KEYS.getClasses,
       queryFn: () => {
-        const isBeutifyDate =
-          queryClient.getQueryData<boolean>([
-            "classes",
-            "list",
-            "isBeutifyDate",
-          ]) ?? false;
-        return ClassService.getClasses(isBeutifyDate);
+        const isBeautifyDate =
+          queryClient.getQueryData<boolean>(CLASS_QUERY_KEYS.getClasses) ??
+          false
+        return ClassService.getClasses(isBeautifyDate)
       },
       enabled: false,
     }
-  );
+  )
 
   // Query để lấy thông tin lớp học theo ID
   const getClassByIdQuery = useQuery<ISuccessResponse<IClass> | IErrorResponse>(
     {
-      queryKey: ["classes", "detail"],
+      queryKey: CLASS_QUERY_KEYS.getClassById,
       queryFn: () => {
-        const id = queryClient.getQueryData<string>([
-          "classes",
-          "detail",
-          "id",
-        ]);
-        const isBeutifyDate =
+        const id = queryClient.getQueryData<string>(
+          CLASS_QUERY_KEYS.getClassById
+        )
+        const isBeautifyDate =
           queryClient.getQueryData<boolean>([
-            "classes",
-            "detail",
-            "isBeutifyDate",
-          ]) ?? false;
+            ...CLASS_QUERY_KEYS.getClassById,
+            "isBeautifyDate",
+          ]) ?? false
         if (!id) {
-          return Promise.reject(new Error("Missing class ID"));
+          return Promise.reject(new Error("Missing class ID"))
         }
-        return ClassService.getClassById(id, isBeutifyDate);
+        return ClassService.getClassById(id, isBeautifyDate)
       },
       enabled: false,
     }
-  );
+  )
 
   // Mutation để tạo lớp học
   const createMutation = useMutation<
     ISuccessResponse<IClass> | IErrorResponse,
     Error,
-    { data: Omit<IClass, "id">; isBeutifyDate: boolean }
+    { data: Omit<IClass, "id">; isBeautifyDate: boolean }
   >({
-    mutationFn: ({ data, isBeutifyDate }) =>
-      ClassService.createClass(data, isBeutifyDate),
+    mutationFn: ({ data, isBeautifyDate }) =>
+      ClassService.createClass(data, isBeautifyDate),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEYS.classes })
     },
-  });
+  })
 
   // Mutation để thêm học sinh vào lớp
   const addStudentsMutation = useMutation<
@@ -70,12 +65,14 @@ export const useClassQueries = () => {
     Error,
     { classId: string; studentIds: string[] }
   >({
-    mutationFn: ({ classId, studentIds }) =>
-      ClassService.addStudentsToClass(classId, studentIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    mutationFn: ({ classId, studentIds }) => {
+      console.log(classId)
+      return ClassService.addStudentsToClass(classId, studentIds)
     },
-  });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEYS.classes })
+    },
+  })
 
   // Mutation để xóa lớp học
   const deleteMutation = useMutation<
@@ -85,9 +82,9 @@ export const useClassQueries = () => {
   >({
     mutationFn: (id: string) => ClassService.deleteClass(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEYS.classes })
     },
-  });
+  })
 
   return {
     getClassesQuery,
@@ -96,5 +93,5 @@ export const useClassQueries = () => {
     addStudentsMutation,
     deleteMutation,
     queryClient,
-  };
-};
+  }
+}

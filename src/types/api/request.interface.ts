@@ -1,7 +1,7 @@
 export interface IGetClassesRequest {
-  isBeutifyDate?: boolean;
+  isBeautifyDate?: boolean
 }
 
 export interface IGetStudentsRequest {
-  isBeutifyDate?: boolean;
+  isBeautifyDate?: boolean
 }

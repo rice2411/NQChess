@@ -1,27 +1,29 @@
-"use client";
+"use client"
 
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/common/ui/tabs";
-import StudentsApiDocumentation from "./students/page";
-import ClassesApiDocumentation from "./classes/page";
-import AuthApiDocumentation from "./auth/page";
+} from "@/components/common/ui/tabs"
+import StudentsApiDocumentation from "./students/page"
+import ClassesApiDocumentation from "./classes/page"
+import AuthApiDocumentation from "./auth/page"
+import TuitionsApiDocumentation from "./tuitions/page"
 
 export default function ApiDocumentation() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">API Documentation</h1>
       <p className="italic text-red-500 my-5">
-        Trong class Service *isBeutifyDate*: Nếu true, sẽ format lại các trường
+        Trong class Service *isBeautifyDate*: Nếu true, sẽ format lại các trường
         timestamp như CreatedAt, UpdatedAt thành chuỗi ngày tháng đẹp
       </p>
       <Tabs defaultValue="students" className="space-y-4">
         <TabsList>
           <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="classes">Classes</TabsTrigger>
+          <TabsTrigger value="tuitions">Tuitions</TabsTrigger>
           <TabsTrigger value="auth">Auth</TabsTrigger>
         </TabsList>
 
@@ -33,10 +35,14 @@ export default function ApiDocumentation() {
           <ClassesApiDocumentation />
         </TabsContent>
 
+        <TabsContent value="tuitions">
+          <TuitionsApiDocumentation />
+        </TabsContent>
+
         <TabsContent value="auth">
           <AuthApiDocumentation />
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

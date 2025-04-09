@@ -7,6 +7,7 @@ import { useStudentQueries } from "@/hooks/react-query/student/useStudentQueries
 import { StudentService } from "@/services/student/student.service"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
 import ApiDocumentation from "@/components/features/api-documentation"
+import { STUDENT_QUERY_KEYS } from "@/hooks/react-query/student/student-query-key"
 
 export default function StudentsApiDocumentation() {
   const {

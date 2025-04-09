@@ -1,14 +1,14 @@
-import { IUser } from "@/types/domain/user/user.interface";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { IUser } from "@/types/domain/user/user.interface"
+import { signInWithEmailAndPassword, signOut } from "firebase/auth"
 import {
   IErrorResponse,
   ISuccessResponse,
-} from "@/types/api/response.interface";
+} from "@/types/api/response.interface"
+import { auth } from "@/lib/firebase/client.config"
 
 export interface LoginCredentials {
-  username: string;
-  password: string;
+  username: string
+  password: string
 }
 
 export const AuthService = {
@@ -20,7 +20,7 @@ export const AuthService = {
         auth,
         credentials.username + "@nqchess.com",
         credentials.password
-      );
+      )
 
       return {
         success: true,
@@ -29,32 +29,32 @@ export const AuthService = {
           id: userCredential.user.uid,
           email: userCredential.user.email || "",
         },
-      };
+      }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", error)
       return {
         success: false,
         errorCode: "LOGIN_ERROR",
         message: "Invalid username or password",
-      };
+      }
     }
   },
 
   async logout(): Promise<ISuccessResponse<null> | IErrorResponse> {
     try {
-      await signOut(auth);
+      await signOut(auth)
       return {
         success: true,
         message: "Logout successful",
         data: null,
-      };
+      }
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error:", error)
       return {
         success: false,
         errorCode: "LOGOUT_ERROR",
         message: "Failed to logout",
-      };
+      }
     }
   },
-};
+}

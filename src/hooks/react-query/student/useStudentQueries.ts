@@ -1,14 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { StudentService } from "@/services/student/student.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { StudentService } from "@/services/student/student.service"
 import {
   ISuccessResponse,
   IErrorResponse,
-} from "@/types/api/response.interface";
-import { IStudent } from "@/types/domain/student/student.interface";
-import { STUDENT_QUERY_KEYS } from "./student-query-key";
+} from "@/types/api/response.interface"
+import { IStudent } from "@/types/domain/student/student.interface"
+import { STUDENT_QUERY_KEYS } from "./student-query-key"
 
 export const useStudentQueries = () => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   // Query để lấy danh sách học sinh
   const getStudentsQuery = useQuery<
@@ -16,13 +16,13 @@ export const useStudentQueries = () => {
   >({
     queryKey: STUDENT_QUERY_KEYS.getStudents,
     queryFn: () => {
-      const isBeutifyDate = queryClient.getQueryData<boolean>(
+      const isBeautifyDate = queryClient.getQueryData<boolean>(
         STUDENT_QUERY_KEYS.getStudents
-      );
-      return StudentService.getStudents(isBeutifyDate);
+      )
+      return StudentService.getStudents(isBeautifyDate)
     },
     enabled: false,
-  });
+  })
 
   // Query để tìm kiếm học sinh
   const searchStudentQuery = useQuery<
@@ -32,19 +32,19 @@ export const useStudentQueries = () => {
     queryFn: () => {
       const params = queryClient.getQueryData<Record<string, any>>(
         STUDENT_QUERY_KEYS.searchStudent
-      );
+      )
       if (!params) {
-        return Promise.reject(new Error("Missing search parameters"));
+        return Promise.reject(new Error("Missing search parameters"))
       }
       return StudentService.searchStudent(
         params.fullName,
         params.dateOfBirth,
         params.phoneNumber,
-        params.isBeutifyDate
-      );
+        params.isBeautifyDate
+      )
     },
     enabled: false,
-  });
+  })
 
   // Mutation để tạo/cập nhật học sinh
   const createOrUpdateMutation = useMutation<
@@ -54,9 +54,9 @@ export const useStudentQueries = () => {
   >({
     mutationFn: (data: any) => StudentService.createOrUpdateStudent(data, true),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: STUDENT_QUERY_KEYS.students })
     },
-  });
+  })
 
   // Mutation để xóa học sinh
   const deleteMutation = useMutation<
@@ -66,9 +66,9 @@ export const useStudentQueries = () => {
   >({
     mutationFn: (id: string) => StudentService.deleteStudent(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: STUDENT_QUERY_KEYS.students })
     },
-  });
+  })
 
   return {
     getStudentsQuery,
@@ -76,5 +76,5 @@ export const useStudentQueries = () => {
     createOrUpdateMutation,
     deleteMutation,
     queryClient,
-  };
-};
+  }
+}

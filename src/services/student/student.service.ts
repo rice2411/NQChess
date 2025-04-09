@@ -1,153 +1,126 @@
 import {
   createOrUpdateDocument,
-  updateDocument,
+  readDocument,
   deleteDocument,
   readDocuments,
-} from "@/lib/firebase/FSD";
+} from "@/lib/firebase/fireStoreDatabase"
+import { IStudent } from "@/types/domain/student/student.interface"
 import {
   IErrorResponse,
   ISuccessResponse,
-} from "@/types/api/response.interface";
-import { IStudent } from "@/types/domain/student/student.interface";
-import { serverTimestamp } from "firebase/firestore";
+} from "@/types/api/response.interface"
+import { serverTimestamp } from "firebase/firestore"
+import { EGender } from "@/types/domain/student/student.enum"
 
-const COLLECTION_NAME = "students";
+const COLLECTION_NAME = "students"
 
 export const StudentService = {
   // Create or Update
   createOrUpdateStudent: async (
-    data: Partial<IStudent> & { id?: string },
-    isBeutifyDate: boolean = true
-  ) => {
-    try {
-      // Nếu có id, thực hiện update
-      if (data.id) {
-        const result = await updateDocument<IStudent>(
-          COLLECTION_NAME,
-          data.id,
-          {
-            ...data,
-            updatedAt: serverTimestamp(),
-          },
-          isBeutifyDate
-        );
-        if (!result.success) {
-          return result as IErrorResponse;
-        }
-        return result as ISuccessResponse<IStudent>;
-      }
-
-      // Kiểm tra các trường bắt buộc khi tạo mới
-      if (
-        !data.phoneNumber ||
-        !data.fullName ||
-        !data.dateOfBirth ||
-        !data.gender
-      ) {
-        return {
-          success: false,
-          errorCode: "MISSING_REQUIRED_FIELDS",
-          message:
-            "Missing required fields: phoneNumber, fullName, dateOfBirth, gender",
-        } as IErrorResponse;
-      }
-
-      // Nếu không có id, thực hiện create
-      const newStudent: Omit<IStudent, "id"> = {
-        ...data,
-        phoneNumber: data.phoneNumber,
-        fullName: data.fullName,
-        dateOfBirth: data.dateOfBirth,
-        gender: data.gender,
-        avatar: data.avatar || "",
-        classes: data.classes || [],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      const result = await createOrUpdateDocument<Omit<IStudent, "id">>(
-        COLLECTION_NAME,
-        newStudent,
-        isBeutifyDate
-      );
-
-      if (!result.success) {
-        return result as IErrorResponse;
-      }
-      return result as ISuccessResponse<IStudent>;
-    } catch {
+    data: Omit<IStudent, "id">,
+    isBeautifyDate: boolean = true
+  ): Promise<ISuccessResponse<IStudent> | IErrorResponse> => {
+    if (!data.fullName || !data.dateOfBirth || !data.phoneNumber) {
       return {
         success: false,
-        errorCode: "INTERNAL_ERROR",
-        message: "Failed to create or update student",
-      } as IErrorResponse;
+        errorCode: "MISSING_REQUIRED_FIELDS",
+        message: "Missing required fields: fullName, dateOfBirth, phoneNumber",
+      }
     }
+
+    const newStudent: Omit<IStudent, "id"> = {
+      ...data,
+      gender: data.gender || EGender.MALE,
+      avatar: data.avatar || "",
+      classes: data.classes || [],
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }
+
+    const result = await createOrUpdateDocument<Omit<IStudent, "id">>(
+      COLLECTION_NAME,
+      newStudent,
+      isBeautifyDate
+    )
+
+    if (!result.success) return result as IErrorResponse
+    return result as ISuccessResponse<IStudent>
   },
 
   // Read
-  getStudents: async (isBeutifyDate: boolean = false) => {
+  getStudents: async (
+    isBeautifyDate: boolean = true
+  ): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
     const result = await readDocuments<IStudent>(
       COLLECTION_NAME,
       [],
-      isBeutifyDate
-    );
-    if (!result.success) {
-      return result as IErrorResponse;
-    }
-    return result as ISuccessResponse<IStudent[]>;
+      isBeautifyDate
+    )
+    if (!result.success) return result as IErrorResponse
+    return result as ISuccessResponse<IStudent[]>
+  },
+
+  getStudentById: async (
+    id: string,
+    isBeautifyDate: boolean = true
+  ): Promise<ISuccessResponse<IStudent> | IErrorResponse> => {
+    const result = await readDocument<IStudent>(
+      COLLECTION_NAME,
+      id,
+      isBeautifyDate
+    )
+    if (!result.success) return result as IErrorResponse
+    return result as ISuccessResponse<IStudent>
   },
 
   // Delete
-  deleteStudent: async (id: string) => {
-    const result = await deleteDocument(COLLECTION_NAME, id);
-    if (!result.success) {
-      return result as IErrorResponse;
-    }
-    return result as ISuccessResponse<null>;
+  deleteStudent: async (
+    id: string
+  ): Promise<ISuccessResponse<null> | IErrorResponse> => {
+    const result = await deleteDocument(COLLECTION_NAME, id)
+    if (!result.success) return result as IErrorResponse
+    return result as ISuccessResponse<null>
   },
 
-  // Search for a single student by criteria
+  // Search
   searchStudent: async (
-    fullName: string,
-    dateOfBirth: string,
-    phoneNumber: string,
-    isBeutifyDate: boolean = true
+    fullName?: string,
+    dateOfBirth?: string,
+    phoneNumber?: string,
+    isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IStudent | null> | IErrorResponse> => {
-    // Kiểm tra nếu thiếu bất kỳ tham số nào
-    console.log("fullName", fullName);
-    console.log("dateOfBirth", dateOfBirth);
-    console.log("phoneNumber", phoneNumber);
-    if (!fullName || !dateOfBirth || !phoneNumber) {
-      return {
-        success: false,
-        errorCode: "MISSING_PARAMETERS",
-        message:
-          "All search parameters (fullName, dateOfBirth, phoneNumber) are required",
-      };
-    }
-
     const result = await readDocuments<IStudent>(
       COLLECTION_NAME,
       [],
-      isBeutifyDate
-    );
+      isBeautifyDate
+    )
+    if (!result.success) return result as IErrorResponse
 
-    if (!result.success) {
-      return result as IErrorResponse;
+    const students = result.data
+    if (!students) {
+      return {
+        success: true,
+        message: "No students found",
+        data: null,
+      }
     }
 
-    const foundStudent = result.data?.find((student) => {
-      return (
-        student.fullName === fullName &&
-        student.dateOfBirth === dateOfBirth &&
-        student.phoneNumber === phoneNumber
-      );
-    });
+    const foundStudent = students.find((student) => {
+      const nameMatch = fullName
+        ? student.fullName.toLowerCase().includes(fullName.toLowerCase())
+        : true
+      const dobMatch = dateOfBirth ? student.dateOfBirth === dateOfBirth : true
+      const phoneMatch = phoneNumber
+        ? student.phoneNumber === phoneNumber
+        : true
+
+      return nameMatch && dobMatch && phoneMatch
+    })
 
     return {
       success: true,
-      message: foundStudent ? "Student found" : "Student not found",
+      message: foundStudent ? "Student found" : "No student found",
       data: foundStudent || null,
-    };
+    }
   },
-};
+}

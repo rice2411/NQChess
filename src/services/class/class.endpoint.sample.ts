@@ -1,5 +1,5 @@
-import { IEndpoint } from "@/types/api/api.endpoints.interface";
-import { EClassStatus } from "@/types/domain/class/class.enum";
+import { IEndpoint } from "@/types/api/api.endpoints.interface"
+import { EClassStatus } from "@/types/domain/class/class.enum"
 
 export const CLASS_ENDPOINTS: IEndpoint[] = [
   {
@@ -7,7 +7,8 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
     service: "getClasses",
     description: "Lấy danh sách tất cả lớp học",
     parameters: {
-      isBeutifyDate: {
+      isBeautifyDate: {
+        name: "isBeautifyDate",
         type: "boolean",
         required: false,
         description: "Có định dạng lại ngày tháng hay không",
@@ -21,54 +22,63 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
     description: "Tạo mới hoặc cập nhật lớp học",
     parameters: {
       id: {
+        name: "id",
         type: "string",
         required: false,
         description: "ID của lớp học (nếu cập nhật)",
         value: "",
       },
       name: {
+        name: "name",
         type: "string",
         required: true,
         description: "Tên lớp học",
         value: "Lớp Cờ Vua 1",
       },
       startDate: {
+        name: "startDate",
         type: "string",
         required: true,
         description: "Ngày bắt đầu",
         value: "2025-01-01",
       },
       endDate: {
+        name: "endDate",
         type: "string",
         required: true,
         description: "Ngày kết thúc",
         value: "2025-03-01",
       },
       schedules: {
+        name: "schedules",
         type: "array",
         required: true,
         description: "Lịch học",
         value: ["19:00 - 20:30 Thứ 3", "20:30 - 22:00 Thứ 5"],
       },
       students: {
+        name: "students",
         type: "array",
         required: false,
         description: "Danh sách ID học sinh",
         value: [],
       },
       status: {
+        name: "status",
         type: "string",
         required: false,
         description: "Trạng thái lớp học",
         value: EClassStatus.INACTIVE,
       },
-      isBeutifyDate: {
+      isBeautifyDate: {
+        name: "isBeautifyDate",
         type: "boolean",
         required: false,
         description: "Có định dạng lại ngày tháng hay không",
         value: true,
       },
       tuition: {
+        name: "tuition",
         type: "number",
         required: false,
         description: "Học phí lớp học",
@@ -82,12 +92,14 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
     description: "Lấy thông tin lớp học theo ID",
     parameters: {
       id: {
+        name: "id",
         type: "string",
         required: true,
         description: "ID của lớp học",
         value: "",
       },
-      isBeutifyDate: {
+      isBeautifyDate: {
+        name: "isBeautifyDate",
         type: "boolean",
         required: false,
         description: "Có định dạng lại ngày tháng hay không",
@@ -101,6 +113,7 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
     description: "Xóa lớp học",
     parameters: {
       id: {
+        name: "id",
         type: "string",
         required: true,
         description: "ID của lớp học cần xóa",
@@ -109,28 +122,24 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
     },
   },
   {
-    method: "PUT",
+    method: "POST",
     service: "addStudentsToClass",
-    description: "Thêm  học sinh khỏi lớp học",
+    description: "Thêm học sinh vào lớp",
     parameters: {
-      classId: {
+      id: {
+        name: "classId",
         type: "string",
         required: true,
         description: "ID của lớp học",
-        value: "",
+        value: "i6b5WkoGNKpQGVspfPVe",
       },
-      studentId: {
-        type: "string",
+      studentIds: {
+        name: "studentIds",
+        type: "string[]",
         required: true,
-        description: "danh sách ID của học sinh",
-        value: [],
-      },
-      isBeutifyDate: {
-        type: "boolean",
-        required: false,
-        description: "Có định dạng lại ngày tháng hay không",
-        value: true,
+        description: "Danh sách ID học sinh",
+        value: ["GZYgGfJ34SoPTKxwVabg"],
       },
     },
   },
-];
+]
