@@ -5,7 +5,6 @@ import {
   ISuccessResponse,
 } from "@/types/api/response.interface"
 import { auth } from "@/lib/firebase/client.config"
-import { CloudCog } from "lucide-react"
 import { tokenUtils } from "@/utils/token"
 
 export interface LoginCredentials {
