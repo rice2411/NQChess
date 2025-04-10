@@ -5,6 +5,8 @@ import {
   ISuccessResponse,
 } from "@/types/api/response.interface"
 import { auth } from "@/lib/firebase/client.config"
+import { CloudCog } from "lucide-react"
+import { tokenUtils } from "@/utils/token"
 
 export interface LoginCredentials {
   username: string
@@ -21,7 +23,8 @@ export const AuthService = {
         credentials.username + "@nqchess.com",
         credentials.password
       )
-
+      const token = await userCredential.user.getIdToken()
+      tokenUtils.setToken(token)
       return {
         success: true,
         message: "Login successful",
@@ -43,6 +46,7 @@ export const AuthService = {
   async logout(): Promise<ISuccessResponse<null> | IErrorResponse> {
     try {
       await signOut(auth)
+      tokenUtils.removeToken()
       return {
         success: true,
         message: "Logout successful",

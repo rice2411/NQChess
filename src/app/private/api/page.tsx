@@ -15,6 +15,9 @@ export default function ApiDocumentation() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">API Documentation</h1>
+      <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+        Về trang chủ
+      </a>
       <p className="italic text-red-500 my-5">
         Trong class Service *isBeautifyDate*: Nếu true, sẽ format lại các trường
         timestamp như CreatedAt, UpdatedAt thành chuỗi ngày tháng đẹp

@@ -1,24 +1,24 @@
-import type { Metadata } from "next";
-import { Kings } from "next/font/google";
-import "./globals.css";
-import QueryProvider from "@/providers/query-provider";
+import type { Metadata } from "next"
+import { Kings } from "next/font/google"
+import "./globals.css"
+import QueryProvider from "@/providers/QueryProvider"
 
 const kings = Kings({
   weight: "400",
   subsets: ["latin", "vietnamese"],
   variable: "--font-kings",
   display: "swap",
-});
+})
 
 export const metadata: Metadata = {
   title: "NQChess",
   description: "Như Quỳnh Chess",
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="vi">
@@ -27,5 +27,5 @@ export default function RootLayout({
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
-  );
+  )
 }
