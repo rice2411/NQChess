@@ -21,10 +21,7 @@ export const useApiDocumentation = () => {
       // Xử lý query (GET method)
       if (method === "GET" && queries[service]) {
         const query = queries[service]
-        queryClient.setQueryData(
-          queryKeys,
-          params[`${queryKeys[queryKeys.length - 1]}`]
-        )
+        queryClient.setQueryData(queryKeys, params)
         const result = await query.refetch()
         return (
           result.data || {

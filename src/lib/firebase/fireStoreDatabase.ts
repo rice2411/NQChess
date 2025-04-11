@@ -10,6 +10,9 @@ import {
   serverTimestamp,
   DocumentData,
   QueryConstraint,
+  orderBy,
+  limit,
+  startAfter,
 } from "firebase/firestore"
 import {
   IErrorResponse,
@@ -17,6 +20,7 @@ import {
 } from "@/types/api/response.interface"
 import { formatFirestoreData } from "@/helpers/timeFireStore.helper"
 import { db } from "@/config/firebase/client.config"
+import { IGetRequest } from "@/types/api/request.interface"
 
 // Create or Update
 export async function createOrUpdateDocument<
@@ -123,17 +127,36 @@ export async function readDocument<T extends DocumentData>(
 export async function readDocuments<T extends DocumentData>(
   collectionName: string,
   constraints: QueryConstraint[] = [],
-  isBeautifyDate: boolean = true
+  options: IGetRequest = { isBeautifyDate: true }
 ): Promise<ISuccessResponse<T[]> | IErrorResponse> {
   try {
-    const q = query(collection(db, collectionName), ...constraints)
+    const queryConstraints = [...constraints]
+
+    // Add sorting if specified
+    if (options.sortBy) {
+      queryConstraints.push(orderBy(options.sortBy, options.sortOrder || "asc"))
+    }
+    // Add limit if specified
+    if (options.limit) {
+      queryConstraints.push(limit(options.limit))
+    }
+
+    // Add pagination if last document is provided
+    if (options.lastDoc) {
+      queryConstraints.push(startAfter(options.lastDoc))
+    }
+
+    const q = query(collection(db, collectionName), ...queryConstraints)
     const querySnapshot = await getDocs(q)
 
     const documents = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     })) as unknown as T[]
-    const formattedData = formatFirestoreData(documents, isBeautifyDate) as T[]
+    const formattedData = formatFirestoreData(
+      documents,
+      options.isBeautifyDate
+    ) as T[]
 
     return {
       success: true,

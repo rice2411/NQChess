@@ -49,14 +49,10 @@ export const StudentService = {
   },
 
   // Read
-  getStudents: async ({
-    isBeautifyDate = true,
-  }: IGetRequest): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
-    const result = await readDocuments<IStudent>(
-      COLLECTION_NAME,
-      [],
-      isBeautifyDate
-    )
+  getStudents: async (
+    params: IGetRequest
+  ): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
+    const result = await readDocuments<IStudent>(COLLECTION_NAME, [], params)
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<IStudent[]>
   },
@@ -87,14 +83,9 @@ export const StudentService = {
   searchStudent: async (
     fullName?: string,
     dateOfBirth?: string,
-    phoneNumber?: string,
-    isBeautifyDate: boolean = true
+    phoneNumber?: string
   ): Promise<ISuccessResponse<IStudent | null> | IErrorResponse> => {
-    const result = await readDocuments<IStudent>(
-      COLLECTION_NAME,
-      [],
-      isBeautifyDate
-    )
+    const result = await readDocuments<IStudent>(COLLECTION_NAME, [])
     if (!result.success) return result as IErrorResponse
 
     const students = result.data

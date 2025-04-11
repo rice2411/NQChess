@@ -6,6 +6,7 @@ import {
 } from "@/types/api/response.interface"
 import { tokenUtils } from "@/utils/token"
 import { auth } from "@/config/firebase/client.config"
+import { UserService } from "./user.service"
 
 export interface LoginCredentials {
   username: string
@@ -24,13 +25,13 @@ export const AuthService = {
       )
       const token = await userCredential.user.getIdToken()
       tokenUtils.setToken(token)
+      // 4. Find user by username
+      const user = await UserService.getUserByUsername(credentials.username)
+      if (!user.success) return user as IErrorResponse
       return {
         success: true,
         message: "Login successful",
-        data: {
-          id: userCredential.user.uid,
-          email: userCredential.user.email || "",
-        },
+        data: user.data as IUser,
       }
     } catch (error) {
       console.error("Login error:", error)

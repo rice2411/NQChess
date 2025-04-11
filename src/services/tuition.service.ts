@@ -17,14 +17,10 @@ const COLLECTION_NAME = "tuitions"
 
 export const TuitionService = {
   // Read
-  getTuitions: async ({
-    isBeautifyDate = true,
-  }: IGetRequest): Promise<ISuccessResponse<ITuition[]> | IErrorResponse> => {
-    const result = await readDocuments<ITuition>(
-      COLLECTION_NAME,
-      [],
-      isBeautifyDate
-    )
+  getTuitions: async (
+    params: IGetRequest
+  ): Promise<ISuccessResponse<ITuition[]> | IErrorResponse> => {
+    const result = await readDocuments<ITuition>(COLLECTION_NAME, [], params)
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<ITuition[]>
   },
@@ -53,14 +49,9 @@ export const TuitionService = {
 
   // Get tuitions by student
   getTuitionsByStudentId: async (
-    studentId: string,
-    isBeautifyDate: boolean = true
+    studentId: string
   ): Promise<ISuccessResponse<ITuition[]> | IErrorResponse> => {
-    const result = await readDocuments<ITuition>(
-      COLLECTION_NAME,
-      [],
-      isBeautifyDate
-    )
+    const result = await readDocuments<ITuition>(COLLECTION_NAME, [])
     if (!result.success) return result as IErrorResponse
 
     const tuitions = result.data
@@ -85,14 +76,9 @@ export const TuitionService = {
 
   // Get tuitions by class
   getTuitionsByClassId: async (
-    classId: string,
-    isBeautifyDate: boolean = true
+    classId: string
   ): Promise<ISuccessResponse<ITuition[]> | IErrorResponse> => {
-    const result = await readDocuments<ITuition>(
-      COLLECTION_NAME,
-      [],
-      isBeautifyDate
-    )
+    const result = await readDocuments<ITuition>(COLLECTION_NAME, [])
     if (!result.success) return result as IErrorResponse
 
     const tuitions = result.data

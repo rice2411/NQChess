@@ -53,14 +53,10 @@ export const ClassService = {
   },
 
   // Read
-  getClasses: async ({
-    isBeautifyDate = true,
-  }: IGetRequest): Promise<ISuccessResponse<IClass[]> | IErrorResponse> => {
-    const result = await readDocuments<IClass>(
-      COLLECTION_NAME,
-      [],
-      isBeautifyDate
-    )
+  getClasses: async (
+    params: IGetRequest
+  ): Promise<ISuccessResponse<IClass[]> | IErrorResponse> => {
+    const result = await readDocuments<IClass>(COLLECTION_NAME, [], params)
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<IClass[]>
   },

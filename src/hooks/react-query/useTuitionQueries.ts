@@ -21,6 +21,7 @@ export const useTuitionQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         TUITION_QUERY_KEYS.getTuitions
       )
+      console.log("params:", params)
       return TuitionService.getTuitions(params || {})
     },
     enabled: false,
@@ -46,10 +47,10 @@ export const useTuitionQueries = () => {
   >({
     queryKey: TUITION_QUERY_KEYS.getTuitionsByStudentId,
     queryFn: () => {
-      const [studentId, isBeautifyDate] = queryClient.getQueryData<
-        [string, boolean]
-      >(TUITION_QUERY_KEYS.getTuitionsByStudentId) || ["", true]
-      return TuitionService.getTuitionsByStudentId(studentId, isBeautifyDate)
+      const [studentId] = queryClient.getQueryData<[string, boolean]>(
+        TUITION_QUERY_KEYS.getTuitionsByStudentId
+      ) || ["", true]
+      return TuitionService.getTuitionsByStudentId(studentId)
     },
     enabled: false,
   })
@@ -60,10 +61,10 @@ export const useTuitionQueries = () => {
   >({
     queryKey: TUITION_QUERY_KEYS.getTuitionsByClassId,
     queryFn: () => {
-      const [classId, isBeautifyDate] = queryClient.getQueryData<
-        [string, boolean]
-      >(TUITION_QUERY_KEYS.getTuitionsByClassId) || ["", true]
-      return TuitionService.getTuitionsByClassId(classId, isBeautifyDate)
+      const [classId] = queryClient.getQueryData<[string, boolean]>(
+        TUITION_QUERY_KEYS.getTuitionsByClassId
+      ) || ["", true]
+      return TuitionService.getTuitionsByClassId(classId)
     },
     enabled: false,
   })
