@@ -1,13 +1,13 @@
 "use client"
 
-import { IApiDocumentationProps } from "@/types/api/api.endpoints.interface"
+import { IApiDocumentationProps } from "@/types/api/apiEndpoint.interface"
 
-import { TUITION_ENDPOINTS } from "@/services/tuition/tuition.endpoint.sample"
-import { useTuitionQueries } from "@/hooks/react-query/tuition/useTuitionQueries"
-import { TuitionService } from "@/services/tuition/tuition.service"
+import { TUITION_ENDPOINTS } from "@/constant/endpoint/tuitionEndPointData"
+import { useTuitionQueries } from "@/hooks/react-query/useTuitionQueries"
+import { TuitionService } from "@/services/tuition.service"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
-import ApiDocumentation from "@/components/features/api-documentation"
-import { TUITION_QUERY_KEYS } from "@/hooks/react-query/tuition/tuition-query-key"
+import ApiDocumentation from "@/components/features/apiDocumentation"
+import { TUITION_QUERY_KEYS } from "@/constant/queryKey/tuitionQueryKey"
 
 export default function TuitionsApiDocumentation() {
   const {
@@ -16,7 +16,7 @@ export default function TuitionsApiDocumentation() {
     getTuitionsByStudentIdQuery,
     getTuitionsByClassIdQuery,
     createTuitionForStudentMutation,
-    updateTuitionMutation,
+    changeStatusTuitionMutation,
     deleteTuitionMutation,
   } = useTuitionQueries()
 
@@ -31,7 +31,7 @@ export default function TuitionsApiDocumentation() {
 
   const mutations = {
     createTuitionForStudent: createTuitionForStudentMutation,
-    updateTuition: updateTuitionMutation,
+    changeStatusTuition: changeStatusTuitionMutation,
     deleteTuition: deleteTuitionMutation,
   }
 

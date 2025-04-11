@@ -10,33 +10,54 @@ import {
   serverTimestamp,
   DocumentData,
   QueryConstraint,
+  orderBy,
+  limit,
+  startAfter,
 } from "firebase/firestore"
 import {
   IErrorResponse,
   ISuccessResponse,
 } from "@/types/api/response.interface"
-import { formatFirestoreData } from "@/helpers/time-firestore.helper"
-import { db } from "./client.config"
+import { formatFirestoreData } from "@/helpers/timeFireStore.helper"
+import { db } from "@/config/firebase/client.config"
+import { IGetRequest } from "@/types/api/request.interface"
 
 // Create or Update
-export async function createOrUpdateDocument<T extends DocumentData>(
+export async function createOrUpdateDocument<
+  T extends DocumentData & { id?: string; createdAt?: any; updatedAt?: any }
+>(
   collectionName: string,
   data: T,
   isBeautifyDate: boolean = true
 ): Promise<ISuccessResponse<T> | IErrorResponse> {
+  // Check if document exists by checking if it has an id
+  const isUpdate = "id" in data && data.id
+
   try {
-    const docRef = await addDoc(collection(db, collectionName), {
+    const docData = {
       ...data,
-      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    })
+    }
+
+    // Only set createdAt for new documents
+    if (!isUpdate) {
+      docData.createdAt = serverTimestamp()
+    }
+
+    const docRef = isUpdate
+      ? doc(db, collectionName, data.id!)
+      : await addDoc(collection(db, collectionName), docData)
+
+    if (isUpdate) {
+      await updateDoc(docRef, docData)
+    }
 
     const docSnap = await getDoc(docRef)
     if (!docSnap.exists()) {
       return {
         success: false,
         errorCode: "DOCUMENT_NOT_FOUND",
-        message: "Document not found after creation",
+        message: "Document not found after creation/update",
       }
     }
 
@@ -47,15 +68,19 @@ export async function createOrUpdateDocument<T extends DocumentData>(
 
     return {
       success: true,
-      message: "Document created successfully",
+      message: isUpdate
+        ? "Document updated successfully"
+        : "Document created successfully",
       data: formattedData as T,
     }
   } catch (err) {
-    console.error("Error creating document: ", err)
+    console.error("Error creating/updating document: ", err)
     return {
       success: false,
-      errorCode: "CREATE_ERROR",
-      message: "Failed to create document",
+      errorCode: isUpdate ? "UPDATE_ERROR" : "CREATE_ERROR",
+      message: isUpdate
+        ? "Failed to update document"
+        : "Failed to create document",
     }
   }
 }
@@ -102,18 +127,36 @@ export async function readDocument<T extends DocumentData>(
 export async function readDocuments<T extends DocumentData>(
   collectionName: string,
   constraints: QueryConstraint[] = [],
-  isBeautifyDate: boolean = true
+  options: IGetRequest = { isBeautifyDate: true }
 ): Promise<ISuccessResponse<T[]> | IErrorResponse> {
   try {
-    const q = query(collection(db, collectionName), ...constraints)
+    const queryConstraints = [...constraints]
+
+    // Add sorting if specified
+    if (options.sortBy) {
+      queryConstraints.push(orderBy(options.sortBy, options.sortOrder || "asc"))
+    }
+    // Add limit if specified
+    if (options.limit) {
+      queryConstraints.push(limit(options.limit))
+    }
+
+    // Add pagination if last document is provided
+    if (options.lastDoc) {
+      queryConstraints.push(startAfter(options.lastDoc))
+    }
+
+    const q = query(collection(db, collectionName), ...queryConstraints)
     const querySnapshot = await getDocs(q)
 
     const documents = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     })) as unknown as T[]
-
-    const formattedData = formatFirestoreData(documents, isBeautifyDate) as T[]
+    const formattedData = formatFirestoreData(
+      documents,
+      options.isBeautifyDate
+    ) as T[]
 
     return {
       success: true,

@@ -11,6 +11,7 @@ import ClassesApiDocumentation from "./classes/page"
 import AuthApiDocumentation from "./auth/page"
 import TuitionsApiDocumentation from "./tuitions/page"
 import Link from "next/link"
+import UsersApiDocumentation from "./users/page"
 
 export default function ApiDocumentation() {
   return (
@@ -29,6 +30,7 @@ export default function ApiDocumentation() {
           <TabsTrigger value="classes">Classes</TabsTrigger>
           <TabsTrigger value="tuitions">Tuitions</TabsTrigger>
           <TabsTrigger value="auth">Auth</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students">
@@ -45,6 +47,10 @@ export default function ApiDocumentation() {
 
         <TabsContent value="auth">
           <AuthApiDocumentation />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <UsersApiDocumentation />
         </TabsContent>
       </Tabs>
     </div>

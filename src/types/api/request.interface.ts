@@ -1,7 +1,7 @@
-export interface IGetClassesRequest {
+export interface IGetRequest {
   isBeautifyDate?: boolean
-}
-
-export interface IGetStudentsRequest {
-  isBeautifyDate?: boolean
+  limit?: number
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+  lastDoc?: any
 }
