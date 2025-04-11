@@ -40,8 +40,7 @@ export const useStudentQueries = () => {
       return StudentService.searchStudent(
         params.fullName,
         params.dateOfBirth,
-        params.phoneNumber,
-        params.isBeautifyDate
+        params.phoneNumber
       )
     },
     enabled: false,
