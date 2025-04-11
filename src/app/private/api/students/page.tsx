@@ -1,13 +1,13 @@
 "use client"
 
-import { IApiDocumentationProps } from "@/types/api/api.endpoints.interface"
+import { IApiDocumentationProps } from "@/types/api/apiEndpoint.interface"
 
-import { STUDENT_ENDPOINTS } from "@/services/student/student.endpoint.sample"
-import { useStudentQueries } from "@/hooks/react-query/student/useStudentQueries"
-import { StudentService } from "@/services/student/student.service"
+import { STUDENT_ENDPOINTS } from "@/constant/endpoint/studentEndPointData"
+import { useStudentQueries } from "@/hooks/react-query/useStudentQueries"
+import { StudentService } from "@/services/student.service"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
-import ApiDocumentation from "@/components/features/api-documentation"
-import { STUDENT_QUERY_KEYS } from "@/hooks/react-query/student/student-query-key"
+import ApiDocumentation from "@/components/features/apiDocumentation"
+import { STUDENT_QUERY_KEYS } from "@/constant/queryKey/studentQueryKey"
 
 export default function StudentsApiDocumentation() {
   const {

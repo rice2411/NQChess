@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { IEndpoint } from "@/types/api/api.endpoints.interface"
+import { IEndpoint } from "@/types/api/apiEndpoint.interface"
 import {
   ISuccessResponse,
   IErrorResponse,

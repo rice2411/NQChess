@@ -1,12 +1,12 @@
 "use client"
 
-import { CLASS_ENDPOINTS } from "@/services/class/class.endpoint.sample"
-import { ClassService } from "@/services/class/class.service"
-import { useClassQueries } from "@/hooks/react-query/class/useClassQueries"
-import { IApiDocumentationProps } from "@/types/api/api.endpoints.interface"
+import { CLASS_ENDPOINTS } from "@/constant/endpoint/classEndpointData"
+import { ClassService } from "@/services/class.service"
+import { useClassQueries } from "@/hooks/react-query/useClassQueries"
+import { IApiDocumentationProps } from "@/types/api/apiEndpoint.interface"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
-import { CLASS_QUERY_KEYS } from "@/hooks/react-query/class/class-query-key"
-import ApiDocumentation from "@/components/features/api-documentation"
+import { CLASS_QUERY_KEYS } from "@/constant/queryKey/classQueryKey"
+import ApiDocumentation from "@/components/features/apiDocumentation"
 export default function ClassApiDocumentation() {
   const {
     getClassesQuery,
