@@ -5,7 +5,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/common/ui/Tabs"
+} from "@/components/common/ui/tabs"
 import StudentsApiDocumentation from "./students/page"
 import ClassesApiDocumentation from "./classes/page"
 import AuthApiDocumentation from "./auth/page"

@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/common/ui/Button"
+import { Button } from "@/components/common/ui/button"
 import {
   Form,
   FormControl,
@@ -8,9 +8,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/common/ui/Form"
-import { Input } from "@/components/common/ui/Input"
-import { Alert, AlertDescription } from "@/components/common/ui/Alert"
+} from "@/components/common/ui/form"
+import { Input } from "@/components/common/ui/input"
+import { Alert, AlertDescription } from "@/components/common/ui/alert"
 import { useMutation } from "@tanstack/react-query"
 import { AuthService, LoginCredentials } from "@/services/auth.service"
 import {
