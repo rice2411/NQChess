@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { UserService } from "@/services/user.service"
 import { USER_QUERY_KEYS } from "../../constant/queryKey/userQueryKey"
 import { IGetRequest } from "@/types/api/request.interface"
+import { IUser } from "@/types/domain/user.interface"
 
 export const useUserQueries = () => {
   const queryClient = useQueryClient()
@@ -22,8 +23,10 @@ export const useUserQueries = () => {
   const getUserByIdQuery = useQuery({
     queryKey: USER_QUERY_KEYS.getUserById,
     queryFn: () => {
-      const id = queryClient.getQueryData<string>(USER_QUERY_KEYS.getUserById)
-      return UserService.getUserById(id || "")
+      const params: IGetRequest | undefined =
+        queryClient.getQueryData<IGetRequest>(USER_QUERY_KEYS.getUserById)
+
+      return UserService.getUserById(params?.id || "", params?.isBeautifyDate)
     },
     enabled: false,
   })
@@ -44,9 +47,10 @@ export const useUserQueries = () => {
   const getUserByUsernameQuery = useQuery({
     queryKey: USER_QUERY_KEYS.getUserByUsername,
     queryFn: () => {
-      const username = queryClient.getQueryData<string>(
+      const params = queryClient.getQueryData<IUser>(
         USER_QUERY_KEYS.getUserByUsername
       )
+      const { username } = params || {}
       return UserService.getUserByUsername(username || "")
     },
     enabled: false,

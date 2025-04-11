@@ -91,6 +91,14 @@ export async function readDocument<T extends DocumentData>(
   id: string,
   isBeautifyDate: boolean = true
 ): Promise<ISuccessResponse<T> | IErrorResponse> {
+  if (!id) {
+    return {
+      success: false,
+      errorCode: "INVALID_ID",
+      message: "Document ID is required",
+    }
+  }
+
   try {
     const docRef = doc(db, collectionName, id)
     const docSnap = await getDoc(docRef)

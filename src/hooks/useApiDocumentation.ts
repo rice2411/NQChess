@@ -17,7 +17,6 @@ export const useApiDocumentation = () => {
   ): Promise<ISuccessResponse<any> | IErrorResponse> => {
     try {
       const { service, method } = endpoint
-
       // Xử lý query (GET method)
       if (method === "GET" && queries[service]) {
         const query = queries[service]
