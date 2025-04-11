@@ -11,14 +11,15 @@ import {
 import { ITuition } from "@/types/domain/tuition.interface"
 import { serverTimestamp } from "firebase/firestore"
 import { ETuitionStatus } from "@/enum/tuition.enum"
+import { IGetRequest } from "@/types/api/request.interface"
 
 const COLLECTION_NAME = "tuitions"
 
 export const TuitionService = {
   // Read
-  getTuitions: async (
-    isBeautifyDate: boolean = true
-  ): Promise<ISuccessResponse<ITuition[]> | IErrorResponse> => {
+  getTuitions: async ({
+    isBeautifyDate = true,
+  }: IGetRequest): Promise<ISuccessResponse<ITuition[]> | IErrorResponse> => {
     const result = await readDocuments<ITuition>(
       COLLECTION_NAME,
       [],

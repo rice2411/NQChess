@@ -7,6 +7,7 @@ import {
 import { ITuition } from "@/types/domain/tuition.interface"
 import { TUITION_QUERY_KEYS } from "../../constant/queryKey/tuitionQueryKey"
 import { ETuitionStatus } from "@/enum/tuition.enum"
+import { IGetRequest } from "@/types/api/request.interface"
 
 export const useTuitionQueries = () => {
   const queryClient = useQueryClient()
@@ -17,10 +18,10 @@ export const useTuitionQueries = () => {
   >({
     queryKey: TUITION_QUERY_KEYS.getTuitions,
     queryFn: () => {
-      const isBeautifyDate = queryClient.getQueryData<boolean>(
+      const params = queryClient.getQueryData<IGetRequest>(
         TUITION_QUERY_KEYS.getTuitions
       )
-      return TuitionService.getTuitions(isBeautifyDate)
+      return TuitionService.getTuitions(params || {})
     },
     enabled: false,
   })

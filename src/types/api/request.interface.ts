@@ -1,7 +1,3 @@
-export interface IGetClassesRequest {
-  isBeautifyDate?: boolean
-}
-
-export interface IGetStudentsRequest {
+export interface IGetRequest {
   isBeautifyDate?: boolean
 }

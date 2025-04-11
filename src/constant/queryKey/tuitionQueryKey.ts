@@ -18,9 +18,6 @@ export const TUITION_QUERY_KEYS = {
     "classId",
     "isBeautifyDate",
   ] as const,
-  createTuitionForStudent: [...BASE_KEY, "create", "params"] as const,
-  changeStatusTuition: [...BASE_KEY, "update", "id", "status"] as const,
-  deleteTuition: [...BASE_KEY, "delete", "id"] as const,
 } as const
 
 export type TuitionQueryKey = QueryKey

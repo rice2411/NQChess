@@ -6,6 +6,7 @@ import {
 } from "@/types/api/response.interface"
 import { IClass } from "@/types/domain/class.interface"
 import { CLASS_QUERY_KEYS } from "../../constant/queryKey/classQueryKey"
+import { IGetRequest } from "@/types/api/request.interface"
 
 export const useClassQueries = () => {
   const queryClient = useQueryClient()
@@ -15,10 +16,10 @@ export const useClassQueries = () => {
     {
       queryKey: CLASS_QUERY_KEYS.getClasses,
       queryFn: () => {
-        const isBeautifyDate =
-          queryClient.getQueryData<boolean>(CLASS_QUERY_KEYS.getClasses) ??
-          false
-        return ClassService.getClasses(isBeautifyDate)
+        const params = queryClient.getQueryData<IGetRequest>(
+          CLASS_QUERY_KEYS.getClasses
+        )
+        return ClassService.getClasses(params || {})
       },
       enabled: false,
     }

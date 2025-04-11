@@ -11,6 +11,7 @@ import {
 } from "@/types/api/response.interface"
 import { serverTimestamp } from "firebase/firestore"
 import { EGender } from "@/enum/student.enum"
+import { IGetRequest } from "@/types/api/request.interface"
 
 const COLLECTION_NAME = "students"
 
@@ -48,9 +49,9 @@ export const StudentService = {
   },
 
   // Read
-  getStudents: async (
-    isBeautifyDate: boolean = true
-  ): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
+  getStudents: async ({
+    isBeautifyDate = true,
+  }: IGetRequest): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
     const result = await readDocuments<IStudent>(
       COLLECTION_NAME,
       [],

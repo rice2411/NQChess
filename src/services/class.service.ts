@@ -15,6 +15,7 @@ import { EClassStatus, EStudentClassStatus } from "@/enum/class.enum"
 import { ETuitionStatus } from "@/enum/tuition.enum"
 import { calculateTuitionMonths } from "@/helpers/tuition.helper"
 import { TuitionService } from "./tuition.service"
+import { IGetRequest } from "@/types/api/request.interface"
 
 const COLLECTION_NAME = "classes"
 
@@ -52,9 +53,9 @@ export const ClassService = {
   },
 
   // Read
-  getClasses: async (
-    isBeautifyDate: boolean = true
-  ): Promise<ISuccessResponse<IClass[]> | IErrorResponse> => {
+  getClasses: async ({
+    isBeautifyDate = true,
+  }: IGetRequest): Promise<ISuccessResponse<IClass[]> | IErrorResponse> => {
     const result = await readDocuments<IClass>(
       COLLECTION_NAME,
       [],

@@ -6,6 +6,7 @@ import {
 } from "@/types/api/response.interface"
 import { IStudent } from "@/types/domain/student.interface"
 import { STUDENT_QUERY_KEYS } from "../../constant/queryKey/studentQueryKey"
+import { IGetRequest } from "@/types/api/request.interface"
 
 export const useStudentQueries = () => {
   const queryClient = useQueryClient()
@@ -16,10 +17,10 @@ export const useStudentQueries = () => {
   >({
     queryKey: STUDENT_QUERY_KEYS.getStudents,
     queryFn: () => {
-      const isBeautifyDate = queryClient.getQueryData<boolean>(
+      const params = queryClient.getQueryData<IGetRequest>(
         STUDENT_QUERY_KEYS.getStudents
       )
-      return StudentService.getStudents(isBeautifyDate)
+      return StudentService.getStudents(params || {})
     },
     enabled: false,
   })
