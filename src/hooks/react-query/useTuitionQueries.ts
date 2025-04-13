@@ -5,7 +5,7 @@ import {
   IErrorResponse,
 } from "@/types/api/response.interface"
 import { ITuition } from "@/types/domain/tuition.interface"
-import { TUITION_QUERY_KEYS } from "../../constant/queryKey/tuitionQueryKey"
+import { TUITION_QUERY_KEYS } from "@/constants/queryKey/tuitionQueryKey"
 import { ETuitionStatus } from "@/enum/tuition.enum"
 import { IGetRequest } from "@/types/api/request.interface"
 

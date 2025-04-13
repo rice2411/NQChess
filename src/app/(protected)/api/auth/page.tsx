@@ -9,7 +9,7 @@ import {
   ISuccessResponse,
   IErrorResponse,
 } from "@/types/api/response.interface"
-import { AUTH_ENDPOINTS } from "@/constant/endpoint/authEndpointData"
+import { AUTH_ENDPOINTS } from "@/constants/endpoint/authEndpointData"
 import { useAuthQueries } from "@/hooks/react-query/useAuthQueries"
 import { AuthService } from "@/services/auth.service"
 

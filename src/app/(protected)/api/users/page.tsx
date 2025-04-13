@@ -5,8 +5,8 @@ import { useUserQueries } from "@/hooks/react-query/useUserQueries"
 import { UserService } from "@/services/user.service"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
 import ApiDocumentation from "@/components/features/apiDocumentation"
-import { USER_QUERY_KEYS } from "@/constant/queryKey/userQueryKey"
-import { USER_ENDPOINTS } from "@/constant/endpoint/userEndPointData"
+import { USER_QUERY_KEYS } from "@/constants/queryKey/userQueryKey"
+import { USER_ENDPOINTS } from "@/constants/endpoint/userEndPointData"
 
 export default function UsersApiDocumentation() {
   const {

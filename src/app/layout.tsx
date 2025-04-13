@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Kings } from "next/font/google"
 import "./globals.css"
 import QueryProvider from "@/providers/QueryProvider"
+import Providers from "@/providers/SessionProvider"
 
 const kings = Kings({
   weight: "400",
@@ -23,8 +24,10 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <link rel="manifest" href="/manifest.json" />
-      <body className={`${kings.variable}  antialiased`}>
-        <QueryProvider>{children}</QueryProvider>
+      <body className={`${kings.variable} antialiased`}>
+        <Providers>
+          <QueryProvider>{children}</QueryProvider>
+        </Providers>
       </body>
     </html>
   )

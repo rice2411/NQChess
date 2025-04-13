@@ -2,12 +2,12 @@
 
 import { IApiDocumentationProps } from "@/types/api/apiEndpoint.interface"
 
-import { STUDENT_ENDPOINTS } from "@/constant/endpoint/studentEndPointData"
+import { STUDENT_ENDPOINTS } from "@/constants/endpoint/studentEndPointData"
 import { useStudentQueries } from "@/hooks/react-query/useStudentQueries"
 import { StudentService } from "@/services/student.service"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
 import ApiDocumentation from "@/components/features/apiDocumentation"
-import { STUDENT_QUERY_KEYS } from "@/constant/queryKey/studentQueryKey"
+import { STUDENT_QUERY_KEYS } from "@/constants/queryKey/studentQueryKey"
 
 export default function StudentsApiDocumentation() {
   const {

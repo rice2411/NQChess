@@ -4,5 +4,6 @@ import { IBaseEntity } from "../common/entity.interface"
 export interface IUser extends IBaseEntity {
   username: string
   password: string
+  email: string
   role: EUserRole
 }

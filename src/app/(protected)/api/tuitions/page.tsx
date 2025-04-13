@@ -2,12 +2,12 @@
 
 import { IApiDocumentationProps } from "@/types/api/apiEndpoint.interface"
 
-import { TUITION_ENDPOINTS } from "@/constant/endpoint/tuitionEndPointData"
+import { TUITION_ENDPOINTS } from "@/constants/endpoint/tuitionEndPointData"
 import { useTuitionQueries } from "@/hooks/react-query/useTuitionQueries"
 import { TuitionService } from "@/services/tuition.service"
 import { useApiDocumentation } from "@/hooks/useApiDocumentation"
 import ApiDocumentation from "@/components/features/apiDocumentation"
-import { TUITION_QUERY_KEYS } from "@/constant/queryKey/tuitionQueryKey"
+import { TUITION_QUERY_KEYS } from "@/constants/queryKey/tuitionQueryKey"
 
 export default function TuitionsApiDocumentation() {
   const {

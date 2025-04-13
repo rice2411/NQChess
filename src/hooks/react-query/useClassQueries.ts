@@ -5,7 +5,7 @@ import {
   IErrorResponse,
 } from "@/types/api/response.interface"
 import { IClass } from "@/types/domain/class.interface"
-import { CLASS_QUERY_KEYS } from "../../constant/queryKey/classQueryKey"
+import { CLASS_QUERY_KEYS } from "@/constants/queryKey/classQueryKey"
 import { IGetRequest } from "@/types/api/request.interface"
 
 export const useClassQueries = () => {

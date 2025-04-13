@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { UserService } from "@/services/user.service"
-import { USER_QUERY_KEYS } from "../../constant/queryKey/userQueryKey"
+import { USER_QUERY_KEYS } from "@/constants/queryKey/userQueryKey"
 import { IGetRequest } from "@/types/api/request.interface"
 import { IUser } from "@/types/domain/user.interface"
 

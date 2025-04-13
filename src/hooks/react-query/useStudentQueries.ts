@@ -5,7 +5,7 @@ import {
   IErrorResponse,
 } from "@/types/api/response.interface"
 import { IStudent } from "@/types/domain/student.interface"
-import { STUDENT_QUERY_KEYS } from "../../constant/queryKey/studentQueryKey"
+import { STUDENT_QUERY_KEYS } from "@/constants/queryKey/studentQueryKey"
 import { IGetRequest } from "@/types/api/request.interface"
 
 export const useStudentQueries = () => {
