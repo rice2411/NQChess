@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth"
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
-
   return (
     <>
       <h3 className="font-kings text-primary">
