@@ -1,7 +1,7 @@
+import { EUserRole } from "@/modules/user/enums/user.enum"
+import { IUser } from "@/modules/user/interfaces/user.interface"
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { EUserRole } from "@/modules/user/user.enum"
-import { IUser } from "@/modules/user/user.interface"
 
 // Thêm type cho session và user
 declare module "next-auth" {
