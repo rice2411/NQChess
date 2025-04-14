@@ -1,30 +1,27 @@
 import type { Metadata } from "next"
-import { Kings } from "next/font/google"
+import { Inter } from "next/font/google"
 import "./globals.css"
-import QueryProvider from "@/providers/QueryProvider"
-import Providers from "@/providers/SessionProvider"
+import QueryProvider from "@/core/providers/QueryProvider"
+import Providers from "@/core/providers/SessionProvider"
+import ProgressBar from "@/shared/components/progress-bar"
 
-const kings = Kings({
-  weight: "400",
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-kings",
-  display: "swap",
-})
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "NQChess",
-  description: "Như Quỳnh Chess",
+  description: "NQChess - Chess Learning Platform",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="vi">
+    <html lang="en">
       <link rel="manifest" href="/manifest.json" />
-      <body className={`${kings.variable} antialiased`}>
+      <body className={inter.className}>
+        <ProgressBar />
         <Providers>
           <QueryProvider>{children}</QueryProvider>
         </Providers>

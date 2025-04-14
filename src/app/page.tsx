@@ -1,4 +1,4 @@
-import { authOptions } from "@/config/next-auth.config"
+import { authOptions } from "@/core/config/next-auth.config"
 import { getServerSession } from "next-auth"
 
 export default async function Home() {
