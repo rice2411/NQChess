@@ -3,7 +3,7 @@ import {
   readDocument,
   deleteDocument,
   readDocuments,
-} from "@/core/lib/firebase/fireStoreDatabase"
+} from "@/core/service/firestore.service"
 import { IStudent } from "@/modules/student/interfaces/student.interface"
 import {
   IErrorResponse,
@@ -12,8 +12,11 @@ import {
 import { serverTimestamp } from "firebase/firestore"
 import { EGender } from "@/modules/student/enum/student.enum"
 import { IGetRequest } from "@/core/types/api/request.interface"
+import { StudentValidator } from "../validators/student.validator"
+import { STUDENT_MESSAGES } from "../validators/student.messages"
 
 const COLLECTION_NAME = "students"
+const studentValidator = new StudentValidator()
 
 export const StudentService = {
   // Create or Update
@@ -21,12 +24,10 @@ export const StudentService = {
     data: Omit<IStudent, "id">,
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IStudent> | IErrorResponse> => {
-    if (!data.fullName || !data.dateOfBirth || !data.phoneNumber) {
-      return {
-        success: false,
-        errorCode: "MISSING_REQUIRED_FIELDS",
-        message: "Missing required fields: fullName, dateOfBirth, phoneNumber",
-      }
+    // Validate data
+    const validationError = studentValidator.validateCreateData(data)
+    if (validationError) {
+      return validationError
     }
 
     const newStudent: Omit<IStudent, "id"> = {
@@ -44,8 +45,19 @@ export const StudentService = {
       isBeautifyDate
     )
 
-    if (!result.success) return result as IErrorResponse
-    return result as ISuccessResponse<IStudent>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "CREATE_FAILED",
+        message: STUDENT_MESSAGES.CREATE_FAILED,
+      }
+    }
+
+    return {
+      success: true,
+      message: STUDENT_MESSAGES.CREATE_SUCCESS,
+      data: result.data as IStudent,
+    }
   },
 
   // Read
@@ -66,7 +78,13 @@ export const StudentService = {
       id,
       isBeautifyDate
     )
-    if (!result.success) return result as IErrorResponse
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "STUDENT_NOT_FOUND",
+        message: STUDENT_MESSAGES.STUDENT_NOT_FOUND,
+      }
+    }
     return result as ISuccessResponse<IStudent>
   },
 
@@ -75,8 +93,18 @@ export const StudentService = {
     id: string
   ): Promise<ISuccessResponse<null> | IErrorResponse> => {
     const result = await deleteDocument(COLLECTION_NAME, id)
-    if (!result.success) return result as IErrorResponse
-    return result as ISuccessResponse<null>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "DELETE_FAILED",
+        message: STUDENT_MESSAGES.DELETE_FAILED,
+      }
+    }
+    return {
+      success: true,
+      message: STUDENT_MESSAGES.DELETE_SUCCESS,
+      data: null,
+    }
   },
 
   // Search
@@ -85,6 +113,16 @@ export const StudentService = {
     dateOfBirth?: string,
     phoneNumber?: string
   ): Promise<ISuccessResponse<IStudent | null> | IErrorResponse> => {
+    // Validate search data
+    const validationError = studentValidator.validateSearchData(
+      fullName,
+      dateOfBirth,
+      phoneNumber
+    )
+    if (validationError) {
+      return validationError
+    }
+
     const result = await readDocuments<IStudent>(COLLECTION_NAME, [])
     if (!result.success) return result as IErrorResponse
 
@@ -92,7 +130,7 @@ export const StudentService = {
     if (!students) {
       return {
         success: true,
-        message: "No students found",
+        message: STUDENT_MESSAGES.STUDENT_NOT_FOUND,
         data: null,
       }
     }
@@ -111,7 +149,9 @@ export const StudentService = {
 
     return {
       success: true,
-      message: foundStudent ? "Student found" : "No student found",
+      message: foundStudent
+        ? "Student found"
+        : STUDENT_MESSAGES.STUDENT_NOT_FOUND,
       data: foundStudent || null,
     }
   },

@@ -1,13 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import {
-  AuthService,
-  LoginCredentials,
-} from "@/modules/auth/services/auth.service"
+import { AuthService } from "@/modules/auth/services/auth.service"
 import {
   ISuccessResponse,
   IErrorResponse,
 } from "@/core/types/api/response.interface"
 import { IUser } from "@/modules/user/interfaces/user.interface"
+import { ILoginCredentials } from "../validators/auth.validator"
 
 export const useAuthQueries = () => {
   const queryClient = useQueryClient()
@@ -16,7 +14,7 @@ export const useAuthQueries = () => {
   const loginMutation = useMutation<
     ISuccessResponse<IUser> | IErrorResponse,
     Error,
-    LoginCredentials
+    ILoginCredentials
   >({
     mutationFn: (credentials) => AuthService.login(credentials),
     onSuccess: (data) => {

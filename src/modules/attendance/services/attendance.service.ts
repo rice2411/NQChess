@@ -3,7 +3,7 @@ import {
   readDocument,
   deleteDocument,
   readDocuments,
-} from "@/core/lib/firebase/fireStoreDatabase"
+} from "@/core/service/firestore.service"
 import { IAttendance } from "@/modules/attendance/interfaces/attendance.interface"
 import {
   IErrorResponse,

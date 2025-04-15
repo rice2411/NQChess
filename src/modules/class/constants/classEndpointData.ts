@@ -84,8 +84,8 @@ export const CLASS_ENDPOINTS: IEndpoint[] = [
         description: "Dữ liệu lớp học",
         value: {
           name: "Lớp Cờ Vua 1",
-          startDate: "2025-01-01",
-          endDate: "2025-03-01",
+          startDate: "01/05/2025",
+          endDate: "01/08/2025",
           schedules: ["19:00 - 20:30 Thứ 3", "20:30 - 22:00 Thứ 5"],
           students: [],
           status: EClassStatus.INACTIVE,

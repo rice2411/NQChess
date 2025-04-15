@@ -4,7 +4,7 @@ import {
   updateDocument,
   deleteDocument,
   readDocuments,
-} from "@/core/lib/firebase/fireStoreDatabase"
+} from "@/core/service/firestore.service"
 import { IClass } from "@/modules/class/interfaces/class.interface"
 import {
   IErrorResponse,
@@ -19,8 +19,11 @@ import { ETuitionStatus } from "@/modules/tuition/enum/tuition.enum"
 import { TuitionService } from "@/modules/tuition/services/tuition.service"
 import { IGetRequest } from "@/core/types/api/request.interface"
 import { calculateTuitionMonths } from "../../tuition/helpers/tuition.helper"
+import { ClassValidator } from "../validators/class.validator"
+import { CLASS_MESSAGES } from "../validators/class.messages"
 
 const COLLECTION_NAME = "classes"
+const classValidator = new ClassValidator()
 
 export const ClassService = {
   // Create
@@ -28,12 +31,10 @@ export const ClassService = {
     data: Omit<IClass, "id">,
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
-    if (!data.name || !data.startDate || !data.endDate || !data.schedules) {
-      return {
-        success: false,
-        errorCode: "MISSING_REQUIRED_FIELDS",
-        message: "Missing required fields: name, startDate, endDate, schedule",
-      }
+    // Validate data
+    const validationError = classValidator.validateCreateData(data)
+    if (validationError) {
+      return validationError
     }
 
     const newClass: Omit<IClass, "id"> = {
@@ -51,8 +52,19 @@ export const ClassService = {
       isBeautifyDate
     )
 
-    if (!result.success) return result as IErrorResponse
-    return result as ISuccessResponse<IClass>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "CREATE_FAILED",
+        message: CLASS_MESSAGES.CREATE_FAILED,
+      }
+    }
+
+    return {
+      success: true,
+      message: CLASS_MESSAGES.CREATE_SUCCESS,
+      data: result.data as IClass,
+    }
   },
 
   // Read
@@ -73,7 +85,13 @@ export const ClassService = {
       id,
       isBeautifyDate
     )
-    if (!result.success) return result as IErrorResponse
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "CLASS_NOT_FOUND",
+        message: CLASS_MESSAGES.CLASS_NOT_FOUND,
+      }
+    }
     return result as ISuccessResponse<IClass>
   },
 
@@ -82,8 +100,18 @@ export const ClassService = {
     id: string
   ): Promise<ISuccessResponse<null> | IErrorResponse> => {
     const result = await deleteDocument(COLLECTION_NAME, id)
-    if (!result.success) return result as IErrorResponse
-    return result as ISuccessResponse<null>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "DELETE_FAILED",
+        message: CLASS_MESSAGES.DELETE_FAILED,
+      }
+    }
+    return {
+      success: true,
+      message: CLASS_MESSAGES.DELETE_SUCCESS,
+      data: null,
+    }
   },
 
   // Add students to class
@@ -92,6 +120,12 @@ export const ClassService = {
     studentIds: string[],
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
+    // Validate student IDs
+    const validationError = classValidator.validateAddStudents(studentIds)
+    if (validationError) {
+      return validationError
+    }
+
     const classResult = await readDocument<IClass>(
       COLLECTION_NAME,
       classId,
@@ -103,8 +137,21 @@ export const ClassService = {
     if (!classData) {
       return {
         success: false,
-        errorCode: "NOT_FOUND",
-        message: "Class not found",
+        errorCode: "CLASS_NOT_FOUND",
+        message: CLASS_MESSAGES.CLASS_NOT_FOUND,
+      }
+    }
+
+    // Check for duplicate students
+    const existingStudentIds = classData.students.map((s) => s.studentId)
+    const duplicateStudents = studentIds.filter((id) =>
+      existingStudentIds.includes(id)
+    )
+    if (duplicateStudents.length > 0) {
+      return {
+        success: false,
+        errorCode: "DUPLICATE_STUDENTS",
+        message: CLASS_MESSAGES.DUPLICATE_STUDENTS,
       }
     }
 
@@ -145,6 +192,18 @@ export const ClassService = {
       isBeautifyDate
     )
 
-    return result as ISuccessResponse<IClass>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: "UPDATE_FAILED",
+        message: CLASS_MESSAGES.UPDATE_FAILED,
+      }
+    }
+
+    return {
+      success: true,
+      message: CLASS_MESSAGES.ADD_STUDENTS_SUCCESS,
+      data: result.data as IClass,
+    }
   },
 }

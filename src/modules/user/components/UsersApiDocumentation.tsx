@@ -3,7 +3,7 @@
 import { IApiDocumentationProps } from "@/modules/documentation/api/interface/apiEndpoint.interface"
 import { useUserQueries } from "@/modules/user/hooks/useUserQueries"
 import { UserService } from "@/modules/user/services/user.service"
-import { useApiDocumentation } from "@/modules/shared/hooks/useApiDocumentation"
+import { useApiDocumentation } from "@/modules/documentation/api/hooks/useApiDocumentation"
 import ApiDocumentation from "@/modules/documentation/api/components"
 import { USER_ENDPOINTS } from "@/modules/user/constants/userEndPointData"
 

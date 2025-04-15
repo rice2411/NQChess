@@ -4,9 +4,9 @@ import { IApiDocumentationProps } from "@/modules/documentation/api/interface/ap
 import { ATTENDANCE_ENDPOINTS } from "@/modules/attendance/constants/attendanceEndpointData"
 import { useAttendanceQueries } from "@/modules/attendance/hooks/useAttendanceQueries"
 import { AttendanceService } from "@/modules/attendance/services/attendance.service"
-import { useApiDocumentation } from "@/modules/shared/hooks/useApiDocumentation"
 import ApiDocumentation from "@/modules/documentation/api/components"
 import { ATTENDANCE_QUERY_KEYS } from "@/modules/attendance/constants/attendanceQueryKey"
+import { useApiDocumentation } from "@/modules/documentation/api/hooks/useApiDocumentation"
 
 export default function AttendancesApiDocumentation() {
   const {

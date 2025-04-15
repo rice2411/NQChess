@@ -17,9 +17,11 @@ export const useApiDocumentation = () => {
   ): Promise<ISuccessResponse<any> | IErrorResponse> => {
     try {
       const { service, method } = endpoint
+
       // Xử lý query (GET method)
       if (method === "GET" && queries[service]) {
         const query = queries[service]
+
         queryClient.setQueryData(queryKeys, params)
         const result = await query.refetch()
         return (
@@ -30,7 +32,6 @@ export const useApiDocumentation = () => {
           }
         )
       }
-
       // Xử lý mutation (POST, PUT, DELETE methods)
       if (["POST", "PUT", "DELETE"].includes(method) && mutations[service]) {
         const mutation = mutations[service]

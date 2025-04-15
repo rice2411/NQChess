@@ -62,7 +62,9 @@ export const useStudentQueries = () => {
     Error,
     any
   >({
-    mutationFn: (data: any) => StudentService.createOrUpdate(data, true),
+    mutationFn: (params: { data: IStudent; isBeautifyDate: boolean }) => {
+      return StudentService.createOrUpdate(params.data, params.isBeautifyDate)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: STUDENT_QUERY_KEYS.students })
     },

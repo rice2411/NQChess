@@ -3,7 +3,7 @@ import {
   readDocument,
   deleteDocument,
   readDocuments,
-} from "@/core/lib/firebase/fireStoreDatabase"
+} from "@/core/service/firestore.service"
 import { IUser } from "../interfaces/user.interface"
 import {
   IErrorResponse,

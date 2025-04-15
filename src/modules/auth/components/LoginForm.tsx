@@ -22,7 +22,7 @@ import {
 } from "@/core/types/api/response.interface"
 import { useRouter } from "next/navigation"
 
-import { useFormWithSchema } from "@/modules/shared/hooks/useReactHookForm"
+import { useFormWithSchema } from "@/shared/hooks/useReactHookForm"
 import { LoginFormData, loginSchema } from "@/modules/auth/schema/login.schema"
 
 export function LoginForm() {

@@ -4,7 +4,7 @@ import { IApiDocumentationProps } from "@/modules/documentation/api/interface/ap
 import { LESSON_ENDPOINTS } from "@/modules/lesson/constants/lessonEndpointData"
 import { useLessonQueries } from "@/modules/lesson/hooks/useLessonQueries"
 import { LessonService } from "@/modules/lesson/services/lesson.service"
-import { useApiDocumentation } from "@/modules/shared/hooks/useApiDocumentation"
+import { useApiDocumentation } from "@/modules/documentation/api/hooks/useApiDocumentation"
 import ApiDocumentation from "@/modules/documentation/api/components"
 import { LESSON_QUERY_KEYS } from "@/modules/lesson/constants/lessonQueryKey"
 

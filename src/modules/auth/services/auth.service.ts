@@ -7,76 +7,54 @@ import { auth } from "@/core/config/firebase/client.config"
 import { signIn, signOut as signOutNextAuth } from "next-auth/react"
 import { IUser } from "@/modules/user/interfaces/user.interface"
 import { UserService } from "@/modules/user/services/user.service"
+import { AuthValidator } from "../validators/auth.validator"
+import { AUTH_MESSAGES } from "../validators/auth.messages"
+import { ILoginCredentials } from "../types/login.interface"
 
-export interface LoginCredentials {
-  username: string
-  password: string
-}
-
-const handleFirebaseError = (error: any): IErrorResponse => {
-  switch (error.code) {
-    case "auth/invalid-email":
-      return {
-        success: false,
-        errorCode: "INVALID_EMAIL",
-        message: "Email không hợp lệ",
-      }
-    case "auth/wrong-password":
-      return {
-        success: false,
-        errorCode: "WRONG_PASSWORD",
-        message: "Sai mật khẩu",
-      }
-    case "auth/user-not-found":
-      return {
-        success: false,
-        errorCode: "USER_NOT_FOUND",
-        message: "Người dùng không tồn tại",
-      }
-    default:
-      return {
-        success: false,
-        errorCode: "FIREBASE_ERROR",
-        message: "Lỗi xác thực",
-      }
-  }
-}
+const authValidator = new AuthValidator()
 
 export const AuthService = {
   async login(
-    credentials: LoginCredentials
+    credentials: ILoginCredentials
   ): Promise<ISuccessResponse<IUser> | IErrorResponse> {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        credentials.username + "@nqchess.com",
-        credentials.password
-      )
+      // Validate credentials
+      const validationError =
+        authValidator.validateLoginCredentials(credentials)
+      if (validationError) {
+        return validationError
+      }
 
-      const user = await UserService.getByUsername(credentials.username)
-      if (!user.success) return user as IErrorResponse
+      // Run Firebase auth and get user data in parallel
+      const [userCredential, user] = await Promise.all([
+        signInWithEmailAndPassword(
+          auth,
+          credentials.username + "@nqchess.com",
+          credentials.password
+        ),
+        UserService.getByUsername(credentials.username),
+      ])
 
-      const result = await signIn("credentials", {
-        ...user.data,
-        token: await userCredential.user.getIdToken(),
-        redirect: false,
-      })
-
-      if (result?.error) {
+      if (!user.success) {
         return {
           success: false,
-          errorCode: "NEXTAUTH_ERROR",
-          message: result.error,
+          errorCode: "USER_NOT_FOUND",
+          message: AUTH_MESSAGES.USER_NOT_FOUND,
         }
       }
 
+      await signIn("credentials", {
+        ...user.data,
+        redirect: false,
+      })
+
       return {
         success: true,
-        message: "Đăng nhập thành công",
+        message: AUTH_MESSAGES.LOGIN_SUCCESS,
         data: user.data as IUser,
       }
     } catch (error) {
-      return handleFirebaseError(error)
+      return authValidator.handleFirebaseError(error)
     }
   },
 
@@ -86,16 +64,12 @@ export const AuthService = {
       await signOutNextAuth({ redirect: false })
       return {
         success: true,
-        message: "Logout successful",
+        message: AUTH_MESSAGES.LOGOUT_SUCCESS,
         data: null,
       }
     } catch (error) {
       console.error("Logout error:", error)
-      return {
-        success: false,
-        errorCode: "LOGOUT_ERROR",
-        message: "Failed to logout",
-      }
+      return authValidator.handleFirebaseError(error)
     }
   },
 }

@@ -5,9 +5,9 @@ import { IApiDocumentationProps } from "@/modules/documentation/api/interface/ap
 import { TUITION_ENDPOINTS } from "@/modules/tuition/constants/tuitionEndPointData"
 import { useTuitionQueries } from "@/modules/tuition/hooks/useTuitionQueries"
 import { TuitionService } from "@/modules/tuition/services/tuition.service"
-import { useApiDocumentation } from "@/modules/shared/hooks/useApiDocumentation"
 import ApiDocumentation from "@/modules/documentation/api/components"
 import { TUITION_QUERY_KEYS } from "@/modules/tuition/constants/tuitionQueryKey"
+import { useApiDocumentation } from "@/modules/documentation/api/hooks/useApiDocumentation"
 
 export default function TuitionsApiDocumentation() {
   const {

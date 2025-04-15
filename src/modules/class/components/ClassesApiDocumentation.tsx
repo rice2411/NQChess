@@ -2,10 +2,11 @@
 
 import { ClassService } from "@/modules/class/services/class.service"
 import { IApiDocumentationProps } from "@/modules/documentation/api/interface/apiEndpoint.interface"
-import { useApiDocumentation } from "@/modules/shared/hooks/useApiDocumentation"
 import ApiDocumentation from "@/modules/documentation/api/components"
 import { useClassQueries } from "@/modules/class/hooks/useClassQueries"
 import { CLASS_ENDPOINTS } from "@/modules/class/constants/classEndpointData"
+import { CLASS_QUERY_KEYS } from "../constants/classQueryKey"
+import { useApiDocumentation } from "@/modules/documentation/api/hooks/useApiDocumentation"
 export default function ClassesApiDocumentation() {
   const {
     getAllQuery,
