@@ -1,0 +1,179 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-04-15"
+  },
+  "common": {
+    "navigation": {
+      "home": "Trang chủ",
+      "about": "Giới thiệu",
+      "contact": "Liên hệ",
+      "apiDocument": "Tài liệu API",
+      "apiDocumentDescription": "Xem và kiểm tra các endpoint API"
+    },
+    "buttons": {
+      "submit": "Gửi",
+      "cancel": "Hủy",
+      "save": "Lưu thay đổi"
+    },
+    "welcome": {
+      "title": "Chào mừng đến với NQChess",
+      "description": "Hệ thống quản lý lớp học và học viên"
+    }
+  },
+  "auth": {
+    "forms": {
+      "login": "Đăng nhập",
+      "register": "Đăng ký",
+      "email": "Email",
+      "password": "Mật khẩu"
+    },
+    "errors": {
+      "invalidCredentials": "Email hoặc mật khẩu không hợp lệ",
+      "emailRequired": "Email là bắt buộc",
+      "passwordMinLength": "Mật khẩu phải có ít nhất {min} ký tự",
+      "userNotFound": "Không tìm thấy người dùng",
+      "unauthorized": "Bạn không có quyền thực hiện hành động này"
+    },
+    "success": {
+      "loginSuccess": "Đăng nhập thành công",
+      "logoutSuccess": "Đăng xuất thành công"
+    }
+  },
+  "dashboard": {
+    "welcome": "Xin chào, {name}",
+    "stats": {
+      "users": {
+        "one": "1 người dùng",
+        "other": "{count} người dùng"
+      }
+    }
+  },
+  "attendance": {
+    "validation": {
+      "invalidStatus": "Trạng thái điểm danh không hợp lệ",
+      "invalidDate": "Ngày không hợp lệ",
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: mã học sinh, mã buổi học, trạng thái, ngày"
+    },
+    "errors": {
+      "notFound": "Không tìm thấy thông tin điểm danh",
+      "createFailed": "Thêm thông tin điểm danh thất bại",
+      "updateFailed": "Cập nhật thông tin điểm danh thất bại",
+      "deleteFailed": "Xóa thông tin điểm danh thất bại"
+    },
+    "success": {
+      "createSuccess": "Thêm thông tin điểm danh thành công",
+      "updateSuccess": "Cập nhật thông tin điểm danh thành công",
+      "deleteSuccess": "Xóa thông tin điểm danh thành công"
+    }
+  },
+  "lesson": {
+    "validation": {
+      "invalidTitle": "Tiêu đề phải từ 3-100 ký tự",
+      "invalidDescription": "Mô tả không được vượt quá 500 ký tự",
+      "invalidDate": "Ngày không hợp lệ",
+      "invalidStartTime": "Thời gian bắt đầu không hợp lệ",
+      "invalidEndTime": "Thời gian kết thúc không hợp lệ",
+      "invalidStatus": "Trạng thái buổi học không hợp lệ",
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: mã lớp, thời gian bắt đầu, thời gian kết thúc"
+    },
+    "errors": {
+      "notFound": "Không tìm thấy buổi học",
+      "createFailed": "Thêm buổi học thất bại",
+      "updateFailed": "Cập nhật thông tin buổi học thất bại",
+      "deleteFailed": "Xóa buổi học thất bại"
+    },
+    "success": {
+      "createSuccess": "Thêm buổi học thành công",
+      "updateSuccess": "Cập nhật thông tin buổi học thành công",
+      "deleteSuccess": "Xóa buổi học thành công"
+    }
+  },
+  "user": {
+    "validation": {
+      "invalidUsername": "Tên đăng nhập phải từ 3-20 ký tự và chỉ chứa chữ cái, số và dấu gạch dưới",
+      "invalidPassword": "Mật khẩu phải có ít nhất 8 ký tự, 1 chữ hoa, 1 chữ thường và 1 số",
+      "invalidEmail": "Email không hợp lệ",
+      "invalidPhone": "Số điện thoại không hợp lệ",
+      "invalidRole": "Vai trò không hợp lệ",
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: tên đăng nhập, mật khẩu, email, vai trò"
+    },
+    "errors": {
+      "notFound": "Không tìm thấy người dùng",
+      "createFailed": "Thêm người dùng thất bại",
+      "updateFailed": "Cập nhật thông tin người dùng thất bại",
+      "deleteFailed": "Xóa người dùng thất bại"
+    },
+    "success": {
+      "createSuccess": "Thêm người dùng thành công",
+      "updateSuccess": "Cập nhật thông tin người dùng thành công",
+      "deleteSuccess": "Xóa người dùng thành công"
+    }
+  },
+  "tuition": {
+    "validation": {
+      "invalidAmount": "Số tiền phải lớn hơn 0",
+      "invalidMonth": "Tháng không hợp lệ (định dạng MM/YYYY)",
+      "invalidStatus": "Trạng thái thanh toán không hợp lệ",
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: mã lớp, mã học sinh, số tiền, tháng"
+    },
+    "errors": {
+      "notFound": "Không tìm thấy thông tin học phí",
+      "createFailed": "Thêm thông tin học phí thất bại",
+      "updateFailed": "Cập nhật thông tin học phí thất bại",
+      "deleteFailed": "Xóa thông tin học phí thất bại"
+    },
+    "success": {
+      "createSuccess": "Thêm thông tin học phí thành công",
+      "updateSuccess": "Cập nhật thông tin học phí thành công",
+      "deleteSuccess": "Xóa thông tin học phí thành công"
+    }
+  },
+  "student": {
+    "validation": {
+      "invalidName": "Tên học sinh không được để trống và phải từ 2 đến 50 ký tự",
+      "invalidPhone": "Số điện thoại không hợp lệ",
+      "invalidDob": "Ngày sinh không hợp lệ",
+      "invalidGender": "Giới tính không hợp lệ",
+      "invalidClasses": "Danh sách lớp không hợp lệ",
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: tên, ngày sinh, số điện thoại"
+    },
+    "errors": {
+      "notFound": "Không tìm thấy học sinh",
+      "createFailed": "Thêm học sinh thất bại",
+      "updateFailed": "Cập nhật thông tin học sinh thất bại",
+      "deleteFailed": "Xóa học sinh thất bại"
+    },
+    "success": {
+      "createSuccess": "Thêm học sinh thành công",
+      "updateSuccess": "Cập nhật thông tin học sinh thành công",
+      "deleteSuccess": "Xóa học sinh thành công"
+    }
+  },
+  "class": {
+    "validation": {
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: tên lớp, ngày bắt đầu, ngày kết thúc, lịch học",
+      "invalidName": "Tên lớp phải từ 2 đến 50 ký tự",
+      "invalidStartDate": "Ngày bắt đầu không hợp lệ (định dạng dd/mm/yyyy) hoặc đã qua",
+      "invalidEndDate": "Ngày kết thúc không hợp lệ (định dạng dd/mm/yyyy) hoặc trước ngày bắt đầu",
+      "invalidSchedules": "Định dạng lịch học không hợp lệ",
+      "invalidStudentData": "Định dạng dữ liệu học sinh không hợp lệ",
+      "invalidStatus": "Trạng thái lớp không hợp lệ",
+      "invalidTuition": "Học phí phải là số dương",
+      "invalidStudentStatus": "Trạng thái học sinh không hợp lệ"
+    },
+    "success": {
+      "createSuccess": "Thêm lớp thành công",
+      "updateSuccess": "Cập nhật thông tin lớp thành công",
+      "deleteSuccess": "Xóa lớp thành công",
+      "addStudentsSuccess": "Thêm học sinh vào lớp thành công"
+    },
+    "errors": {
+      "createFailed": "Thêm lớp thất bại",
+      "updateFailed": "Cập nhật thông tin lớp thất bại",
+      "deleteFailed": "Xóa lớp thất bại",
+      "notFound": "Không tìm thấy lớp",
+      "duplicateStudents": "Một số học sinh đã có trong lớp"
+    }
+  }
+}

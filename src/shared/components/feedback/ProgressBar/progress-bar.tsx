@@ -1,53 +1,52 @@
 "use client"
 
-import { Suspense, useEffect } from "react"
-import NProgress from "nprogress"
+import { useEffect, useState } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
-
-// Import styles
+import NProgress from "nprogress"
 import "nprogress/nprogress.css"
 
-// Customize NProgress
-NProgress.configure({
-  showSpinner: false,
-  trickleSpeed: 100,
-  minimum: 0.08,
-  easing: "ease",
-  speed: 200,
-})
-
-function ProgressBarContent() {
+export default function ProgressBar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    NProgress.configure({
+      showSpinner: false,
+      minimum: 0.1,
+      trickleSpeed: 200,
+    })
+
     NProgress.start()
 
-    const interval = setInterval(() => {
-      NProgress.inc(0.1)
+    const timer = setTimeout(() => {
+      NProgress.done()
     }, 100)
 
-    const handleLoad = () => {
-      clearInterval(interval)
+    const handleBeforeUnload = () => {
       NProgress.done()
     }
 
+    const handleLoad = () => {
+      NProgress.done()
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
     window.addEventListener("load", handleLoad)
 
     return () => {
-      clearInterval(interval)
-      window.removeEventListener("load", handleLoad)
+      clearTimeout(timer)
       NProgress.done()
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+      window.removeEventListener("load", handleLoad)
     }
-  }, [pathname, searchParams])
+  }, [pathname, searchParams, mounted])
 
   return null
-}
-
-export default function ProgressBar() {
-  return (
-    <Suspense fallback={null}>
-      <ProgressBarContent />
-    </Suspense>
-  )
 }

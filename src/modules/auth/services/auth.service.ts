@@ -24,16 +24,13 @@ export const AuthService = {
       if (validationError) {
         return validationError
       }
-
+      await signInWithEmailAndPassword(
+        auth,
+        credentials.username + "@nqchess.com",
+        credentials.password
+      )
       // Run Firebase auth and get user data in parallel
-      const [userCredential, user] = await Promise.all([
-        signInWithEmailAndPassword(
-          auth,
-          credentials.username + "@nqchess.com",
-          credentials.password
-        ),
-        UserService.getByUsername(credentials.username),
-      ])
+      const user = await UserService.getByUsername(credentials.username)
 
       if (!user.success) {
         return {
