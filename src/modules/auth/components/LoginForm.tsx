@@ -12,10 +12,7 @@ import {
 import { Input } from "@/shared/components/ui/input"
 import { Alert, AlertDescription } from "@/shared/components/ui/alert"
 import { useMutation } from "@tanstack/react-query"
-import {
-  AuthService,
-  LoginCredentials,
-} from "@/modules/auth/services/auth.service"
+import { AuthService } from "@/modules/auth/services/auth.service"
 import {
   ISuccessResponse,
   IErrorResponse,
@@ -24,6 +21,7 @@ import { useRouter } from "next/navigation"
 
 import { useFormWithSchema } from "@/shared/hooks/useReactHookForm"
 import { LoginFormData, loginSchema } from "@/modules/auth/schema/login.schema"
+import { ILoginCredentials } from "../types/login.interface"
 
 export function LoginForm() {
   const router = useRouter()
@@ -34,7 +32,7 @@ export function LoginForm() {
   const loginMutation = useMutation<
     ISuccessResponse<any> | IErrorResponse,
     Error,
-    LoginCredentials
+    ILoginCredentials
   >({
     mutationFn: async (credentials) => {
       const response = await AuthService.login(credentials)
