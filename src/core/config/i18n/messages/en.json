@@ -9,7 +9,13 @@
       "about": "About",
       "contact": "Contact",
       "apiDocument": "API Documentation",
-      "apiDocumentDescription": "View and test our API endpoints"
+      "apiDocumentDescription": "View and test our API endpoints",
+      "management": "Management",
+      "tracking": "Tracking",
+      "reporting": "Reporting",
+      "apiDocs": "API Docs",
+      "login": "Login",
+      "register": "Register"
     },
     "buttons": {
       "submit": "Submit",
@@ -17,8 +23,49 @@
       "save": "Save Changes"
     },
     "welcome": {
-      "title": "Welcome to NQChess",
-      "description": "Class and student management system"
+      "title": "Welcome to Nhu Quynh Chess Class",
+      "description": "Professional chess class and student management system",
+      "back": "Welcome back!",
+      "alreadyLoggedIn": "You are already logged in."
+    },
+    "hero": {
+      "title": "Nhu Quynh Chess Class - Nurturing Chess Talents",
+      "description": "A professional chess class management system that helps you easily track learning progress and manage student information.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "Key Features",
+      "description": "Discover powerful features that help you manage chess classes effectively",
+      "management": {
+        "title": "Class Management",
+        "description": "Create and manage chess classes easily with an intuitive interface"
+      },
+      "tracking": {
+        "title": "Progress Tracking",
+        "description": "Track and update student learning progress"
+      },
+      "reporting": {
+        "title": "Detailed Reporting",
+        "description": "Create detailed reports about classes, students, and learning outcomes"
+      },
+      "api": {
+        "title": "API Docs",
+        "description": "Integrate your system with our powerful API"
+      }
+    },
+    "newsletter": {
+      "title": "Subscribe to Newsletter",
+      "description": "Get notified about new courses and updates from us",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe"
+    },
+    "footer": {
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "copyright": "© 2024 Nhu Quynh Chess Class. All rights reserved."
     }
   },
   "auth": {
@@ -182,5 +229,11 @@
       "notFound": "Class not found",
       "duplicateStudents": "Some students are already in the class"
     }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you are looking for does not exist or has been moved.",
+    "back": "Go Back",
+    "home": "Go Home"
   }
 }

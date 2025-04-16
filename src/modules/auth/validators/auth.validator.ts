@@ -25,7 +25,6 @@ export class AuthValidator extends BaseValidator {
         AUTH_MESSAGE.VALIDATION.MESSAGES.INVALID_USERNAME
       )
     }
-
     if (!this.stringValidator.validatePassword(data.password)) {
       return this.createErrorResponse(
         AUTH_MESSAGE.VALIDATION.CODES.INVALID_PASSWORD,

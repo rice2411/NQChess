@@ -9,7 +9,13 @@
       "about": "Giới thiệu",
       "contact": "Liên hệ",
       "apiDocument": "Tài liệu API",
-      "apiDocumentDescription": "Xem và kiểm tra các endpoint API"
+      "apiDocumentDescription": "Xem và kiểm tra các endpoint API",
+      "management": "Quản lý",
+      "tracking": "Theo dõi",
+      "reporting": "Báo cáo",
+      "apiDocs": "API Docs",
+      "login": "Đăng nhập",
+      "register": "Đăng ký"
     },
     "buttons": {
       "submit": "Gửi",
@@ -17,8 +23,49 @@
       "save": "Lưu thay đổi"
     },
     "welcome": {
-      "title": "Chào mừng đến với NQChess",
-      "description": "Hệ thống quản lý lớp học và học viên"
+      "title": "Chào mừng đến với Lớp cờ vua Như Quỳnh",
+      "description": "Hệ thống quản lý lớp học và học viên cờ vua",
+      "back": "Chào mừng trở lại!",
+      "alreadyLoggedIn": "Bạn đã đăng nhập rồi."
+    },
+    "hero": {
+      "title": "Lớp cờ vua Như Quỳnh - Nơi ươm mầm tài năng",
+      "description": "Hệ thống quản lý lớp học cờ vua chuyên nghiệp, giúp bạn dễ dàng theo dõi tiến độ học tập và quản lý thông tin học viên.",
+      "getStarted": "Bắt đầu ngay",
+      "learnMore": "Tìm hiểu thêm"
+    },
+    "features": {
+      "title": "Tính năng nổi bật",
+      "description": "Khám phá các tính năng mạnh mẽ giúp bạn quản lý lớp học cờ vua hiệu quả",
+      "management": {
+        "title": "Quản lý lớp học",
+        "description": "Tạo và quản lý lớp học cờ vua một cách dễ dàng với giao diện trực quan"
+      },
+      "tracking": {
+        "title": "Theo dõi tiến độ",
+        "description": "Theo dõi và cập nhật tiến độ học tập của học viên"
+      },
+      "reporting": {
+        "title": "Báo cáo chi tiết",
+        "description": "Tạo báo cáo chi tiết về lớp học, học viên và kết quả học tập"
+      },
+      "api": {
+        "title": "API Docs",
+        "description": "Tích hợp hệ thống của bạn với API mạnh mẽ của chúng tôi"
+      }
+    },
+    "newsletter": {
+      "title": "Đăng ký nhận tin",
+      "description": "Nhận thông báo về các khóa học mới và cập nhật từ chúng tôi",
+      "placeholder": "Nhập email của bạn",
+      "subscribe": "Đăng ký"
+    },
+    "footer": {
+      "about": "Giới thiệu",
+      "contact": "Liên hệ",
+      "privacy": "Chính sách bảo mật",
+      "terms": "Điều khoản sử dụng",
+      "copyright": "© 2024 Lớp cờ vua Như Quỳnh. All rights reserved."
     }
   },
   "auth": {
@@ -182,5 +229,11 @@
       "notFound": "Không tìm thấy lớp",
       "duplicateStudents": "Một số học sinh đã có trong lớp"
     }
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.",
+    "back": "Quay lại",
+    "home": "Về trang chủ"
   }
 }

@@ -10,8 +10,9 @@ export class StringValidator {
   }
 
   validatePassword(password: string): boolean {
-    // Password phải có ít nhất 8 ký tự, 1 chữ hoa, 1 chữ thường, 1 số
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/
+    // Password phải có ít nhất 6 ký tự, 1 chữ hoa, 1 chữ thường, 1 số, cho phép ký tự đặc biệt
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{6,}$/
     return passwordRegex.test(password)
   }
 

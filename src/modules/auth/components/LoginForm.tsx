@@ -132,7 +132,8 @@ export function LoginForm() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-white text-black border-2 border-transparent hover:bg-transparent hover:text-white hover:border-white transition-all duration-300 ease-in-out cursor-pointer hover:scale-[1.02]"
+                  variant="primary"
+                  className="w-full"
                   disabled={loginMutation.isPending}
                 >
                   {loginMutation.isPending ? t("loggingIn") : t("login")}
