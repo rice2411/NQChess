@@ -131,12 +131,13 @@
   },
   "student": {
     "validation": {
+      "missingRequiredFields": "Missing required fields: name, date of birth, phone number",
       "invalidName": "Student name cannot be empty and must be between 2-50 characters",
       "invalidPhone": "Invalid phone number",
       "invalidDob": "Invalid date of birth",
       "invalidGender": "Invalid gender",
       "invalidClasses": "Invalid class list",
-      "missingRequiredFields": "Missing required fields: name, date of birth, phone number"
+      "invalidAvatar": "Invalid avatar format or size"
     },
     "errors": {
       "notFound": "Student not found",

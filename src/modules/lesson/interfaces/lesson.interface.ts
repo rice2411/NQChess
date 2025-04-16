@@ -2,6 +2,8 @@ import { ELessonStatus } from "@/modules/lesson/enums/lesson.enum"
 import { IBaseEntity } from "../../../core/types/common/entity.interface"
 
 export interface ILesson extends IBaseEntity {
+  title: string // Tiêu đề buổi học
+  description?: string // Mô tả buổi học
   classId: string // Reference đến lớp
   startTime: string // Thời gian bắt đầu
   endTime: string // Thời gian kết thúc

@@ -131,12 +131,13 @@
   },
   "student": {
     "validation": {
+      "missingRequiredFields": "Thiếu thông tin bắt buộc: tên, ngày sinh, số điện thoại",
       "invalidName": "Tên học sinh không được để trống và phải từ 2 đến 50 ký tự",
       "invalidPhone": "Số điện thoại không hợp lệ",
       "invalidDob": "Ngày sinh không hợp lệ",
       "invalidGender": "Giới tính không hợp lệ",
       "invalidClasses": "Danh sách lớp không hợp lệ",
-      "missingRequiredFields": "Thiếu thông tin bắt buộc: tên, ngày sinh, số điện thoại"
+      "invalidAvatar": "Định dạng hoặc kích thước ảnh đại diện không hợp lệ"
     },
     "errors": {
       "notFound": "Không tìm thấy học sinh",

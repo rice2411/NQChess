@@ -5,7 +5,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import QueryProvider from "@/core/providers/QueryProvider"
 import Providers from "@/core/providers/SessionProvider"
-import { locales } from "@/core/config/i18n/constant"
+import { locales, type Locale } from "@/core/config/i18n/constant"
 import ProgressBar from "@/shared/components/feedback/ProgressBar/progress-bar"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -21,11 +21,17 @@ export function generateStaticParams() {
 
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode
-  params: { locale: string }
+  params: { locale: Locale }
 }) {
+  const { locale } = await Promise.resolve(params)
+
+  if (!locales.includes(locale)) {
+    notFound()
+  }
+
   let messages
   try {
     messages = (await import(`@/core/config/i18n/messages/${locale}.json`))

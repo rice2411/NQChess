@@ -13,7 +13,7 @@ import { serverTimestamp } from "firebase/firestore"
 import { EGender } from "@/modules/student/enum/student.enum"
 import { IGetRequest } from "@/core/types/api/request.interface"
 import { StudentValidator } from "../validators/student.validator"
-import { STUDENT_MESSAGES } from "../validators/student.messages"
+import { STUDENT_MESSAGE } from "../constants/studentMessages"
 
 const COLLECTION_NAME = "students"
 const studentValidator = new StudentValidator()
@@ -48,14 +48,14 @@ export const StudentService = {
     if (!result.success) {
       return {
         success: false,
-        errorCode: "CREATE_FAILED",
-        message: STUDENT_MESSAGES.CREATE_FAILED,
+        errorCode: STUDENT_MESSAGE.ERRORS.CODES.CREATE_FAILED,
+        message: STUDENT_MESSAGE.ERRORS.MESSAGES.CREATE_FAILED,
       }
     }
 
     return {
       success: true,
-      message: STUDENT_MESSAGES.CREATE_SUCCESS,
+      message: STUDENT_MESSAGE.SUCCESS.MESSAGES.CREATE_SUCCESS,
       data: result.data as IStudent,
     }
   },
@@ -81,8 +81,8 @@ export const StudentService = {
     if (!result.success) {
       return {
         success: false,
-        errorCode: "STUDENT_NOT_FOUND",
-        message: STUDENT_MESSAGES.STUDENT_NOT_FOUND,
+        errorCode: STUDENT_MESSAGE.ERRORS.CODES.NOT_FOUND,
+        message: STUDENT_MESSAGE.ERRORS.MESSAGES.NOT_FOUND,
       }
     }
     return result as ISuccessResponse<IStudent>
@@ -96,13 +96,13 @@ export const StudentService = {
     if (!result.success) {
       return {
         success: false,
-        errorCode: "DELETE_FAILED",
-        message: STUDENT_MESSAGES.DELETE_FAILED,
+        errorCode: STUDENT_MESSAGE.ERRORS.CODES.DELETE_FAILED,
+        message: STUDENT_MESSAGE.ERRORS.MESSAGES.DELETE_FAILED,
       }
     }
     return {
       success: true,
-      message: STUDENT_MESSAGES.DELETE_SUCCESS,
+      message: STUDENT_MESSAGE.SUCCESS.MESSAGES.DELETE_SUCCESS,
       data: null,
     }
   },
@@ -130,7 +130,7 @@ export const StudentService = {
     if (!students) {
       return {
         success: true,
-        message: STUDENT_MESSAGES.STUDENT_NOT_FOUND,
+        message: STUDENT_MESSAGE.ERRORS.MESSAGES.NOT_FOUND,
         data: null,
       }
     }
@@ -151,7 +151,7 @@ export const StudentService = {
       success: true,
       message: foundStudent
         ? "Student found"
-        : STUDENT_MESSAGES.STUDENT_NOT_FOUND,
+        : STUDENT_MESSAGE.ERRORS.MESSAGES.NOT_FOUND,
       data: foundStudent || null,
     }
   },

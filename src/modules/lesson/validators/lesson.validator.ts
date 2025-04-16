@@ -1,109 +1,113 @@
 import { IErrorResponse } from "@/core/types/api/response.interface"
 import { ILesson } from "../interfaces/lesson.interface"
 import { ELessonStatus } from "../enums/lesson.enum"
-import { LESSON_MESSAGES } from "./lesson.messages"
+import { LESSON_MESSAGE } from "../constants/lessonMessages"
+import { BaseValidator } from "@/core/validators/base.validator"
 
 export type CreateLessonData = Omit<ILesson, "id" | "createdAt" | "updatedAt">
 
-export class LessonValidator {
+export class LessonValidator extends BaseValidator {
   validateTitle(title: string): boolean {
-    return title.length >= 3 && title.length <= 100
+    return (
+      this.validateMinLength(title, 2) && this.validateMaxLength(title, 100)
+    )
   }
 
   validateDescription(description: string): boolean {
-    return description.length <= 500
-  }
-
-  validateStartTime(startTime: string): boolean {
-    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
-    return timeRegex.test(startTime)
-  }
-
-  validateEndTime(endTime: string): boolean {
-    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
-    return timeRegex.test(endTime)
-  }
-
-  validateDate(date: string): boolean {
-    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
-    if (!dateRegex.test(date)) {
-      return false
-    }
-
-    const [day, month, year] = date.split("/").map(Number)
-    const lessonDate = new Date(year, month - 1, day)
-
-    const isValidDate =
-      lessonDate.getDate() === day &&
-      lessonDate.getMonth() === month - 1 &&
-      lessonDate.getFullYear() === year
-
-    return isValidDate
-  }
-
-  validateStatus(status: string): boolean {
-    return Object.values(ELessonStatus).includes(status as ELessonStatus)
+    return this.validateMaxLength(description, 1000)
   }
 
   validateCreateData(data: CreateLessonData): IErrorResponse | null {
-    if (!data.classId || !data.startTime || !data.endTime) {
-      return {
-        success: false,
-        errorCode: "MISSING_REQUIRED_FIELDS",
-        message: LESSON_MESSAGES.MISSING_REQUIRED_FIELDS,
-      }
+    // Check required fields
+    const requiredFields = ["title", "startTime", "endTime", "classId"]
+    const requiredError = this.validateRequiredFields(
+      data,
+      requiredFields,
+      LESSON_MESSAGE.VALIDATION.CODES.MISSING_REQUIRED_FIELDS,
+      LESSON_MESSAGE.VALIDATION.MESSAGES.MISSING_REQUIRED_FIELDS
+    )
+    if (requiredError) return requiredError
+
+    // Validate title
+    if (!this.validateTitle(data.title)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_TITLE,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_TITLE
+      )
     }
 
-    if (!this.validateStartTime(data.startTime)) {
-      return {
-        success: false,
-        errorCode: "INVALID_START_TIME",
-        message: LESSON_MESSAGES.INVALID_START_TIME,
-      }
+    // Validate description if provided
+    if (data.description && !this.validateDescription(data.description)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_DESCRIPTION,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_DESCRIPTION
+      )
     }
 
-    if (!this.validateEndTime(data.endTime)) {
-      return {
-        success: false,
-        errorCode: "INVALID_END_TIME",
-        message: LESSON_MESSAGES.INVALID_END_TIME,
-      }
+    // Validate time range
+    if (!this.validateTimeRange(data.startTime, data.endTime)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_TIME_RANGE,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_TIME_RANGE
+      )
     }
 
-    if (data.status && !this.validateStatus(data.status)) {
-      return {
-        success: false,
-        errorCode: "INVALID_STATUS",
-        message: LESSON_MESSAGES.INVALID_STATUS,
-      }
+    // Validate status if provided
+    if (data.status && !this.validateEnumValue(data.status, ELessonStatus)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_STATUS,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_STATUS
+      )
     }
 
     return null
   }
 
   validateUpdateData(data: Partial<CreateLessonData>): IErrorResponse | null {
-    if (data.startTime && !this.validateStartTime(data.startTime)) {
-      return {
-        success: false,
-        errorCode: "INVALID_START_TIME",
-        message: LESSON_MESSAGES.INVALID_START_TIME,
-      }
+    if (data.title && !this.validateTitle(data.title)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_TITLE,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_TITLE
+      )
     }
 
-    if (data.endTime && !this.validateEndTime(data.endTime)) {
-      return {
-        success: false,
-        errorCode: "INVALID_END_TIME",
-        message: LESSON_MESSAGES.INVALID_END_TIME,
-      }
+    if (data.description && !this.validateDescription(data.description)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_DESCRIPTION,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_DESCRIPTION
+      )
     }
 
-    if (data.status && !this.validateStatus(data.status)) {
-      return {
-        success: false,
-        errorCode: "INVALID_STATUS",
-        message: LESSON_MESSAGES.INVALID_STATUS,
-      }
+    if (data.startTime && !this.validateTime(data.startTime)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_START_TIME,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_START_TIME
+      )
+    }
+
+    if (data.endTime && !this.validateTime(data.endTime)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_END_TIME,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_END_TIME
+      )
+    }
+
+    if (
+      data.startTime &&
+      data.endTime &&
+      !this.validateTimeRange(data.startTime, data.endTime)
+    ) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_TIME_RANGE,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_TIME_RANGE
+      )
+    }
+
+    if (data.status && !this.validateEnumValue(data.status, ELessonStatus)) {
+      return this.createErrorResponse(
+        LESSON_MESSAGE.VALIDATION.CODES.INVALID_STATUS,
+        LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_STATUS
+      )
     }
 
     return null

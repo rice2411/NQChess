@@ -20,7 +20,7 @@ import { TuitionService } from "@/modules/tuition/services/tuition.service"
 import { IGetRequest } from "@/core/types/api/request.interface"
 import { calculateTuitionMonths } from "../../tuition/helpers/tuition.helper"
 import { ClassValidator } from "../validators/class.validator"
-import { CLASS_MESSAGES } from "../validators/class.messages"
+import { CLASS_MESSAGE } from "../constants/classMessages"
 
 const COLLECTION_NAME = "classes"
 const classValidator = new ClassValidator()
@@ -56,13 +56,13 @@ export const ClassService = {
       return {
         success: false,
         errorCode: "CREATE_FAILED",
-        message: CLASS_MESSAGES.CREATE_FAILED,
+        message: CLASS_MESSAGE.ERRORS.MESSAGES.CREATE_FAILED,
       }
     }
 
     return {
       success: true,
-      message: CLASS_MESSAGES.CREATE_SUCCESS,
+      message: CLASS_MESSAGE.SUCCESS.MESSAGES.CREATE_SUCCESS,
       data: result.data as IClass,
     }
   },
@@ -89,7 +89,7 @@ export const ClassService = {
       return {
         success: false,
         errorCode: "CLASS_NOT_FOUND",
-        message: CLASS_MESSAGES.CLASS_NOT_FOUND,
+        message: CLASS_MESSAGE.ERRORS.MESSAGES.CLASS_NOT_FOUND,
       }
     }
     return result as ISuccessResponse<IClass>
@@ -104,12 +104,12 @@ export const ClassService = {
       return {
         success: false,
         errorCode: "DELETE_FAILED",
-        message: CLASS_MESSAGES.DELETE_FAILED,
+        message: CLASS_MESSAGE.ERRORS.MESSAGES.DELETE_FAILED,
       }
     }
     return {
       success: true,
-      message: CLASS_MESSAGES.DELETE_SUCCESS,
+      message: CLASS_MESSAGE.SUCCESS.MESSAGES.DELETE_SUCCESS,
       data: null,
     }
   },
@@ -138,7 +138,7 @@ export const ClassService = {
       return {
         success: false,
         errorCode: "CLASS_NOT_FOUND",
-        message: CLASS_MESSAGES.CLASS_NOT_FOUND,
+        message: CLASS_MESSAGE.ERRORS.MESSAGES.CLASS_NOT_FOUND,
       }
     }
 
@@ -151,7 +151,7 @@ export const ClassService = {
       return {
         success: false,
         errorCode: "DUPLICATE_STUDENTS",
-        message: CLASS_MESSAGES.DUPLICATE_STUDENTS,
+        message: CLASS_MESSAGE.ERRORS.MESSAGES.DUPLICATE_STUDENTS,
       }
     }
 
@@ -196,13 +196,13 @@ export const ClassService = {
       return {
         success: false,
         errorCode: "UPDATE_FAILED",
-        message: CLASS_MESSAGES.UPDATE_FAILED,
+        message: CLASS_MESSAGE.ERRORS.MESSAGES.UPDATE_FAILED,
       }
     }
 
     return {
       success: true,
-      message: CLASS_MESSAGES.ADD_STUDENTS_SUCCESS,
+      message: CLASS_MESSAGE.SUCCESS.MESSAGES.ADD_STUDENTS_SUCCESS,
       data: result.data as IClass,
     }
   },

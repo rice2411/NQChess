@@ -12,6 +12,7 @@ import {
 import { serverTimestamp } from "firebase/firestore"
 import { EUserRole } from "../enums/user.enum"
 import { IGetRequest } from "@/core/types/api/request.interface"
+import { USER_MESSAGE } from "../constants/userMessages"
 
 const COLLECTION_NAME = "users"
 
@@ -24,8 +25,8 @@ export const UserService = {
     if (!data.username || !data.password || !data.role) {
       return {
         success: false,
-        errorCode: "MISSING_REQUIRED_FIELDS",
-        message: "Missing required fields: username, password, role",
+        errorCode: USER_MESSAGE.VALIDATION.CODES.MISSING_REQUIRED_FIELDS,
+        message: USER_MESSAGE.VALIDATION.MESSAGES.MISSING_REQUIRED_FIELDS,
       }
     }
 
@@ -42,8 +43,19 @@ export const UserService = {
       isBeautifyDate
     )
 
-    if (!result.success) return result as IErrorResponse
-    return result as ISuccessResponse<IUser>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: USER_MESSAGE.ERRORS.CODES.CREATE_FAILED,
+        message: USER_MESSAGE.ERRORS.MESSAGES.CREATE_FAILED,
+      }
+    }
+
+    return {
+      success: true,
+      message: USER_MESSAGE.SUCCESS.MESSAGES.CREATE_SUCCESS,
+      data: result.data as IUser,
+    }
   },
 
   // Read
@@ -76,7 +88,13 @@ export const UserService = {
       id,
       isBeautifyDate
     )
-    if (!result.success) return result as IErrorResponse
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: USER_MESSAGE.ERRORS.CODES.NOT_FOUND,
+        message: USER_MESSAGE.ERRORS.MESSAGES.NOT_FOUND,
+      }
+    }
     return result as ISuccessResponse<IUser>
   },
 
@@ -85,8 +103,18 @@ export const UserService = {
     id: string
   ): Promise<ISuccessResponse<null> | IErrorResponse> => {
     const result = await deleteDocument(COLLECTION_NAME, id)
-    if (!result.success) return result as IErrorResponse
-    return result as ISuccessResponse<null>
+    if (!result.success) {
+      return {
+        success: false,
+        errorCode: USER_MESSAGE.ERRORS.CODES.DELETE_FAILED,
+        message: USER_MESSAGE.ERRORS.MESSAGES.DELETE_FAILED,
+      }
+    }
+    return {
+      success: true,
+      message: USER_MESSAGE.SUCCESS.MESSAGES.DELETE_SUCCESS,
+      data: null,
+    }
   },
 
   getByUsername: async (

@@ -8,7 +8,7 @@ import { signIn, signOut as signOutNextAuth } from "next-auth/react"
 import { IUser } from "@/modules/user/interfaces/user.interface"
 import { UserService } from "@/modules/user/services/user.service"
 import { AuthValidator } from "../validators/auth.validator"
-import { AUTH_MESSAGES } from "../validators/auth.messages"
+import { AUTH_MESSAGE } from "../constants/authMessages"
 import { ILoginCredentials } from "../types/login.interface"
 
 const authValidator = new AuthValidator()
@@ -36,7 +36,7 @@ export const AuthService = {
         return {
           success: false,
           errorCode: "USER_NOT_FOUND",
-          message: AUTH_MESSAGES.USER_NOT_FOUND,
+          message: AUTH_MESSAGE.ERRORS.MESSAGES.USER_NOT_FOUND,
         }
       }
 
@@ -47,7 +47,7 @@ export const AuthService = {
 
       return {
         success: true,
-        message: AUTH_MESSAGES.LOGIN_SUCCESS,
+        message: AUTH_MESSAGE.SUCCESS.MESSAGES.LOGIN_SUCCESS,
         data: user.data as IUser,
       }
     } catch (error) {
@@ -61,7 +61,7 @@ export const AuthService = {
       await signOutNextAuth({ redirect: false })
       return {
         success: true,
-        message: AUTH_MESSAGES.LOGOUT_SUCCESS,
+        message: AUTH_MESSAGE.SUCCESS.MESSAGES.LOGOUT_SUCCESS,
         data: null,
       }
     } catch (error) {

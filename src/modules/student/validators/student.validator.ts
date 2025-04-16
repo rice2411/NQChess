@@ -1,14 +1,14 @@
-import { STUDENT_MESSAGES } from "./student.messages"
+import { STUDENT_MESSAGE } from "../constants/studentMessages"
 import { IErrorResponse } from "@/core/types/api/response.interface"
 import { IStudent } from "../interfaces/student.interface"
 import { EGender } from "../enum/student.enum"
+import { BaseValidator } from "@/core/validators/base.validator"
 
 export type CreateStudentData = Omit<IStudent, "id" | "createdAt" | "updatedAt">
 
-export class StudentValidator {
+export class StudentValidator extends BaseValidator {
   validatePhoneNumber(phone: string): boolean {
-    const phoneRegex = /^[0-9]{10}$/
-    return phoneRegex.test(phone)
+    return this.stringValidator.validatePhoneNumber(phone)
   }
 
   validateDateOfBirth(dob: string): boolean {
@@ -42,111 +42,122 @@ export class StudentValidator {
   }
 
   validateClasses(classes: string[]): boolean {
-    return Array.isArray(classes) && classes.every((c) => typeof c === "string")
+    return this.validateArrayOfStrings(classes)
+  }
+
+  validateAvatar(avatar: string): boolean {
+    if (avatar === "") return true
+    try {
+      new URL(avatar)
+      return true
+    } catch {
+      return false
+    }
   }
 
   validateCreateData(data: CreateStudentData): IErrorResponse | null {
     // Check required fields
-    if (!data.fullName || !data.dateOfBirth || !data.phoneNumber) {
-      return {
-        success: false,
-        errorCode: "MISSING_REQUIRED_FIELDS",
-        message: STUDENT_MESSAGES.MISSING_REQUIRED_FIELDS,
-      }
-    }
+    const requiredFields = ["fullName", "dateOfBirth", "phoneNumber"]
+    const requiredError = this.validateRequiredFields(
+      data,
+      requiredFields,
+      STUDENT_MESSAGE.VALIDATION.CODES.MISSING_REQUIRED_FIELDS,
+      STUDENT_MESSAGE.VALIDATION.MESSAGES.MISSING_REQUIRED_FIELDS
+    )
+    if (requiredError) return requiredError
 
     // Validate fullName
     if (!this.validateFullName(data.fullName)) {
-      return {
-        success: false,
-        errorCode: "INVALID_NAME",
-        message: STUDENT_MESSAGES.INVALID_NAME,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_NAME,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_NAME
+      )
     }
 
     // Validate phone
     if (!this.validatePhoneNumber(data.phoneNumber)) {
-      return {
-        success: false,
-        errorCode: "INVALID_PHONE",
-        message: STUDENT_MESSAGES.INVALID_PHONE,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_PHONE,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_PHONE
+      )
     }
 
     // Validate date of birth
     if (!this.validateDateOfBirth(data.dateOfBirth)) {
-      return {
-        success: false,
-        errorCode: "INVALID_DOB",
-        message: STUDENT_MESSAGES.INVALID_DOB,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_DOB,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_DOB
+      )
     }
 
     // Validate gender if provided
-    if (data.gender && !this.validateGender(data.gender)) {
-      return {
-        success: false,
-        errorCode: "INVALID_GENDER",
-        message: STUDENT_MESSAGES.INVALID_GENDER,
-      }
+    if (data.gender && !this.validateEnumValue(data.gender, EGender)) {
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_GENDER,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_GENDER
+      )
     }
 
     // Validate classes if provided
     if (data.classes && !this.validateClasses(data.classes)) {
-      return {
-        success: false,
-        errorCode: "INVALID_CLASSES",
-        message: STUDENT_MESSAGES.INVALID_CLASSES,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_CLASSES,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_CLASSES
+      )
+    }
+
+    // Validate avatar if provided
+    if (data.avatar && !this.validateAvatar(data.avatar)) {
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_AVATAR,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_AVATAR
+      )
     }
 
     return null
   }
 
   validateUpdateData(data: Partial<CreateStudentData>): IErrorResponse | null {
-    // Validate fullName if provided
     if (data.fullName && !this.validateFullName(data.fullName)) {
-      return {
-        success: false,
-        errorCode: "INVALID_NAME",
-        message: STUDENT_MESSAGES.INVALID_NAME,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_NAME,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_NAME
+      )
     }
 
-    // Validate phone if provided
     if (data.phoneNumber && !this.validatePhoneNumber(data.phoneNumber)) {
-      return {
-        success: false,
-        errorCode: "INVALID_PHONE",
-        message: STUDENT_MESSAGES.INVALID_PHONE,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_PHONE,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_PHONE
+      )
     }
 
-    // Validate date of birth if provided
     if (data.dateOfBirth && !this.validateDateOfBirth(data.dateOfBirth)) {
-      return {
-        success: false,
-        errorCode: "INVALID_DOB",
-        message: STUDENT_MESSAGES.INVALID_DOB,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_DOB,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_DOB
+      )
     }
 
-    // Validate gender if provided
-    if (data.gender && !this.validateGender(data.gender)) {
-      return {
-        success: false,
-        errorCode: "INVALID_GENDER",
-        message: STUDENT_MESSAGES.INVALID_GENDER,
-      }
+    if (data.gender && !this.validateEnumValue(data.gender, EGender)) {
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_GENDER,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_GENDER
+      )
     }
 
-    // Validate classes if provided
     if (data.classes && !this.validateClasses(data.classes)) {
-      return {
-        success: false,
-        errorCode: "INVALID_CLASSES",
-        message: STUDENT_MESSAGES.INVALID_CLASSES,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_CLASSES,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_CLASSES
+      )
+    }
+
+    if (data.avatar && !this.validateAvatar(data.avatar)) {
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_AVATAR,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_AVATAR
+      )
     }
 
     return null
@@ -157,31 +168,25 @@ export class StudentValidator {
     dateOfBirth?: string,
     phoneNumber?: string
   ): IErrorResponse | null {
-    // Validate phone number if provided
-    if (phoneNumber && !this.validatePhoneNumber(phoneNumber)) {
-      return {
-        success: false,
-        errorCode: "INVALID_PHONE",
-        message: STUDENT_MESSAGES.INVALID_PHONE,
-      }
-    }
-
-    // Validate date of birth if provided
-    if (dateOfBirth && !this.validateDateOfBirth(dateOfBirth)) {
-      return {
-        success: false,
-        errorCode: "INVALID_DOB",
-        message: STUDENT_MESSAGES.INVALID_DOB,
-      }
-    }
-
-    // Validate full name if provided
     if (fullName && !this.validateFullName(fullName)) {
-      return {
-        success: false,
-        errorCode: "INVALID_NAME",
-        message: STUDENT_MESSAGES.INVALID_NAME,
-      }
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_NAME,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_NAME
+      )
+    }
+
+    if (dateOfBirth && !this.validateDateOfBirth(dateOfBirth)) {
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_DOB,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_DOB
+      )
+    }
+
+    if (phoneNumber && !this.validatePhoneNumber(phoneNumber)) {
+      return this.createErrorResponse(
+        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_PHONE,
+        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_PHONE
+      )
     }
 
     return null
