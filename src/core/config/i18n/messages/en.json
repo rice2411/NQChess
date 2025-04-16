@@ -26,7 +26,13 @@
       "login": "Login",
       "register": "Register",
       "email": "Email",
-      "password": "Password"
+      "password": "Password",
+      "username": "Username",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot Password?",
+      "dontHaveAccount": "Don't have an account?",
+      "loggingIn": "Logging in...",
+      "loginSuccess": "Login successful"
     },
     "errors": {
       "invalidCredentials": "Invalid email or password",

@@ -26,7 +26,13 @@
       "login": "Đăng nhập",
       "register": "Đăng ký",
       "email": "Email",
-      "password": "Mật khẩu"
+      "password": "Mật khẩu",
+      "username": "Tên đăng nhập",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "dontHaveAccount": "Chưa có tài khoản?",
+      "loggingIn": "Đang đăng nhập...",
+      "loginSuccess": "Đăng nhập thành công"
     },
     "errors": {
       "invalidCredentials": "Email hoặc mật khẩu không hợp lệ",

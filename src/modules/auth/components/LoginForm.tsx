@@ -18,13 +18,18 @@ import {
   IErrorResponse,
 } from "@/core/types/api/response.interface"
 import { useRouter } from "next/navigation"
-
 import { useFormWithSchema } from "@/shared/hooks/useReactHookForm"
 import { LoginFormData, loginSchema } from "@/modules/auth/schema/login.schema"
 import { ILoginCredentials } from "../types/login.interface"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 export function LoginForm() {
   const router = useRouter()
+  const t = useTranslations("auth.forms")
+  const tErrors = useTranslations("auth.errors")
+  const tSuccess = useTranslations("auth.success")
+
   const form = useFormWithSchema({
     schema: loginSchema,
   })
@@ -38,7 +43,7 @@ export function LoginForm() {
       const response = await AuthService.login(credentials)
       return {
         success: true,
-        message: "Đăng nhập thành công",
+        message: tSuccess("loginSuccess"),
         data: response,
       }
     },
@@ -52,49 +57,101 @@ export function LoginForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tên đăng nhập</FormLabel>
-              <FormControl>
-                <Input placeholder="Nhập tên đăng nhập" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mật khẩu</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Nhập mật khẩu" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className="fixed inset-0 bg-[url('/background-login.jpg')] bg-cover bg-center bg-no-repeat bg-fixed">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass-container relative w-full max-w-[400px] h-full bg-white/10 backdrop-blur-md rounded-lg border border-white/20 shadow-lg">
+          <div className="login-box w-full max-w-[300px] mx-auto text-center my-6 md:my-10 px-4">
+            <h2 className="text-white text-2xl font-semibold mb-4">
+              {t("login")}
+            </h2>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white text-sm font-medium">
+                        {t("username")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="bg-transparent border-white/50 text-white placeholder:text-white/70"
+                          placeholder={t("username")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white text-sm font-medium">
+                        {t("password")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          className="bg-transparent border-white/50 text-white placeholder:text-white/70"
+                          placeholder={t("password")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
+                />
 
-        {loginMutation.error && (
-          <Alert variant="destructive">
-            <AlertDescription>{loginMutation.error.message}</AlertDescription>
-          </Alert>
-        )}
+                <div className="flex items-center justify-between text-sm text-white/80">
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="remember" className="w-4 h-4" />
+                    <label htmlFor="remember">{t("rememberMe")}</label>
+                  </div>
+                  <Link href="#" className="hover:text-white transition-colors">
+                    {t("forgotPassword")}
+                  </Link>
+                </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loginMutation.isPending}
-        >
-          {loginMutation.isPending ? "Đang đăng nhập..." : "Đăng nhập"}
-        </Button>
-      </form>
-    </Form>
+                {loginMutation.error && (
+                  <Alert
+                    variant="destructive"
+                    className="bg-red-500/20 border-red-500/50"
+                  >
+                    <AlertDescription className="text-red-200">
+                      {tErrors("invalidCredentials")}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full bg-white text-black border-2 border-transparent hover:bg-transparent hover:text-white hover:border-white transition-all duration-300 ease-in-out cursor-pointer hover:scale-[1.02]"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? t("loggingIn") : t("login")}
+                </Button>
+
+                <p className="text-sm text-white/80">
+                  {t("dontHaveAccount")}{" "}
+                  <Link
+                    href="/register"
+                    className="text-white font-semibold hover:underline"
+                  >
+                    {t("register")}
+                  </Link>
+                </p>
+              </form>
+            </Form>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
