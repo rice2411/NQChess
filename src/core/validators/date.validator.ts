@@ -17,8 +17,8 @@ export class DateValidator {
       date.getFullYear() === year
 
     // Kiểm tra ngày phải trong quá khứ
-    const now = new Date()
-    return isValidDate && date < now
+
+    return isValidDate
   }
 
   validateMonth(month: string): boolean {
@@ -40,7 +40,6 @@ export class DateValidator {
     const start = new Date(startYear, startMonth - 1, startDay)
     const end = new Date(endYear, endMonth - 1, endDay)
     const now = new Date()
-
     return start >= now && end > start
   }
 }

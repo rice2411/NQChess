@@ -7,12 +7,15 @@ export interface IStudentClass {
   status: EStudentClassStatus
 }
 
+// Format: "HH:mm - HH:mm Thứ X"
+export type ClassSchedule = string
+
 export interface IClass extends IBaseEntity {
   name: string
   startDate: string
   endDate: string
   students: IStudentClass[]
-  schedules: string[]
+  schedules: ClassSchedule[]
   status: EClassStatus
   tuition: number
 }

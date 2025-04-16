@@ -21,6 +21,8 @@ import { IGetRequest } from "@/core/types/api/request.interface"
 import { calculateTuitionMonths } from "../../tuition/helpers/tuition.helper"
 import { ClassValidator } from "../validators/class.validator"
 import { CLASS_MESSAGE } from "../constants/classMessages"
+import { generateLessons } from "../../lesson/helper/lesson.helper"
+import { LessonService } from "@/modules/lesson/services/lesson.service"
 
 const COLLECTION_NAME = "classes"
 const classValidator = new ClassValidator()
@@ -52,7 +54,7 @@ export const ClassService = {
       isBeautifyDate
     )
 
-    if (!result.success) {
+    if (!result.success || !result.data) {
       return {
         success: false,
         errorCode: "CREATE_FAILED",
@@ -60,6 +62,22 @@ export const ClassService = {
       }
     }
 
+    // Generate and create lessons
+    const lessons = generateLessons(
+      data.startDate,
+      data.endDate,
+      data.schedules
+    )
+
+    for (const lesson of lessons) {
+      await LessonService.createOrUpdate(
+        {
+          ...lesson,
+          classId: (result.data as IClass).id,
+        },
+        isBeautifyDate
+      )
+    }
     return {
       success: true,
       message: CLASS_MESSAGE.SUCCESS.MESSAGES.CREATE_SUCCESS,

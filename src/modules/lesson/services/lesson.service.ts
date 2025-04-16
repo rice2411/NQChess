@@ -17,11 +17,11 @@ const COLLECTION_NAME = "lessons"
 
 export const LessonService = {
   // Create or Update
-  createOrUpdateLesson: async (
+  createOrUpdate: async (
     data: Omit<ILesson, "id">,
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<ILesson> | IErrorResponse> => {
-    if (!data.classId || !data.startTime || !data.endTime) {
+    if (!data.classId || !data.startDate || !data.endDate) {
       return {
         success: false,
         errorCode: "MISSING_REQUIRED_FIELDS",
@@ -47,7 +47,7 @@ export const LessonService = {
   },
 
   // Read
-  getLessons: async (
+  getAll: async (
     params: IGetRequest
   ): Promise<ISuccessResponse<ILesson[]> | IErrorResponse> => {
     const result = await readDocuments<ILesson>(COLLECTION_NAME, [], params)
@@ -55,7 +55,7 @@ export const LessonService = {
     return result as ISuccessResponse<ILesson[]>
   },
 
-  getLessonById: async (
+  getById: async (
     id: string,
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<ILesson> | IErrorResponse> => {
@@ -69,7 +69,7 @@ export const LessonService = {
   },
 
   // Delete
-  deleteLesson: async (
+  delete: async (
     id: string
   ): Promise<ISuccessResponse<null> | IErrorResponse> => {
     const result = await deleteDocument(COLLECTION_NAME, id)
@@ -78,7 +78,7 @@ export const LessonService = {
   },
 
   // Get lessons by class
-  getLessonsByClassId: async (
+  getByClassId: async (
     classId: string
   ): Promise<ISuccessResponse<ILesson[]> | IErrorResponse> => {
     const result = await readDocuments<ILesson>(COLLECTION_NAME, [])
@@ -103,7 +103,7 @@ export const LessonService = {
   },
 
   // Update lesson status
-  changeStatusLesson: async (
+  changeStatus: async (
     id: string,
     status: ELessonStatus,
     isBeautifyDate: boolean = true

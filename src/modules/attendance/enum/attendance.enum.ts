@@ -1,5 +1,5 @@
 export enum EAttendanceStatus {
   PRESENT = "present",
   ABSENT = "absent",
-  LATE = "late",
+  NOT_YET = "not_yet",
 }

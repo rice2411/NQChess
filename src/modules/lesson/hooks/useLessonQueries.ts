@@ -19,7 +19,7 @@ export const useLessonQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         LESSON_QUERY_KEYS.getAll
       )
-      return LessonService.getLessons(params || {})
+      return LessonService.getAll(params || {})
     },
     enabled: false,
   })
@@ -31,10 +31,7 @@ export const useLessonQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         LESSON_QUERY_KEYS.getById
       )
-      return LessonService.getLessonById(
-        params?.id || "",
-        params?.isBeautifyDate
-      )
+      return LessonService.getById(params?.id || "", params?.isBeautifyDate)
     },
     enabled: false,
   })
@@ -51,7 +48,7 @@ export const useLessonQueries = () => {
       if (!params?.classId) {
         return Promise.reject(new Error("Missing classId parameter"))
       }
-      return LessonService.getLessonsByClassId(params.classId)
+      return LessonService.getByClassId(params.classId)
     },
     enabled: false,
   })
@@ -63,7 +60,7 @@ export const useLessonQueries = () => {
     Omit<ILesson, "id">
   >({
     mutationFn: (data: Omit<ILesson, "id">) =>
-      LessonService.createOrUpdateLesson(data),
+      LessonService.createOrUpdate(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LESSON_QUERY_KEYS.lessons })
     },
@@ -75,7 +72,7 @@ export const useLessonQueries = () => {
     Error,
     string
   >({
-    mutationFn: (id: string) => LessonService.deleteLesson(id),
+    mutationFn: (id: string) => LessonService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LESSON_QUERY_KEYS.lessons })
     },
@@ -87,8 +84,7 @@ export const useLessonQueries = () => {
     Error,
     { id: string; status: ELessonStatus }
   >({
-    mutationFn: ({ id, status }) =>
-      LessonService.changeStatusLesson(id, status),
+    mutationFn: ({ id, status }) => LessonService.changeStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LESSON_QUERY_KEYS.lessons })
     },

@@ -3,6 +3,7 @@ import { IErrorResponse } from "@/core/types/api/response.interface"
 import { IClass, IStudentClass } from "../interfaces/class.interface"
 import { EClassStatus, EStudentClassStatus } from "../enums/class.enum"
 import { BaseValidator } from "@/core/validators/base.validator"
+import { validateSchedules } from "../helpers/class.helper"
 
 export type CreateClassData = Omit<IClass, "id" | "createdAt" | "updatedAt">
 
@@ -16,7 +17,11 @@ export class ClassValidator extends BaseValidator {
   }
 
   validateSchedules(schedules: string[]): boolean {
-    return this.validateArrayOfStrings(schedules) && schedules.length > 0
+    return (
+      this.validateArrayOfStrings(schedules) &&
+      schedules.length > 0 &&
+      validateSchedules(schedules)
+    )
   }
 
   validateTuition(tuition: number): boolean {
