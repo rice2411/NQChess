@@ -19,7 +19,7 @@ export class LessonValidator extends BaseValidator {
 
   validateCreateData(data: CreateLessonData): IErrorResponse | null {
     // Check required fields
-    const requiredFields = ["title", "startTime", "endTime", "classId"]
+    const requiredFields = ["title", "startDate", "endDate", "classId"]
     const requiredError = this.validateRequiredFields(
       data,
       requiredFields,
@@ -45,7 +45,7 @@ export class LessonValidator extends BaseValidator {
     }
 
     // Validate time range
-    if (!this.validateTimeRange(data.startTime, data.endTime)) {
+    if (!this.validateTimeRange(data.startDate, data.endDate)) {
       return this.createErrorResponse(
         LESSON_MESSAGE.VALIDATION.CODES.INVALID_TIME_RANGE,
         LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_TIME_RANGE
@@ -78,14 +78,14 @@ export class LessonValidator extends BaseValidator {
       )
     }
 
-    if (data.startTime && !this.validateTime(data.startTime)) {
+    if (data.startDate && !this.validateTime(data.startDate)) {
       return this.createErrorResponse(
         LESSON_MESSAGE.VALIDATION.CODES.INVALID_START_TIME,
         LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_START_TIME
       )
     }
 
-    if (data.endTime && !this.validateTime(data.endTime)) {
+    if (data.endDate && !this.validateTime(data.endDate)) {
       return this.createErrorResponse(
         LESSON_MESSAGE.VALIDATION.CODES.INVALID_END_TIME,
         LESSON_MESSAGE.VALIDATION.MESSAGES.INVALID_END_TIME
@@ -93,9 +93,9 @@ export class LessonValidator extends BaseValidator {
     }
 
     if (
-      data.startTime &&
-      data.endTime &&
-      !this.validateTimeRange(data.startTime, data.endTime)
+      data.startDate &&
+      data.endDate &&
+      !this.validateTimeRange(data.startDate, data.endDate)
     ) {
       return this.createErrorResponse(
         LESSON_MESSAGE.VALIDATION.CODES.INVALID_TIME_RANGE,
