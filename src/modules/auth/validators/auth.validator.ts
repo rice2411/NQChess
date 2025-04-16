@@ -40,8 +40,8 @@ export class AuthValidator extends BaseValidator {
     switch (error.code) {
       case "auth/user-not-found":
         return this.createErrorResponse(
-          AUTH_MESSAGE.ERRORS.CODES.USER_NOT_FOUND,
-          AUTH_MESSAGE.ERRORS.MESSAGES.USER_NOT_FOUND
+          AUTH_MESSAGE.ERRORS.CODES.NOT_FOUND,
+          AUTH_MESSAGE.ERRORS.MESSAGES.NOT_FOUND
         )
       case "auth/wrong-password":
         return this.createErrorResponse(
