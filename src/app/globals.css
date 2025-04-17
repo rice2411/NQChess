@@ -12,3 +12,20 @@
   --color-primary-dark: #cb80ab; /* Màu hồng đậm */
   --color-primary-foreground: #444; /* Màu chữ trên nền primary */
 }
+
+/* Prevent scrollbar jump and body margin issues */
+html {
+  overflow-y: scroll;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Fix for Radix UI dropdown portal */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+}

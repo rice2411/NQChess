@@ -57,7 +57,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="fixed inset-0 bg-[url('/background-login.jpg')] bg-cover bg-center bg-no-repeat bg-fixed">
+    <div className="fixed inset-0 bg-[url('/background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed">
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="glass-container relative w-full max-w-[400px] h-full bg-white/10 backdrop-blur-md rounded-lg border border-white/20 shadow-lg">
           <div className="login-box w-full max-w-[300px] mx-auto text-center my-6 md:my-10 px-4">

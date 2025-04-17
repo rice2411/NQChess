@@ -13,7 +13,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs"
-import Link from "next/link"
 import { ReactNode } from "react"
 
 // Define type for API module
@@ -51,59 +50,55 @@ const API_MODULES: ApiModule[] = [
     component: <UsersApiDocumentation />,
   },
   {
-    id: "lesson",
-    label: "Lesson",
-    component: <LessonsApiDocumentation />,
-  },
-  {
     id: "attendance",
     label: "Attendance",
     component: <AttendancesApiDocumentation />,
   },
+  {
+    id: "lesson",
+    label: "Lesson",
+    component: <LessonsApiDocumentation />,
+  },
 ]
 
-export default function ApiDocumentation() {
+export default function ApiDocumentPage() {
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold">API Documentation</h1>
-        <Link
-          href="/"
-          className="text-blue-500 hover:text-blue-700 underline inline-block"
-        >
-          Về trang chủ
-        </Link>
-      </div>
-
-      <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
-        <p className="text-yellow-800">
-          <span className="font-semibold">Lưu ý:</span> Trong class Service{" "}
-          <code className="bg-yellow-100 px-1 rounded">isBeautifyDate</code>:
-          Nếu <code className="bg-yellow-100 px-1 rounded">true</code>, sẽ
-          format lại các trường timestamp như CreatedAt, UpdatedAt thành chuỗi
-          ngày tháng đẹp
+    <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+      <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 lg:mb-4">
+          API Documentation
+        </h1>
+        <p className="text-base sm:text-lg lg:text-xl text-white/90">
+          Explore and test our API endpoints
         </p>
       </div>
 
-      <Tabs defaultValue={API_MODULES[0].id} className="space-y-4">
-        <TabsList className="flex-wrap">
-          {API_MODULES.map((module) => (
-            <TabsTrigger
-              key={module.id}
-              value={module.id}
-              className="cursor-pointer hover:bg-amber-100"
-            >
-              {module.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {API_MODULES.map((module) => (
-          <TabsContent key={module.id} value={module.id}>
-            {module.component}
-          </TabsContent>
-        ))}
-      </Tabs>
+      <div className="bg-white/5 backdrop-blur-sm border-white/10 rounded-lg p-4 sm:p-5 lg:p-6">
+        <Tabs defaultValue={API_MODULES[0].id} className="w-full">
+          <TabsList className="flex flex-wrap w-full gap-2 mb-4 sm:mb-5 lg:mb-6">
+            {API_MODULES.map((module) => (
+              <TabsTrigger
+                key={module.id}
+                value={module.id}
+                className="flex-1 min-w-[120px] sm:min-w-[140px] text-sm sm:text-base text-white/90 hover:text-white hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:text-white py-1.5 sm:py-2"
+              >
+                {module.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="mt-[200px] sm:mt-[100px] md:mt-[80px] lg:mt-0">
+            {API_MODULES.map((module) => (
+              <TabsContent
+                key={module.id}
+                value={module.id}
+                className="mt-2 sm:mt-3 lg:mt-4"
+              >
+                {module.component}
+              </TabsContent>
+            ))}
+          </div>
+        </Tabs>
+      </div>
     </div>
   )
 }

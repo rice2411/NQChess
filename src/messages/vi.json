@@ -1,0 +1,31 @@
+{
+  "common": {
+    "features": {
+      "management": {
+        "title": "Quản lý"
+      },
+      "tracking": {
+        "title": "Theo dõi"
+      },
+      "reporting": {
+        "title": "Báo cáo"
+      },
+      "api": {
+        "title": "API"
+      }
+    },
+    "user": {
+      "profile": "Hồ sơ",
+      "viewProfile": "Xem hồ sơ",
+      "settings": "Cài đặt",
+      "logout": "Đăng xuất"
+    },
+    "error": {
+      "notFound": {
+        "title": "Không Tìm Thấy Trang",
+        "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.",
+        "backToHome": "Về Trang Chủ"
+      }
+    }
+  }
+}

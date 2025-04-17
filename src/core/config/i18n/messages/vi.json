@@ -24,15 +24,11 @@
     },
     "welcome": {
       "title": "Chào mừng đến với Lớp cờ vua Như Quỳnh",
-      "description": "Hệ thống quản lý lớp học và học viên cờ vua",
-      "back": "Chào mừng trở lại!",
-      "alreadyLoggedIn": "Bạn đã đăng nhập rồi."
+      "description": "Hệ thống quản lý lớp học và học viên cờ vua"
     },
     "hero": {
       "title": "Lớp cờ vua Như Quỳnh - Nơi ươm mầm tài năng",
-      "description": "Hệ thống quản lý lớp học cờ vua chuyên nghiệp, giúp bạn dễ dàng theo dõi tiến độ học tập và quản lý thông tin học viên.",
-      "getStarted": "Bắt đầu ngay",
-      "learnMore": "Tìm hiểu thêm"
+      "description": "Hệ thống quản lý lớp học cờ vua chuyên nghiệp, giúp bạn dễ dàng theo dõi tiến độ học tập và quản lý thông tin học viên."
     },
     "features": {
       "title": "Tính năng nổi bật",
@@ -61,11 +57,13 @@
       "subscribe": "Đăng ký"
     },
     "footer": {
-      "about": "Giới thiệu",
-      "contact": "Liên hệ",
-      "privacy": "Chính sách bảo mật",
-      "terms": "Điều khoản sử dụng",
       "copyright": "© 2024 Lớp cờ vua Như Quỳnh. All rights reserved."
+    },
+    "user": {
+      "profile": "Hồ sơ",
+      "viewProfile": "Xem hồ sơ",
+      "settings": "Cài đặt",
+      "logout": "Đăng xuất"
     }
   },
   "auth": {

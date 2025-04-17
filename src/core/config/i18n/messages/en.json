@@ -24,15 +24,11 @@
     },
     "welcome": {
       "title": "Welcome to Nhu Quynh Chess Class",
-      "description": "Professional chess class and student management system",
-      "back": "Welcome back!",
-      "alreadyLoggedIn": "You are already logged in."
+      "description": "Professional chess class and student management system"
     },
     "hero": {
       "title": "Nhu Quynh Chess Class - Nurturing Chess Talents",
-      "description": "A professional chess class management system that helps you easily track learning progress and manage student information.",
-      "getStarted": "Get Started",
-      "learnMore": "Learn More"
+      "description": "A professional chess class management system that helps you easily track learning progress and manage student information."
     },
     "features": {
       "title": "Key Features",
@@ -61,11 +57,13 @@
       "subscribe": "Subscribe"
     },
     "footer": {
-      "about": "About",
-      "contact": "Contact",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
       "copyright": "© 2024 Nhu Quynh Chess Class. All rights reserved."
+    },
+    "user": {
+      "profile": "Profile",
+      "viewProfile": "View Profile",
+      "settings": "Settings",
+      "logout": "Logout"
     }
   },
   "auth": {

@@ -1,6 +1,6 @@
 import { EUserRole } from "@/modules/user/enums/user.enum"
 import { IUser } from "@/modules/user/interfaces/user.interface"
-import { NextAuthOptions } from "next-auth"
+import { getServerSession, NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 // Thêm type cho session và user
@@ -62,4 +62,9 @@ export const authOptions: NextAuthOptions = {
   debug:
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_PUBLIC_DEBUG === "true",
+}
+
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions)
+  return session?.user || null
 }

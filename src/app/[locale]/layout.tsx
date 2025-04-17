@@ -10,7 +10,7 @@ import ProgressBar from "@/shared/components/feedback/ProgressBar/progress-bar"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NQChess",
+  title: "Như Quỳnh Chess",
   description: "NQChess - Chess Learning Platform",
 }
 
@@ -37,7 +37,6 @@ export default async function LocaleLayout({ children, params }: Props) {
   } catch {
     notFound()
   }
-
   return (
     <html lang={locale}>
       <link rel="manifest" href="/manifest.json" />
