@@ -3,18 +3,19 @@ import Image from "next/image"
 import { getCurrentUser } from "@/core/config/next-auth.config"
 import { Navbar } from "@/shared/components/layout/navbar"
 
-export default async function ProtectedLayout({
-  children,
-  params,
-}: {
+interface Props {
   children: React.ReactNode
-  params: { locale: string }
-}) {
+  params: Promise<{ locale: string }>
+}
+
+export default async function ProtectedLayout({ children, params }: Props) {
   const currentUser = await getCurrentUser()
-  const data = await params
+  const { locale } = await params
+
   if (!currentUser) {
-    redirect(`/${data.locale}/login`)
+    redirect(`/${locale}/login`)
   }
+
   return (
     <div className="relative min-h-screen">
       {/* Background Image */}
@@ -32,8 +33,8 @@ export default async function ProtectedLayout({
       {/* Content */}
       <div className="relative z-10">
         <div className="min-h-screen flex flex-col">
-          <Navbar locale={data.locale} user={currentUser} />
-          <main className=" pt-16">{children}</main>
+          <Navbar locale={locale} user={currentUser} />
+          <main className="pt-16">{children}</main>
         </div>
       </div>
     </div>
