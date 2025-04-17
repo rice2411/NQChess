@@ -4,10 +4,14 @@ import LandingPage from "@/components/landing/landing-page"
 import { IUser } from "@/modules/user/interfaces/user.interface"
 import { Navbar } from "@/shared/components/layout/navbar"
 
-export default async function Home({ params }: { params: { locale: string } }) {
+interface Props {
+  params: Promise<{ locale: string }>
+}
+
+export default async function Home({ params }: Props) {
   const [session, { locale }] = await Promise.all([
     getServerSession(authOptions),
-    Promise.resolve(params),
+    params,
   ])
 
   return (
