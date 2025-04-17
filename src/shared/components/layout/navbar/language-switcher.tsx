@@ -11,11 +11,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from "@/shared/components/ui/dropdown-menu"
-
-const LANGUAGE_FLAGS = {
-  en: "US",
-  vi: "VN",
-} as const
+import { LANGUAGE_FLAGS } from "@/core/config/i18n/constant"
 
 interface LanguageSwitcherProps {
   locale: string

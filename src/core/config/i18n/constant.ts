@@ -6,3 +6,8 @@ export const languageNames: Record<Locale, string> = {
   vi: "Tiếng Việt",
   en: "English",
 }
+
+export const LANGUAGE_FLAGS = {
+  en: "US",
+  vi: "VN",
+} as const
