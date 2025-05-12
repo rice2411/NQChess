@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
-import Image from "next/image"
 import { getCurrentUser } from "@/core/config/next-auth.config"
 import { Navbar } from "@/shared/components/layout/navbar"
+import Sidebar from "@/shared/components/layout/sidebar/Sidebar"
 
 interface Props {
   children: React.ReactNode
@@ -18,23 +18,11 @@ export default async function ProtectedLayout({ children, params }: Props) {
 
   return (
     <div className="relative min-h-screen">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/background.jpg"
-          alt="Chess background"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10">
-        <div className="min-h-screen flex flex-col">
+      <div className="relative z-10 flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-h-screen">
           <Navbar locale={locale} user={currentUser} />
-          <main className="pt-16">{children}</main>
+          <main className="pt-16 flex-1 bg-white">{children}</main>
         </div>
       </div>
     </div>
