@@ -9,9 +9,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-white text-black border-2 border-transparent hover:bg-transparent hover:text-white hover:border-white",
+          "bg-gradient-to-b from-purple-300 to-pink-300 text-purple-900  text-black border-2 border-transparent hover:bg-transparent hover:text-white hover:border-white",
         secondary:
-          "bg-transparent text-white border-2 border-white hover:bg-white hover:text-black",
+          "bg-white text-black border-2 border-white hover:bg-white hover:text-black",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:

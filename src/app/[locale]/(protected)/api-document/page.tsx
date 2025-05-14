@@ -12,7 +12,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/shared/components/ui/tabs"
+} from "@/core/components/ui/tabs"
 import { ReactNode } from "react"
 
 // Define type for API module

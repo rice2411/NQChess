@@ -6,13 +6,6 @@
   --color-primary-dark: var(--color-primary-dark);
 }
 
-:root {
-  /* Custom colors */
-  --color-primary: #fdb7ea; /* Màu hồng */
-  --color-primary-dark: #cb80ab; /* Màu hồng đậm */
-  --color-primary-foreground: #444; /* Màu chữ trên nền primary */
-}
-
 /* Prevent scrollbar jump and body margin issues */
 html {
   overflow-y: scroll;

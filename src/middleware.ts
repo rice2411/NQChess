@@ -12,7 +12,7 @@ export default createMiddleware({
   domains: [
     {
       domain: "localhost",
-      defaultLocale: "en",
+      defaultLocale: "vi",
       // Optionally restrict the locales managed by this domain
       locales: ["en", "vi"],
     },

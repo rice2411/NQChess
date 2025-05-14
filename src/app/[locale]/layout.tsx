@@ -5,7 +5,7 @@ import { Inter } from "next/font/google"
 import QueryProvider from "@/core/providers/QueryProvider"
 import Providers from "@/core/providers/SessionProvider"
 import { locales, type Locale } from "@/core/config/i18n/constant"
-import ProgressBar from "@/shared/components/feedback/ProgressBar/progress-bar"
+import ProgressBar from "@/core/components/feedback/ProgressBar/progress-bar"
 
 const inter = Inter({ subsets: ["latin"] })
 

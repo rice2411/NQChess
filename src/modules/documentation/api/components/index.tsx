@@ -6,10 +6,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card"
-import { Button } from "@/shared/components/ui/button"
-import { Label } from "@/shared/components/ui/label"
-import { Textarea } from "@/shared/components/ui/textarea"
+} from "@/core/components/ui/card"
+import { Button } from "@/core/components/ui/button"
+import { Label } from "@/core/components/ui/label"
+import { Textarea } from "@/core/components/ui/textarea"
 import { CopyIcon } from "lucide-react"
 import {
   IApiDocumentationProps,
