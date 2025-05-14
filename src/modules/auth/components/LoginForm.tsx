@@ -18,7 +18,7 @@ import {
   IErrorResponse,
 } from "@/core/types/api/response.interface"
 import { useRouter } from "next/navigation"
-import { useFormWithSchema } from "@/shared/hooks/useReactHookForm"
+import { useFormWithSchema } from "@/core/hooks/useReactHookForm"
 import { LoginFormData, loginSchema } from "@/modules/auth/schema/login.schema"
 import { ILoginCredentials } from "../types/login.interface"
 import Link from "next/link"
