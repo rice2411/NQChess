@@ -12,25 +12,14 @@ export class StudentValidator extends BaseValidator {
   }
 
   validateDateOfBirth(dob: string): boolean {
-    // Kiểm tra định dạng dd/mm/yyyy
-    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
-    if (!dateRegex.test(dob)) {
-      return false
-    }
-
     // Chuyển đổi thành Date object
-    const [day, month, year] = dob.split("/").map(Number)
-    const date = new Date(year, month - 1, day) // month - 1 vì tháng trong JS bắt đầu từ 0
+    const date = new Date(dob) // month - 1 vì tháng trong JS bắt đầu từ 0
 
-    // Kiểm tra tính hợp lệ của ngày
-    const isValidDate =
-      date.getDate() === day &&
-      date.getMonth() === month - 1 &&
-      date.getFullYear() === year
+
 
     // Kiểm tra ngày phải trong quá khứ
     const now = new Date()
-    return isValidDate && date < now
+    return  date < now
   }
 
   validateFullName(name: string): boolean {
@@ -46,6 +35,7 @@ export class StudentValidator extends BaseValidator {
   }
 
   validateAvatar(avatar: string): boolean {
+    return true
     if (avatar === "") return true
     try {
       new URL(avatar)

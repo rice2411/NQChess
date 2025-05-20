@@ -22,10 +22,10 @@ export const StudentService = {
   // Create or Update
   createOrUpdate: async (
     data: Omit<IStudent, "id">,
-    isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IStudent> | IErrorResponse> => {
     // Validate data
     const validationError = studentValidator.validateCreateData(data)
+    console.log('validationError:', validationError);
     if (validationError) {
       return validationError
     }
@@ -42,7 +42,7 @@ export const StudentService = {
     const result = await createOrUpdateDocument<Omit<IStudent, "id">>(
       COLLECTION_NAME,
       newStudent,
-      isBeautifyDate
+      
     )
 
     if (!result.success) {
