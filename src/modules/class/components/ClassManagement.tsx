@@ -1,42 +1,62 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Pencil, Trash, Users, PlusCircle } from "lucide-react";
-import { useClassQueries } from "@/modules/class/hooks/useClassQueries";
-import { IClass } from "@/modules/class/interfaces/class.interface";
-import ManagementBase from "@/core/components/layout/admin/management/ManagementBase";
-import useModal from "@/core/hooks/useModal";
-import BaseModal from "@/core/components/ui/BaseModal";
-import ConfirmModal from "@/core/components/ui/ConfirmModal";
-import { Input } from "@/core/components/ui/input";
-import { Button } from "@/core/components/ui/button";
-import { Label } from "@/core/components/ui/label";
-import { EClassStatus } from "@/modules/class/enums/class.enum";
-import ClassModal from "./ClassModal";
+import { useEffect, useState } from "react"
+import { Pencil, Trash, Users, PlusCircle } from "lucide-react"
+import { useClassQueries } from "@/modules/class/hooks/useClassQueries"
+import { IClass } from "@/modules/class/interfaces/class.interface"
+import ManagementBase from "@/core/components/layout/admin/management/ManagementBase"
+import useModal from "@/core/hooks/useModal"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/core/components/ui/alert-dialog"
+import ClassModal from "./ClassModal"
+import { EClassStatus } from "../enums/class.enum"
+import toast from "react-hot-toast"
+import StatusBadge from "./StatusBadge"
+import { formatCurrencyVND } from "@/core/utils/currency.util"
 
 const columns = [
-  { key: "STT", title: "STT", renderCell: (_: IClass, index: number) => index + 1 },
+  {
+    key: "STT",
+    title: "STT",
+    renderCell: (_: IClass, index: number) => index + 1,
+  },
   { key: "name", title: "Tên lớp" },
   { key: "startDate", title: "Ngày bắt đầu" },
   { key: "endDate", title: "Ngày kết thúc" },
-  { key: "status", title: "Trạng thái" },
-  { key: "tuition", title: "Học phí" },
-];
+  {
+    key: "status",
+    title: "Trạng thái",
+    renderCell: (row: IClass) => <StatusBadge status={row.status} />,
+  },
+  {
+    key: "tuition",
+    title: "Học phí",
+    renderCell: (row: IClass) => formatCurrencyVND(row.tuition),
+  },
+]
 
 export default function ClassManagement() {
-  const { getAllQuery, deleteMutation } = useClassQueries();
-  const modal = useModal();
-  const confirmModal = useModal();
-  const [editClass, setEditClass] = useState<IClass | null>(null);
-  const [classToDelete, setClassToDelete] = useState<IClass | null>(null);
+  const { getAllQuery, deleteMutation } = useClassQueries()
+  const modal = useModal()
+  const confirmModal = useModal()
+  const [editClass, setEditClass] = useState<IClass | null>(null)
+  const [classToDelete, setClassToDelete] = useState<IClass | null>(null)
 
   useEffect(() => {
-    getAllQuery.refetch();
-  }, []);
+    getAllQuery.refetch()
+  }, [])
 
-  const classes = getAllQuery.data?.success ? getAllQuery.data.data || [] : [];
-  const isLoading = getAllQuery.isLoading || getAllQuery.isFetching;
-  const isError = getAllQuery.isError;
+  const classes = getAllQuery.data?.success ? getAllQuery.data.data || [] : []
+  const isLoading = getAllQuery.isLoading || getAllQuery.isFetching
+  const isError = getAllQuery.isError
 
   const statistics = [
     {
@@ -44,43 +64,60 @@ export default function ClassManagement() {
       title: "Tổng số lớp",
       value: classes.length,
     },
-    // Có thể bổ sung thêm thống kê khác nếu muốn
-  ];
+    {
+      icon: <Users />,
+      title: "Số lớp đang mở",
+      value: classes.filter(
+        (classItem) => classItem.status !== EClassStatus.INACTIVE
+      ).length,
+    },
+    {
+      icon: <Users />,
+      title: "Số lớp đã kết thúc",
+      value: classes.filter(
+        (classItem) => classItem.status === EClassStatus.INACTIVE
+      ).length,
+    },
+  ]
 
   const handleEdit = (classItem: IClass) => {
-    setEditClass(classItem);
-    modal.open();
-  };
+    setEditClass(classItem)
+    modal.open()
+  }
 
   const handleDelete = (classItem: IClass) => {
-    setClassToDelete(classItem);
-    confirmModal.open();
-  };
+    setClassToDelete(classItem)
+    confirmModal.open()
+  }
 
   const handleConfirmDelete = () => {
     if (classToDelete) {
       deleteMutation.mutate(classToDelete.id, {
         onSuccess: () => {
-          getAllQuery.refetch();
-          confirmModal.close();
-          setClassToDelete(null);
+          getAllQuery.refetch()
+          confirmModal.close()
+          setClassToDelete(null)
+          toast.success("Xóa lớp học thành công")
         },
-      });
+        onError: () => {
+          toast.error("Xóa lớp học thất bại")
+        },
+      })
     }
-  };
+  }
 
   const addButton = (
     <button
-      className="ml-0 md:ml-auto bg-green-500 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-green-600 shadow-lg transition flex items-center gap-2 mt-2 md:mt-0 font-semibold text-sm sm:text-base"
+      className="flex items-center gap-2 px-4 py-2 mt-2 ml-0 text-sm font-semibold text-white transition bg-green-500 rounded-full shadow-lg md:ml-auto sm:px-5 hover:bg-green-600 md:mt-0 sm:text-base"
       onClick={() => {
-        setEditClass(null);
-        modal.open();
+        setEditClass(null)
+        modal.open()
       }}
     >
-      <PlusCircle className="h-5 w-5" />
+      <PlusCircle className="w-5 h-5" />
       Thêm lớp học
     </button>
-  );
+  )
 
   return (
     <>
@@ -94,14 +131,14 @@ export default function ClassManagement() {
         renderAction={(row: IClass) => (
           <div className="flex gap-2">
             <button
-              className="p-2 rounded hover:bg-primary-100 text-primary-600 transition"
+              className="p-2 transition rounded hover:bg-primary-100 text-primary-600"
               title="Sửa"
               onClick={() => handleEdit(row)}
             >
               <Pencil className="w-4 h-4" />
             </button>
             <button
-              className="p-2 rounded hover:bg-red-100 text-red-600 transition"
+              className="p-2 text-red-600 transition rounded hover:bg-red-100"
               title="Xóa"
               onClick={() => handleDelete(row)}
             >
@@ -110,15 +147,34 @@ export default function ClassManagement() {
           </div>
         )}
       />
-      <ClassModal open={modal.isOpen} onClose={modal.close} initialData={editClass} refetch={getAllQuery.refetch} />
-      <ConfirmModal
-        open={confirmModal.isOpen}
-        onClose={confirmModal.close}
-        onConfirm={handleConfirmDelete}
-        title="Xác nhận xóa"
-        description={`Bạn có chắc muốn xóa lớp học "${classToDelete?.name}"?`}
-        loading={deleteMutation.isPending}
+      <ClassModal
+        open={modal.isOpen}
+        onClose={modal.close}
+        initialData={editClass}
+        refetch={getAllQuery.refetch}
       />
+      <AlertDialog
+        open={confirmModal.isOpen}
+        onOpenChange={(v) => !v && confirmModal.close()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Bạn có chắc muốn xóa lớp học "${classToDelete?.name}"?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Đang xóa..." : "Xác nhận"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
-  );
+  )
 }

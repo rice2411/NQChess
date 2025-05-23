@@ -6,6 +6,10 @@ import { addDays, getDay, startOfDay } from "date-fns"
  * @returns number representing day of week (2-7)
  */
 export const getDayOfWeek = (schedule: string): number => {
+  // Nhận diện Chủ nhật
+  if (/Chủ nhật$/.test(schedule)) {
+    return 8 // hoặc return 0 nếu muốn dùng chuẩn JS
+  }
   // Extract the day part from the schedule string
   const dayMatch = schedule.match(/Thứ\s+(\d+)$/)
   if (!dayMatch) {

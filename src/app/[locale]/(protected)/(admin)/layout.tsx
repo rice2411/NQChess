@@ -11,15 +11,15 @@ export default async function AdminLayout({ children, params }: Props) {
   const currentUser = await getCurrentUser()
   const { locale } = await params
 
-  if (!currentUser) {
-    redirect(`/${locale}/login`)
-  }
+  // if (!currentUser) {
+  //   redirect(`/${locale}/login`)
+  // }
 
   return (
-    <div className="relative min-h-screen h-screen overflow-x-hidden">
-      <div className="relative z-10 flex min-h-screen h-screen">
+    <div className="relative h-screen min-h-screen overflow-x-hidden">
+      <div className="relative z-10 flex h-screen min-h-screen">
         <Sidebar />
-        <div className="flex-1 flex flex-col min-h-screen h-screen w-full">
+        <div className="flex flex-col flex-1 w-full h-screen min-h-screen">
           <main className="flex-1 bg-[#f0f4f4] overflow-y-auto h-screen w-full">
             {children}
           </main>

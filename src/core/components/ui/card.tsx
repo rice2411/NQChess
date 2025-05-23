@@ -1,5 +1,6 @@
-import { cn } from "@/core/utils/tailwind.util"
 import * as React from "react"
+
+import { cn } from "@/core/utils/tailwind.util"
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (

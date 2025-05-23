@@ -1,19 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { User, Pencil, UserRoundCheck, UserMinus, Trash } from "lucide-react";
-import { useStudentQueries } from "@/modules/student/hooks/useStudentQueries";
-import { IStudent } from "@/modules/student/interfaces/student.interface";
-import ManagementBase from "@/core/components/layout/admin/management/ManagementBase";
-import useModal from "@/core/hooks/useModal";
-import StudentModal from "./StudentModal";
-import ConfirmModal from "@/core/components/ui/ConfirmModal";
-
-
+import { useEffect, useState } from "react"
+import { User, Pencil, UserRoundCheck, UserMinus, Trash } from "lucide-react"
+import { useStudentQueries } from "@/modules/student/hooks/useStudentQueries"
+import { IStudent } from "@/modules/student/interfaces/student.interface"
+import ManagementBase from "@/core/components/layout/admin/management/ManagementBase"
+import useModal from "@/core/hooks/useModal"
+import StudentModal from "./StudentModal"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/core/components/ui/alert-dialog"
 
 const columns = [
-  { key: "STT", title: "STT" ,   renderCell: (row: IStudent, index: number) =>
-    index + 1,
+  {
+    key: "STT",
+    title: "STT",
+    renderCell: (row: IStudent, index: number) => index + 1,
   },
   { key: "fullName", title: "Tên học sinh" },
   { key: "phoneNumber", title: "Số điện thoại" },
@@ -29,22 +38,22 @@ const columns = [
     title: "Lớp",
     renderCell: (row: IStudent) => row.classes?.join(", "),
   },
-];
+]
 
 export default function StudentManagement() {
-  const { getAllQuery, deleteMutation } = useStudentQueries();
-  const modal = useModal();
-  const [editStudent, setEditStudent] = useState<IStudent | null>(null);
-  const confirmModal = useModal();
-  const [studentToDelete, setStudentToDelete] = useState<IStudent | null>(null);
+  const { getAllQuery, deleteMutation } = useStudentQueries()
+  const modal = useModal()
+  const [editStudent, setEditStudent] = useState<IStudent | null>(null)
+  const confirmModal = useModal()
+  const [studentToDelete, setStudentToDelete] = useState<IStudent | null>(null)
 
   useEffect(() => {
-    getAllQuery.refetch();
-  }, []);
+    getAllQuery.refetch()
+  }, [])
 
-  const students = getAllQuery.data?.success ? getAllQuery.data.data || [] : [];
-  const isLoading = getAllQuery.isLoading || getAllQuery.isFetching;
-  const isError = getAllQuery.isError;
+  const students = getAllQuery.data?.success ? getAllQuery.data.data || [] : []
+  const isLoading = getAllQuery.isLoading || getAllQuery.isFetching
+  const isError = getAllQuery.isError
 
   const statistics = [
     {
@@ -66,42 +75,42 @@ export default function StudentManagement() {
           new Date().getTime() - 30 * 24 * 60 * 60 * 1000
       ).length,
     },
-  ];
+  ]
 
   const handleEdit = (student: IStudent) => {
-    setEditStudent(student);
-    modal.open();
-  };
+    setEditStudent(student)
+    modal.open()
+  }
 
   const handleDelete = (student: IStudent) => {
-    setStudentToDelete(student);
-    confirmModal.open();
-  };
+    setStudentToDelete(student)
+    confirmModal.open()
+  }
 
   const handleConfirmDelete = () => {
     if (studentToDelete) {
       deleteMutation.mutate(studentToDelete.id, {
         onSuccess: () => {
-          getAllQuery.refetch();
-          confirmModal.close();
-          setStudentToDelete(null);
+          getAllQuery.refetch()
+          confirmModal.close()
+          setStudentToDelete(null)
         },
-      });
+      })
     }
-  };
+  }
 
   const addButton = (
     <button
-      className="ml-0 md:ml-auto bg-green-500 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-green-600 shadow-lg transition flex items-center gap-2 mt-2 md:mt-0 font-semibold text-sm sm:text-base"
+      className="flex items-center gap-2 px-4 py-2 mt-2 ml-0 text-sm font-semibold text-white transition bg-green-500 rounded-full shadow-lg md:ml-auto sm:px-5 hover:bg-green-600 md:mt-0 sm:text-base"
       onClick={() => {
-        setEditStudent(null);
-        modal.open();
+        setEditStudent(null)
+        modal.open()
       }}
     >
-      <Pencil className="h-5 w-5" />
+      <Pencil className="w-5 h-5" />
       Thêm học sinh
     </button>
-  );
+  )
 
   return (
     <>
@@ -115,14 +124,14 @@ export default function StudentManagement() {
         renderAction={(row: IStudent) => (
           <div className="flex gap-2">
             <button
-              className="p-2 rounded hover:bg-primary-100 text-primary-600 transition"
+              className="p-2 transition rounded hover:bg-primary-100 text-primary-600"
               title="Sửa"
               onClick={() => handleEdit(row)}
             >
               <Pencil className="w-4 h-4" />
             </button>
             <button
-              className="p-2 rounded hover:bg-red-100 text-red-600 transition"
+              className="p-2 text-red-600 transition rounded hover:bg-red-100"
               title="Xóa"
               onClick={() => handleDelete(row)}
             >
@@ -131,15 +140,34 @@ export default function StudentManagement() {
           </div>
         )}
       />
-      <StudentModal open={modal.isOpen} onClose={modal.close} initialData={editStudent} refetch={getAllQuery.refetch} />
-      <ConfirmModal
-        open={confirmModal.isOpen}
-        onClose={confirmModal.close}
-        onConfirm={handleConfirmDelete}
-        title="Xác nhận xóa"
-        description={`Bạn có chắc muốn xóa học sinh "${studentToDelete?.fullName}"?`}
-        loading={deleteMutation.isPending}
+      <StudentModal
+        open={modal.isOpen}
+        onClose={modal.close}
+        initialData={editStudent}
+        refetch={getAllQuery.refetch}
       />
+      <AlertDialog
+        open={confirmModal.isOpen}
+        onOpenChange={(v) => !v && confirmModal.close()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Bạn có chắc muốn xóa học sinh "${studentToDelete?.fullName}"?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Đang xóa..." : "Xác nhận"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
-  );
-} 
+  )
+}

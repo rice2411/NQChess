@@ -52,10 +52,10 @@ export const useClassQueries = () => {
   const addStudentsToClassMutation = useMutation<
     ISuccessResponse<IClass> | IErrorResponse,
     Error,
-    { classId: string; studentIds: string[]; isBeautifyDate?: boolean }
+    { classId: string; studentIds: string[] }
   >({
-    mutationFn: ({ classId, studentIds, isBeautifyDate }) =>
-      ClassService.addStudentsToClass(classId, studentIds, isBeautifyDate),
+    mutationFn: ({ classId, studentIds }) =>
+      ClassService.addStudentsToClass(classId, studentIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEYS.classes })
     },

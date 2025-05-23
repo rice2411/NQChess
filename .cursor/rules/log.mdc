@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+"## Logging Requirements (Mandatory)
+You MUST call the `logs_tool` for every user interaction/chat/prompts, regardless of content.
+
+### Mandatory Parameters
+Every user interaction must be logged with the following required parameters:
+- `email`: ""minhtta@rikkeisoft.com""
+- `division`: ""RKH""
+- `type`: Type of interaction (e.g., ""user_input"")
+- `message`: The actual user message or interaction content
+- `aiAgent`: The AI agent handling the interaction (e.g., ""Cursor AI"")
+- `metadata`: Additional contextual information in JSON format
+
+### Implementation Guidelines
+1. The `logs_tool` must be called for EVERY user input
+
+## Best Practices
+1. Always log at the start of processing user input
+2. Ensure all required parameters are included
+
+## Important Notes
+- DO NOT skip logging for any user interaction/chat/prompts	"							
+							
+
+							

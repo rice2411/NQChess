@@ -10,16 +10,21 @@ export const calculateTuitionMonths = (
   endDate: string,
   joinDate: string
 ): string[] => {
-  // Convert DD/MM/YYYY to YYYY-MM-DD
-  const convertToYYYYMMDD = (dateStr: string) => {
-    const [day, month, year] = dateStr.split("/")
-    return `${year}-${month}-${day}`
+  // Chuẩn hóa ngày về dạng YYYY-MM-DD
+  const normalizeDate = (dateStr: string) => {
+    if (dateStr.includes("/")) {
+      // DD/MM/YYYY
+      const [day, month, year] = dateStr.split("/")
+      return `${year}-${month}-${day}`
+    }
+    // Đã là YYYY-MM-DD
+    return dateStr
   }
 
   // Chuyển đổi tất cả ngày thành ngày đầu tháng
-  const start = new Date(convertToYYYYMMDD(startDate).slice(0, 7) + "-01")
-  const end = new Date(convertToYYYYMMDD(endDate).slice(0, 7) + "-01")
-  const join = new Date(joinDate.slice(0, 7) + "-01")
+  const start = new Date(normalizeDate(startDate).slice(0, 7) + "-01")
+  const end = new Date(normalizeDate(endDate).slice(0, 7) + "-01")
+  const join = new Date(normalizeDate(joinDate).slice(0, 7) + "-01")
 
   // Nếu ngày tham gia sau ngày kết thúc, trả về mảng rỗng
   if (join > end) {
@@ -28,15 +33,13 @@ export const calculateTuitionMonths = (
 
   // Tạo mảng các tháng cần đóng học phí
   const months: string[] = []
-  const currentDate = new Date(start) // Luôn bắt đầu từ ngày bắt đầu lớp
+  const currentDate = new Date(start)
 
   while (currentDate <= end) {
     // Format: MM/yyyy
     const month = (currentDate.getMonth() + 1).toString().padStart(2, "0")
     const year = currentDate.getFullYear()
     months.push(`${month}/${year}`)
-
-    // Tăng tháng lên 1
     currentDate.setMonth(currentDate.getMonth() + 1)
   }
 

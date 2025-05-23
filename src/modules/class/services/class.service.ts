@@ -34,7 +34,6 @@ interface FirestoreTimestamp {
 }
 
 const COLLECTION_NAME = "classes"
-const classValidator = new ClassValidator()
 
 export const ClassService = {
   // Create
@@ -43,9 +42,16 @@ export const ClassService = {
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
     // Validate data
-    const validationError = classValidator.validateCreateData(data)
-    if (validationError) {
-      return validationError
+
+    const isUpdate = !!(data as any).id
+    let oldStudents: { studentId: string }[] = []
+    let classId: string | undefined = (data as any).id
+    if (isUpdate && classId) {
+      // Lấy danh sách học sinh cũ
+      const oldClass = await readDocument<IClass>(COLLECTION_NAME, classId)
+      if (oldClass.success && oldClass.data) {
+        oldStudents = oldClass.data.students || []
+      }
     }
 
     const newClass: Omit<IClass, "id"> = {
@@ -57,11 +63,20 @@ export const ClassService = {
       updatedAt: serverTimestamp(),
     }
 
-    const result = await createOrUpdateDocument<Omit<IClass, "id">>(
+    const result = (await createOrUpdateDocument<Omit<IClass, "id">>(
       COLLECTION_NAME,
-      newClass,
-      isBeautifyDate
+      newClass
+    )) as ISuccessResponse<IClass>
+
+    // So sánh học sinh mới và cũ, chỉ tạo học phí cho học sinh mới
+    const newStudentIds = (data.students || []).map((s) => s.studentId)
+    const oldStudentIds = oldStudents.map((s) => s.studentId)
+    const addedStudentIds = newStudentIds.filter(
+      (id) => !oldStudentIds.includes(id)
     )
+    if (addedStudentIds.length > 0 && result.data?.id) {
+      await ClassService.addStudentsToClass(result.data.id, addedStudentIds)
+    }
 
     if (!result.success || !result.data) {
       return {
@@ -144,22 +159,11 @@ export const ClassService = {
   // Add students to class
   addStudentsToClass: async (
     classId: string,
-    studentIds: string[],
-    isBeautifyDate: boolean = true
+    studentIds: string[]
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
     // Validate student IDs
-    const validationError = classValidator.validateAddStudents(studentIds)
-    if (validationError) {
-      return validationError
-    }
-
-    const classResult = await readDocument<IClass>(
-      COLLECTION_NAME,
-      classId,
-      isBeautifyDate
-    )
+    const classResult = await readDocument<IClass>(COLLECTION_NAME, classId)
     if (!classResult.success) return classResult as IErrorResponse
-
     const classData = classResult.data
     if (!classData) {
       return {
@@ -169,27 +173,11 @@ export const ClassService = {
       }
     }
 
-    // Check for duplicate students
-    const existingStudentIds = classData.students.map((s) => s.studentId)
-    const duplicateStudents = studentIds.filter((id) =>
-      existingStudentIds.includes(id)
-    )
-    if (duplicateStudents.length > 0) {
-      return {
-        success: false,
-        errorCode: "DUPLICATE_STUDENTS",
-        message: CLASS_MESSAGE.ERRORS.MESSAGES.DUPLICATE_STUDENTS,
-      }
-    }
-
-    const currentStudents = classData.students || []
     const newStudents = studentIds.map((id) => ({
       studentId: id,
-      joinDate: new Date("2025-04-13"),
+      joinDate: new Date(),
       status: EStudentClassStatus.ONLINE,
     }))
-    const updatedStudents = [...currentStudents, ...newStudents]
-
     // Create tuition for new students
     for (const student of newStudents) {
       // Convert joinDate to ISO string
@@ -210,7 +198,7 @@ export const ClassService = {
       const months = calculateTuitionMonths(
         classData.startDate,
         classData.endDate,
-        joinDate
+        joinDate.slice(0, 10)
       )
 
       for (let i = 0; i < months.length; i++) {
@@ -231,7 +219,11 @@ export const ClassService = {
           )
 
           // Calculate adjusted amount based on actual lessons
-          amount = Math.round((actualLessons / totalLessons) * amount)
+          if (totalLessons > 0) {
+            amount = Math.round((actualLessons / totalLessons) * amount)
+          } else {
+            amount = 0
+          }
         }
         const test = {
           classId,
@@ -241,29 +233,14 @@ export const ClassService = {
           status: ETuitionStatus.PENDING,
         }
 
-        await TuitionService.createForStudent(test, isBeautifyDate)
-      }
-    }
-
-    const result = await updateDocument<IClass>(
-      COLLECTION_NAME,
-      classId,
-      { students: updatedStudents },
-      isBeautifyDate
-    )
-
-    if (!result.success) {
-      return {
-        success: false,
-        errorCode: "UPDATE_FAILED",
-        message: CLASS_MESSAGE.ERRORS.MESSAGES.UPDATE_FAILED,
+        await TuitionService.createForStudent(test)
       }
     }
 
     return {
       success: true,
       message: CLASS_MESSAGE.SUCCESS.MESSAGES.ADD_STUDENTS_SUCCESS,
-      data: result.data as IClass,
+      data: classData as IClass,
     }
   },
 }

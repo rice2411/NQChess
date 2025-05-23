@@ -142,8 +142,7 @@ export const TuitionService = {
 
   // Create tuition for student
   createForStudent: async (
-    data: Omit<ITuition, "id">,
-    isBeautifyDate: boolean = true
+    data: Omit<ITuition, "id">
   ): Promise<ISuccessResponse<ITuition> | IErrorResponse> => {
     if (!data.classId || !data.studentId || !data.amount || !data.month) {
       return {
@@ -159,11 +158,10 @@ export const TuitionService = {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
-
+    console.log("newTuition:", newTuition)
     const result = await createOrUpdateDocument<Omit<ITuition, "id">>(
       COLLECTION_NAME,
-      newTuition,
-      isBeautifyDate
+      newTuition
     )
 
     if (!result.success) return result as IErrorResponse
