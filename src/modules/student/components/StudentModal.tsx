@@ -5,6 +5,7 @@ import { EGender } from "@/modules/student/enum/student.enum";
 import { Input } from "@/core/components/ui/input";
 import { Button } from "@/core/components/ui/button";
 import { Label } from "@/core/components/ui/label";
+import toast from "react-hot-toast";
 
 export default function StudentModal({ open, onClose, initialData, refetch }: { open: boolean; onClose: () => void; initialData?: any; refetch: () => void }) {
   const { createOrUpdateMutation } = useStudentQueries();
@@ -73,6 +74,8 @@ export default function StudentModal({ open, onClose, initialData, refetch }: { 
             classes: "",
           });
           refetch();
+          toast.success( initialData ?  "Cập nhật học sinh thành công!" : "Thêm học sinh thành công!");
+
         },
         onError: () => setError("Có lỗi xảy ra, vui lòng thử lại!"),
       }

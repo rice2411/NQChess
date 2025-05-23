@@ -6,6 +6,7 @@ import QueryProvider from "@/core/providers/QueryProvider"
 import Providers from "@/core/providers/SessionProvider"
 import { locales, type Locale } from "@/core/config/i18n/constant"
 import ProgressBar from "@/core/components/feedback/ProgressBar/progress-bar"
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -46,6 +47,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Providers>
             <QueryProvider>{children}</QueryProvider>
           </Providers>
+          <Toaster position="top-right" />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -14,6 +14,8 @@ import React, { useState } from "react"
 import { Button } from "@/core/components/ui/button"
 import { useTranslations } from "next-intl"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
+import { createLocaleLink } from "@/core/utils/locale.util"
 
 export default function SidebarAdmin() {
   const [open, setOpen] = useState(false)
@@ -71,6 +73,7 @@ export default function SidebarAdmin() {
           {/* Menu */}
           <nav className="flex flex-col gap-2 mt-2">
             {systemItems.map((item) => (
+             <Link href={createLocaleLink(item.key, )} key={item.key} >
               <li
                 key={item.key}
                 className={`sidebar-item group cursor-pointer flex items-center gap-3 px-4 py-2 rounded-lg transition hover:bg-purple-100 ${
@@ -84,6 +87,7 @@ export default function SidebarAdmin() {
                   {t(item.key)}
                 </span>
               </li>
+             </Link>
             ))}
           </nav>
           <span className="text-sm font-medium ">{t("subtitle2")}</span>

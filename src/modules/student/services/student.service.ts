@@ -25,11 +25,9 @@ export const StudentService = {
   ): Promise<ISuccessResponse<IStudent> | IErrorResponse> => {
     // Validate data
     const validationError = studentValidator.validateCreateData(data)
-    console.log('validationError:', validationError);
     if (validationError) {
       return validationError
     }
-
     const newStudent: Omit<IStudent, "id"> = {
       ...data,
       gender: data.gender || EGender.MALE,
@@ -38,11 +36,9 @@ export const StudentService = {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
-
     const result = await createOrUpdateDocument<Omit<IStudent, "id">>(
       COLLECTION_NAME,
       newStudent,
-      
     )
 
     if (!result.success) {

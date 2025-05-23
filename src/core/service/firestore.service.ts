@@ -42,6 +42,9 @@ export async function createOrUpdateDocument<
     // Only set createdAt for new documents
     if (!isUpdate) {
       docData.createdAt = serverTimestamp()
+      if("id" in docData) {
+        delete docData.id;
+      }
     }
 
     const docRef = isUpdate

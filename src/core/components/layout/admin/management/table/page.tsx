@@ -4,7 +4,7 @@ import {  Plus, Search } from "lucide-react"
 interface Column<T> {
   key: keyof T | string
   title: string
-  renderCell?: (row: T) => React.ReactNode
+  renderCell?: (row: T, index: number) => React.ReactNode
   className?: string
 }
 
@@ -78,13 +78,13 @@ export default function BaseTable<T extends { id: string | number }>({
                 key={row.id}
                 className="border-b last:border-b-0 hover:bg-primary-50/60 transition group"
               >
-                {allColumns.map((col) => (
+                {allColumns.map((col, index) => (
                   <td
                     key={col.key as string}
                     className="py-3 sm:py-4 px-3 sm:px-5"
                   >
                     {col.renderCell
-                      ? col.renderCell(row)
+                      ? col.renderCell(row, index)
                       : (row[col.key as keyof T] as React.ReactNode)}
                   </td>
                 ))}

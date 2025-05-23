@@ -7,11 +7,14 @@ import { IStudent } from "@/modules/student/interfaces/student.interface";
 import ManagementBase from "@/core/components/layout/admin/management/ManagementBase";
 import useModal from "@/core/hooks/useModal";
 import StudentModal from "./StudentModal";
+import ConfirmModal from "@/core/components/ui/ConfirmModal";
 
 
 
 const columns = [
-  { key: "id", title: "ID" },
+  { key: "STT", title: "STT" ,   renderCell: (row: IStudent, index: number) =>
+    index + 1,
+  },
   { key: "fullName", title: "Tên học sinh" },
   { key: "phoneNumber", title: "Số điện thoại" },
   { key: "dateOfBirth", title: "Ngày sinh" },
@@ -32,6 +35,8 @@ export default function StudentManagement() {
   const { getAllQuery, deleteMutation } = useStudentQueries();
   const modal = useModal();
   const [editStudent, setEditStudent] = useState<IStudent | null>(null);
+  const confirmModal = useModal();
+  const [studentToDelete, setStudentToDelete] = useState<IStudent | null>(null);
 
   useEffect(() => {
     getAllQuery.refetch();
@@ -69,10 +74,17 @@ export default function StudentManagement() {
   };
 
   const handleDelete = (student: IStudent) => {
-    if (window.confirm("Bạn có chắc muốn xóa học sinh này?")) {
-      deleteMutation.mutate(student.id, {
+    setStudentToDelete(student);
+    confirmModal.open();
+  };
+
+  const handleConfirmDelete = () => {
+    if (studentToDelete) {
+      deleteMutation.mutate(studentToDelete.id, {
         onSuccess: () => {
           getAllQuery.refetch();
+          confirmModal.close();
+          setStudentToDelete(null);
         },
       });
     }
@@ -120,6 +132,14 @@ export default function StudentManagement() {
         )}
       />
       <StudentModal open={modal.isOpen} onClose={modal.close} initialData={editStudent} refetch={getAllQuery.refetch} />
+      <ConfirmModal
+        open={confirmModal.isOpen}
+        onClose={confirmModal.close}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa"
+        description={`Bạn có chắc muốn xóa học sinh "${studentToDelete?.fullName}"?`}
+        loading={deleteMutation.isPending}
+      />
     </>
   );
 } 
