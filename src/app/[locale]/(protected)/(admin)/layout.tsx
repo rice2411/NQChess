@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+// import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/core/config/next-auth.config"
 import Sidebar from "@/core/components/layout/admin/sidebar/Sidebar"
 
@@ -11,9 +11,10 @@ export default async function AdminLayout({ children, params }: Props) {
   const currentUser = await getCurrentUser()
   const { locale } = await params
 
-  // if (!currentUser) {
-  //   redirect(`/${locale}/login`)
-  // }
+  if (!currentUser && currentUser) {
+    console.log("currentUser", locale)
+    // redirect(`/${locale}/login`)
+  }
 
   return (
     <div className="relative h-screen min-h-screen overflow-x-hidden">

@@ -1,7 +1,6 @@
 import {
   createOrUpdateDocument,
   readDocument,
-  updateDocument,
   deleteDocument,
   readDocuments,
 } from "@/core/service/firestore.service"
@@ -23,10 +22,12 @@ import {
   calculateLessonsInMonth,
   calculateActualLessons,
 } from "../../tuition/helpers/tuition.helper"
-import { ClassValidator } from "../validators/class.validator"
 import { CLASS_MESSAGE } from "../constants/classMessages"
 import { generateLessons } from "../../lesson/helper/lesson.helper"
 import { LessonService } from "@/modules/lesson/services/lesson.service"
+import { AttendanceService } from "@/modules/attendance/services/attendance.service"
+import { EAttendanceStatus } from "@/modules/attendance/enum/attendance.enum"
+import { format, parseISO } from "date-fns"
 
 interface FirestoreTimestamp {
   seconds: number
@@ -38,19 +39,43 @@ const COLLECTION_NAME = "classes"
 export const ClassService = {
   // Create
   createOrUpdate: async (
-    data: Omit<IClass, "id">,
-    isBeautifyDate: boolean = true
+    data: Omit<IClass, "id">
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
     // Validate data
 
     const isUpdate = !!(data as any).id
     let oldStudents: { studentId: string }[] = []
-    let classId: string | undefined = (data as any).id
+    const classId: string | undefined = (data as any).id
     if (isUpdate && classId) {
       // Lấy danh sách học sinh cũ
       const oldClass = await readDocument<IClass>(COLLECTION_NAME, classId)
       if (oldClass.success && oldClass.data) {
-        oldStudents = oldClass.data.students || []
+        oldStudents = [...(oldClass.data.students || [])]
+      }
+    }
+
+    // Xóa attendance của học sinh bị xóa khỏi lớp
+    if (isUpdate && classId) {
+      const oldStudentIds = oldStudents.map((s) => s.studentId)
+      const newStudentIds = (data.students || []).map((s) => s.studentId)
+      const removedStudentIds = oldStudentIds.filter(
+        (id) => !newStudentIds.includes(id)
+      )
+      if (removedStudentIds.length > 0) {
+        // Lấy toàn bộ lesson của lớp
+        const lessonsRes = await LessonService.getByClassId(classId)
+        if (lessonsRes.success && lessonsRes.data) {
+          for (const studentId of removedStudentIds) {
+            for (const lesson of lessonsRes.data) {
+              // Xóa attendance theo lessonId + studentId
+              // Cần implement hàm AttendanceService.deleteByLessonAndStudent nếu chưa có
+              await AttendanceService.deleteByLessonAndStudent(
+                lesson.id,
+                studentId
+              )
+            }
+          }
+        }
       }
     }
 
@@ -67,15 +92,36 @@ export const ClassService = {
       COLLECTION_NAME,
       newClass
     )) as ISuccessResponse<IClass>
+    console.log("    data.startDate,:", data.startDate)
+    console.log("    data.endDate,:", data.endDate)
+    console.log("    data.schedules,:", data.schedules)
+    // Chuyển đổi ngày về dd/MM/yyyy trước khi generateLessons
+    const startDate = format(parseISO(data.startDate), "dd/MM/yyyy")
+    const endDate = format(parseISO(data.endDate), "dd/MM/yyyy")
+    const lessons = generateLessons(startDate, endDate, data.schedules)
 
-    // So sánh học sinh mới và cũ, chỉ tạo học phí cho học sinh mới
-    const newStudentIds = (data.students || []).map((s) => s.studentId)
-    const oldStudentIds = oldStudents.map((s) => s.studentId)
-    const addedStudentIds = newStudentIds.filter(
-      (id) => !oldStudentIds.includes(id)
-    )
-    if (addedStudentIds.length > 0 && result.data?.id) {
-      await ClassService.addStudentsToClass(result.data.id, addedStudentIds)
+    for (const lesson of lessons) {
+      await LessonService.createOrUpdate({
+        ...lesson,
+        classId: (result.data as IClass).id,
+      })
+    }
+
+    // Sau khi chắc chắn đã tạo xong lesson, mới tạo attendance cho học sinh
+    if (!isUpdate) {
+      const newStudentIds = (data.students || []).map((s) => s.studentId)
+      if (newStudentIds.length > 0 && result.data?.id) {
+        await ClassService.addStudentsToClass(result.data.id, newStudentIds)
+      }
+    } else {
+      const newStudentIds = (data.students || []).map((s) => s.studentId)
+      const oldStudentIds = oldStudents.map((s) => s.studentId)
+      const addedStudentIds = newStudentIds.filter(
+        (id) => !oldStudentIds.includes(id)
+      )
+      if (addedStudentIds.length > 0 && result.data?.id) {
+        await ClassService.addStudentsToClass(result.data.id, addedStudentIds)
+      }
     }
 
     if (!result.success || !result.data) {
@@ -86,22 +132,6 @@ export const ClassService = {
       }
     }
 
-    // Generate and create lessons
-    const lessons = generateLessons(
-      data.startDate,
-      data.endDate,
-      data.schedules
-    )
-
-    for (const lesson of lessons) {
-      await LessonService.createOrUpdate(
-        {
-          ...lesson,
-          classId: (result.data as IClass).id,
-        },
-        isBeautifyDate
-      )
-    }
     return {
       success: true,
       message: CLASS_MESSAGE.SUCCESS.MESSAGES.CREATE_SUCCESS,
@@ -234,6 +264,22 @@ export const ClassService = {
         }
 
         await TuitionService.createForStudent(test)
+      }
+
+      // Tạo attendance cho tất cả các lesson của lớp này cho học sinh mới
+      if (classData.id) {
+        const lessonsRes = await LessonService.getByClassId(classData.id)
+        if (lessonsRes.success && lessonsRes.data) {
+          const lessonIds = lessonsRes.data.map((l) => l.id)
+          for (const lessonId of lessonIds) {
+            await AttendanceService.createOrUpdateAttendance({
+              lessonId,
+              studentId: student.studentId,
+              status: EAttendanceStatus.NOT_YET,
+              note: "",
+            })
+          }
+        }
       }
     }
 

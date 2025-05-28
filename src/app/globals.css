@@ -22,3 +22,48 @@ body {
 [data-radix-popper-content-wrapper] {
   position: fixed !important;
 }
+
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.5s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shine:hover::before,
+.btn-shine:focus-visible::before {
+  left: 120%;
+  transition: left 0.5s;
+}
+
+.btn-shine:focus:not(:hover)::before {
+  left: -75%;
+  transition: left 0.5s;
+  animation: shine-reverse 0.5s;
+}
+
+@keyframes shine-reverse {
+  from {
+    left: 120%;
+  }
+  to {
+    left: -75%;
+  }
+}

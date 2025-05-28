@@ -16,8 +16,9 @@ import {
 import { useClassQueries } from "@/modules/class/hooks/useClassQueries"
 import { useStudentQueries } from "@/modules/student/hooks/useStudentQueries"
 import { IStudent } from "@/modules/student/interfaces/student.interface"
-import { UserCheck, UserPlus, UserX } from "lucide-react"
+import { UserPlus, UserX } from "lucide-react"
 import { IStudentClass } from "@/modules/class/interfaces/class.interface"
+import { format, parse } from "date-fns"
 
 const days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"]
 
@@ -41,12 +42,12 @@ export default function ClassModal({
   open,
   onClose,
   initialData,
-  refetch,
+  onSave,
 }: {
   open: boolean
   onClose: () => void
   initialData?: any
-  refetch: () => void
+  onSave?: (newClass: any) => void
 }) {
   const { createOrUpdateMutation } = useClassQueries()
   const { getAllQuery: getAllStudentsQuery } = useStudentQueries()
@@ -80,12 +81,25 @@ export default function ClassModal({
 
   useEffect(() => {
     if (initialData) {
+      // Chuyển đổi ngày về yyyy-MM-dd cho input type="date"
+      const parseDate = (dateStr: string) => {
+        if (!dateStr) return ""
+        try {
+          // Nếu đã đúng yyyy-MM-dd thì trả về luôn
+          if (/\d{4}-\d{2}-\d{2}/.test(dateStr)) return dateStr
+          // Nếu là dd/MM/yyyy thì convert
+          const d = parse(dateStr, "dd/MM/yyyy", new Date())
+          return format(d, "yyyy-MM-dd")
+        } catch {
+          return ""
+        }
+      }
       setForm({
         name: initialData.name || "",
-        startDate: initialData.startDate || today,
+        startDate: parseDate(initialData.startDate) || today,
         endDate:
-          initialData.endDate ||
-          getThreeMonthsLater(initialData.startDate || today),
+          parseDate(initialData.endDate) ||
+          getThreeMonthsLater(parseDate(initialData.startDate) || today),
         status: initialData.status || EClassStatus.INACTIVE,
         tuition: initialData.tuition
           ? formatCurrency(initialData.tuition.toString())
@@ -181,7 +195,7 @@ export default function ClassModal({
     const scheduleStrings = schedules.map(
       (s) => `${s.start} - ${s.end} ${s.day}`
     )
-    let newClass = {
+    const newClass = {
       ...form,
       id: initialData?.id,
       tuition: Number(form.tuition.replace(/,/g, "")),
@@ -196,18 +210,14 @@ export default function ClassModal({
         isBeautifyDate: true,
       },
       {
-        onSuccess: () => {
-          onClose()
-          setForm({
-            name: "",
-            startDate: today,
-            endDate: defaultEndDate,
-            status: EClassStatus.INACTIVE,
-            tuition: "",
-            students: [],
-          })
-          setSchedules([{ start: "", end: "", day: days[0] }])
-          refetch()
+        onSuccess: (res) => {
+          if (res.success) {
+            if (onSave) onSave(res.data)
+            else if (typeof window !== "undefined") window.location.reload()
+            onClose()
+          } else {
+            setError(res.message || "Có lỗi xảy ra!")
+          }
         },
         onError: () => setError("Có lỗi xảy ra, vui lòng thử lại!"),
       }
@@ -342,7 +352,7 @@ export default function ClassModal({
                   </select>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="icon"
                     onClick={() => removeSchedule(idx)}
                     disabled={schedules.length === 1}
@@ -390,7 +400,7 @@ export default function ClassModal({
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
+                    variant="dark"
                     className={`border-2 ${
                       selectedStudentIds.includes(student.id)
                         ? "border-green-500 text-green-600"
@@ -424,7 +434,7 @@ export default function ClassModal({
                         <Button
                           type="button"
                           size="icon"
-                          variant="ghost"
+                          variant="dark"
                           onClick={() =>
                             handleRemoveStudent({ id: s.studentId } as IStudent)
                           }

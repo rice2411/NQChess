@@ -9,17 +9,32 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        //
         primary:
-          "bg-gradient-to-b from-purple-300 to-pink-300 text-white shadow-xs hover:from-purple-400 hover:to-pink-400 ",
-        destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "btn-shine bg-gradient-to-b from-purple-300 to-pink-300 text-white shadow-xs hover:from-purple-400 hover:to-pink-400 ",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "btn-shine bg-gradient-to-r from-green-500 to-blue-500  text-white shadow-xs hover:from-green-400 hover:to-blue-400 ",
+        danger:
+          "btn-shine bg-gradient-to-r from-red-500 to-orange-500  text-white shadow-xs hover:from-red-600 hover:to-orange-600 ",
+        warning:
+          "btn-shine bg-gradient-to-r from-yellow-300 to-orange-300  text-white shadow-xs hover:from-yellow-400 hover:to-orange-400 ",
+        success:
+          "btn-shine bg-gradient-to-r from-green-300 to-blue-300  text-white shadow-xs hover:from-green-400 hover:to-blue-400 ",
+        info: "btn-shine bg-gradient-to-r from-sky-400 to-blue-500 text-white shadow-xs hover:from-sky-500 hover:to-blue-600",
+        neutral:
+          "btn-shine bg-gradient-to-r from-gray-400 to-gray-600 text-white shadow-xs hover:from-gray-500 hover:to-gray-700",
+        dark: "btn-shine bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow-xs hover:from-gray-900 hover:to-black",
+        light:
+          "btn-shine bg-gradient-to-r from-gray-100 to-gray-300 text-gray-800 shadow-xs hover:from-gray-200 hover:to-gray-400",
+        violet:
+          "btn-shine bg-gradient-to-r from-violet-400 to-fuchsia-500 text-white shadow-xs hover:from-violet-500 hover:to-fuchsia-600",
+        pink: "btn-shine bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-xs hover:from-pink-500 hover:to-rose-600",
+        cyan: "btn-shine bg-gradient-to-r from-cyan-400 to-teal-400 text-white shadow-xs hover:from-cyan-500 hover:to-teal-500",
+        orange:
+          "btn-shine bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-xs hover:from-orange-500 hover:to-amber-600",
+        teal: "btn-shine bg-gradient-to-r from-teal-400 to-emerald-500 text-white shadow-xs hover:from-teal-500 hover:to-emerald-600",
+        indigo:
+          "btn-shine bg-gradient-to-r from-indigo-400 to-blue-700 text-white shadow-xs hover:from-indigo-500 hover:to-blue-800",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Pencil, Trash, Users, PlusCircle } from "lucide-react"
+import { Users, PlusCircle } from "lucide-react"
 import { useClassQueries } from "@/modules/class/hooks/useClassQueries"
 import { IClass } from "@/modules/class/interfaces/class.interface"
 import ManagementBase from "@/core/components/layout/admin/management/ManagementBase"
@@ -21,6 +21,9 @@ import { EClassStatus } from "../enums/class.enum"
 import toast from "react-hot-toast"
 import StatusBadge from "./StatusBadge"
 import { formatCurrencyVND } from "@/core/utils/currency.util"
+import { useQueryClient } from "@tanstack/react-query"
+import { CLASS_QUERY_KEYS } from "@/modules/class/constants/classQueryKey"
+import { Button } from "@/core/components/ui/button"
 
 const columns = [
   {
@@ -45,6 +48,7 @@ const columns = [
 
 export default function ClassManagement() {
   const { getAllQuery, deleteMutation } = useClassQueries()
+  const queryClient = useQueryClient()
   const modal = useModal()
   const confirmModal = useModal()
   const [editClass, setEditClass] = useState<IClass | null>(null)
@@ -94,7 +98,15 @@ export default function ClassManagement() {
     if (classToDelete) {
       deleteMutation.mutate(classToDelete.id, {
         onSuccess: () => {
-          getAllQuery.refetch()
+          queryClient.setQueryData(CLASS_QUERY_KEYS.getAll, (oldData: any) => {
+            if (!oldData?.data) return oldData
+            return {
+              ...oldData,
+              data: oldData.data.filter(
+                (item: IClass) => item.id !== classToDelete.id
+              ),
+            }
+          })
           confirmModal.close()
           setClassToDelete(null)
           toast.success("Xóa lớp học thành công")
@@ -107,7 +119,7 @@ export default function ClassManagement() {
   }
 
   const addButton = (
-    <button
+    <Button
       className="flex items-center gap-2 px-4 py-2 mt-2 ml-0 text-sm font-semibold text-white transition bg-green-500 rounded-full shadow-lg md:ml-auto sm:px-5 hover:bg-green-600 md:mt-0 sm:text-base"
       onClick={() => {
         setEditClass(null)
@@ -116,7 +128,7 @@ export default function ClassManagement() {
     >
       <PlusCircle className="w-5 h-5" />
       Thêm lớp học
-    </button>
+    </Button>
   )
 
   return (
@@ -130,20 +142,24 @@ export default function ClassManagement() {
         addButton={addButton}
         renderAction={(row: IClass) => (
           <div className="flex gap-2">
-            <button
-              className="p-2 transition rounded hover:bg-primary-100 text-primary-600"
+            <Button
+              size="sm"
+              variant="secondary"
+              className="p-2"
               title="Sửa"
               onClick={() => handleEdit(row)}
             >
-              <Pencil className="w-4 h-4" />
-            </button>
-            <button
-              className="p-2 text-red-600 transition rounded hover:bg-red-100"
+              Chỉnh sửa
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              className="p-2"
               title="Xóa"
               onClick={() => handleDelete(row)}
             >
-              <Trash className="w-4 h-4" />
-            </button>
+              Xóa
+            </Button>
           </div>
         )}
       />
@@ -151,7 +167,37 @@ export default function ClassManagement() {
         open={modal.isOpen}
         onClose={modal.close}
         initialData={editClass}
-        refetch={getAllQuery.refetch}
+        onSave={(newClass) => {
+          if (editClass && editClass.id) {
+            // Sửa
+            queryClient.setQueryData(
+              CLASS_QUERY_KEYS.getAll,
+              (oldData: any) => {
+                if (!oldData?.data) return oldData
+                return {
+                  ...oldData,
+                  data: oldData.data.map((item: IClass) =>
+                    item.id === newClass.id ? newClass : item
+                  ),
+                }
+              }
+            )
+          } else {
+            // Thêm
+            queryClient.setQueryData(
+              CLASS_QUERY_KEYS.getAll,
+              (oldData: any) => {
+                if (!oldData?.data) return oldData
+                return {
+                  ...oldData,
+                  data: [newClass, ...oldData.data],
+                }
+              }
+            )
+          }
+          modal.close()
+          setEditClass(null)
+        }}
       />
       <AlertDialog
         open={confirmModal.isOpen}

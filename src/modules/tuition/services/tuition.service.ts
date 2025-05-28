@@ -158,7 +158,6 @@ export const TuitionService = {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
-    console.log("newTuition:", newTuition)
     const result = await createOrUpdateDocument<Omit<ITuition, "id">>(
       COLLECTION_NAME,
       newTuition

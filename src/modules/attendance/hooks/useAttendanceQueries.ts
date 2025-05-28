@@ -110,10 +110,10 @@ export const useAttendanceQueries = () => {
   const changeStatusMutation = useMutation<
     ISuccessResponse<IAttendance> | IErrorResponse,
     Error,
-    { id: string; status: EAttendanceStatus }
+    { id: string; status: EAttendanceStatus; note?: string }
   >({
-    mutationFn: ({ id, status }) =>
-      AttendanceService.changeStatusAttendance(id, status),
+    mutationFn: ({ id, status, note }) =>
+      AttendanceService.changeStatusAttendance(id, status, note),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ATTENDANCE_QUERY_KEYS.attendances,

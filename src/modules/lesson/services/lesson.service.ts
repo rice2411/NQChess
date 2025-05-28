@@ -18,8 +18,7 @@ const COLLECTION_NAME = "lessons"
 export const LessonService = {
   // Create or Update
   createOrUpdate: async (
-    data: Omit<ILesson, "id">,
-    isBeautifyDate: boolean = true
+    data: Omit<ILesson, "id">
   ): Promise<ISuccessResponse<ILesson> | IErrorResponse> => {
     if (!data.classId || !data.startDate || !data.endDate) {
       return {
@@ -38,8 +37,7 @@ export const LessonService = {
 
     const result = await createOrUpdateDocument<Omit<ILesson, "id">>(
       COLLECTION_NAME,
-      newLesson,
-      isBeautifyDate
+      newLesson
     )
 
     if (!result.success) return result as IErrorResponse

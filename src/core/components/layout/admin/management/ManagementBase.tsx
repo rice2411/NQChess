@@ -9,6 +9,7 @@ interface IManagementBaseProps {
   columns: any[]
   addButton?: React.ReactNode
   renderAction?: (row: any) => React.ReactNode
+  filters?: any[]
 }
 
 export default function ManagementBase({
@@ -19,6 +20,7 @@ export default function ManagementBase({
   columns,
   addButton,
   renderAction,
+  filters = [],
 }: IManagementBaseProps) {
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -35,6 +37,7 @@ export default function ManagementBase({
         renderAction={renderAction}
         isLoading={isLoading}
         isError={isError}
+        filters={filters}
       />
     </div>
   )

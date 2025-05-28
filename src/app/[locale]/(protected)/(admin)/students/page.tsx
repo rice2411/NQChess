@@ -1,2 +1,2 @@
-import StudentManagement from "@/modules/student/components/StudentManagement";
-export default StudentManagement;
+import StudentManagement from "@/modules/student/components/admin/StudentManagement"
+export default StudentManagement

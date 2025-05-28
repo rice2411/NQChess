@@ -1,23 +1,11 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useRef } from "react"
 import { Plus, Search } from "lucide-react"
-
-interface Column<T> {
-  key: keyof T | string
-  title: string
-  renderCell?: (row: T, index: number) => React.ReactNode
-  className?: string
-}
-
-interface BaseTableProps<T> {
-  columns: Column<T>[]
-  data: T[]
-  addButton?: React.ReactNode
-  renderAction?: (row: T) => React.ReactNode
-  isLoading?: boolean
-  isError?: boolean
-}
+import { Button } from "@/core/components/ui/button"
+import { Input } from "@/core/components/ui/input"
+import type { BaseTableProps } from "./BaseTable.types"
+import { FilterDropdown } from "./FilterDropdown"
 
 export default function BaseTable<T extends { id: string | number }>({
   columns,
@@ -26,8 +14,14 @@ export default function BaseTable<T extends { id: string | number }>({
   renderAction,
   isLoading,
   isError,
+  filters = [],
 }: BaseTableProps<T>) {
   const [search, setSearch] = useState("")
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const [pendingFilterValues, setPendingFilterValues] = useState<
+    Record<string, any>
+  >({})
+  const dropdownRef = useRef<any>(null)
 
   const allColumns = renderAction
     ? [
@@ -40,11 +34,30 @@ export default function BaseTable<T extends { id: string | number }>({
       ]
     : columns
 
-  // Lọc data theo search
+  // Lọc data theo search và filter
   const filteredData = useMemo(() => {
-    if (!search.trim()) return data
+    let result = data
+    // Lọc theo filter nâng cao
+    filters.forEach((filter) => {
+      const value = filterValues[filter.key]
+      if (value !== undefined && value !== "" && value !== null) {
+        result = result.filter((row) => {
+          const rowValue = row[filter.key as keyof T]
+          if (filter.type === "select") return rowValue === value
+          if (filter.type === "number")
+            return Number(rowValue) === Number(value)
+          if (filter.type === "text")
+            return String(rowValue)
+              .toLowerCase()
+              .includes(String(value).toLowerCase())
+          return true
+        })
+      }
+    })
+    // Lọc theo search toàn cục
+    if (!search.trim()) return result
     const lowerSearch = search.toLowerCase()
-    return data.filter((row) =>
+    return result.filter((row) =>
       allColumns.some((col) => {
         const value = row[col.key as keyof T]
         if (typeof value === "string" || typeof value === "number") {
@@ -53,29 +66,44 @@ export default function BaseTable<T extends { id: string | number }>({
         return false
       })
     )
-  }, [search, data, allColumns])
+  }, [search, data, allColumns, filters, filterValues])
+
+  // Khi mở dropdown, đồng bộ pendingFilterValues với filterValues
+  const handleOpenChange = (open: boolean) => {
+    if (open) setPendingFilterValues(filterValues)
+  }
 
   return (
     <div className="w-full h-auto p-4 bg-white shadow-xl dashboard-orders rounded-2xl sm:p-6 md:p-8">
       <div className="flex flex-col items-center gap-2 mb-4 md:flex-row sm:mb-6 sm:gap-3">
         <div className="relative w-full md:w-1/3">
           <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
-          <input
+          <Input
             type="text"
             placeholder="Tìm kiếm..."
-            className="w-full py-2 pl-10 pr-4 text-sm transition border border-gray-300 rounded-full shadow-sm outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 sm:text-base"
+            className="py-2 pl-10 pr-4 "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        {filters.length > 0 && (
+          <FilterDropdown
+            filters={filters}
+            pendingFilterValues={pendingFilterValues}
+            setPendingFilterValues={setPendingFilterValues}
+            setFilterValues={setFilterValues}
+            dropdownRef={dropdownRef}
+            handleOpenChange={handleOpenChange}
+          />
+        )}
 
         {addButton ? (
           addButton
         ) : (
-          <button className="flex items-center gap-2 px-4 py-2 mt-2 ml-0 text-sm font-semibold text-white transition bg-green-500 rounded-full shadow-lg md:ml-auto sm:px-5 hover:bg-green-600 md:mt-0 sm:text-base">
+          <Button variant="primary" size="sm">
             <Plus className="w-5 h-5" />
             Thêm mới
-          </button>
+          </Button>
         )}
       </div>
 

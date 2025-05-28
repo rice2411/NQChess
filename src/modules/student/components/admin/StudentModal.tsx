@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from "@/core/components/ui/dialog"
 import { EGender } from "@/modules/student/enum/student.enum"
 import { Input } from "@/core/components/ui/input"
@@ -18,12 +17,12 @@ export default function StudentModal({
   open,
   onClose,
   initialData,
-  refetch,
+  onSave,
 }: {
   open: boolean
   onClose: () => void
   initialData?: any
-  refetch: () => void
+  onSave?: (newStudent: any) => void
 }) {
   const { createOrUpdateMutation } = useStudentQueries()
   const [form, setForm] = useState({
@@ -85,22 +84,27 @@ export default function StudentModal({
         isBeautifyDate: true,
       },
       {
-        onSuccess: () => {
-          onClose()
-          setForm({
-            fullName: "",
-            phoneNumber: "",
-            dateOfBirth: "",
-            avatar: "",
-            gender: EGender.MALE,
-            classes: "",
-          })
-          refetch()
-          toast.success(
-            initialData
-              ? "Cập nhật học sinh thành công!"
-              : "Thêm học sinh thành công!"
-          )
+        onSuccess: (res) => {
+          if (res.success) {
+            if (onSave) onSave(res.data)
+            else if (typeof window !== "undefined") window.location.reload()
+            onClose()
+            setForm({
+              fullName: "",
+              phoneNumber: "",
+              dateOfBirth: "",
+              avatar: "",
+              gender: EGender.MALE,
+              classes: "",
+            })
+            toast.success(
+              initialData
+                ? "Cập nhật học sinh thành công!"
+                : "Thêm học sinh thành công!"
+            )
+          } else {
+            setError(res.message || "Có lỗi xảy ra!")
+          }
         },
         onError: () => setError("Có lỗi xảy ra, vui lòng thử lại!"),
       }

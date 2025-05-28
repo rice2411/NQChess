@@ -5,5 +5,5 @@ export interface IAttendance extends IBaseEntity {
   lessonId: string
   studentId: string
   status: EAttendanceStatus
-  note?: string
+  note: string
 }

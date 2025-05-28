@@ -18,8 +18,7 @@ const COLLECTION_NAME = "attendances"
 export const AttendanceService = {
   // Create or Update
   createOrUpdateAttendance: async (
-    data: Omit<IAttendance, "id">,
-    isBeautifyDate: boolean = true
+    data: Omit<IAttendance, "id">
   ): Promise<ISuccessResponse<IAttendance> | IErrorResponse> => {
     if (!data.lessonId || !data.studentId || !data.status) {
       return {
@@ -37,8 +36,7 @@ export const AttendanceService = {
 
     const result = await createOrUpdateDocument<Omit<IAttendance, "id">>(
       COLLECTION_NAME,
-      newAttendance,
-      isBeautifyDate
+      newAttendance
     )
 
     if (!result.success) return result as IErrorResponse
@@ -138,6 +136,7 @@ export const AttendanceService = {
   changeStatusAttendance: async (
     id: string,
     status: EAttendanceStatus,
+    note?: string,
     isBeautifyDate: boolean = true
   ): Promise<ISuccessResponse<IAttendance> | IErrorResponse> => {
     const result = await readDocument<IAttendance>(
@@ -159,6 +158,7 @@ export const AttendanceService = {
     const updatedAttendance = {
       ...attendance,
       status,
+      note: note !== undefined ? note : attendance.note,
       createdAt: attendance.createdAt,
       updatedAt: serverTimestamp(),
     }
@@ -171,5 +171,26 @@ export const AttendanceService = {
 
     if (!updateResult.success) return updateResult as IErrorResponse
     return updateResult as ISuccessResponse<IAttendance>
+  },
+
+  // Xóa attendance theo lessonId và studentId
+  deleteByLessonAndStudent: async (
+    lessonId: string,
+    studentId: string
+  ): Promise<ISuccessResponse<null> | IErrorResponse> => {
+    // Lấy tất cả attendance theo lessonId
+    const result = await readDocuments<IAttendance>(COLLECTION_NAME, [])
+    if (!result.success || !result.data) return result as IErrorResponse
+    const found = result.data.find(
+      (a) => a.lessonId === lessonId && a.studentId === studentId
+    )
+    if (!found) {
+      return {
+        success: true,
+        message: "No attendance found to delete",
+        data: null,
+      }
+    }
+    return await deleteDocument(COLLECTION_NAME, found.id)
   },
 }

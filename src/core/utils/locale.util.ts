@@ -1,7 +1,7 @@
 export const getLocale = () => {
-  if (!localStorage) return
+  if (typeof window === "undefined") return
   const locale = localStorage.getItem("locale")
-  return locale
+  return locale || "vi"
 }
 
 export const setLocale = (locale: string) => {
@@ -9,5 +9,5 @@ export const setLocale = (locale: string) => {
 }
 
 export const createLocaleLink = (link: string) => {
-  return `/${getLocale()}/${link}`
+  return `/vi/${link}`
 }
