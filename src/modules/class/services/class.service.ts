@@ -149,14 +149,9 @@ export const ClassService = {
   },
 
   getById: async (
-    id: string,
-    isBeautifyDate: boolean = true
+    id: string
   ): Promise<ISuccessResponse<IClass> | IErrorResponse> => {
-    const result = await readDocument<IClass>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<IClass>(COLLECTION_NAME, id)
     if (!result.success) {
       return {
         success: false,

@@ -31,7 +31,7 @@ export const useTuitionQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         TUITION_QUERY_KEYS.getById
       )
-      return TuitionService.getById(params?.id || "", params?.isBeautifyDate)
+      return TuitionService.getById(params?.id || "")
     },
     enabled: false,
   })
@@ -68,10 +68,9 @@ export const useTuitionQueries = () => {
   const createForStudentMutation = useMutation<
     ISuccessResponse<ITuition> | IErrorResponse,
     Error,
-    { data: Omit<ITuition, "id">; isBeautifyDate?: boolean }
+    { data: Omit<ITuition, "id"> }
   >({
-    mutationFn: ({ data, isBeautifyDate }) =>
-      TuitionService.createForStudent(data, isBeautifyDate),
+    mutationFn: ({ data }) => TuitionService.createForStudent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TUITION_QUERY_KEYS.tuitions })
     },
@@ -81,10 +80,9 @@ export const useTuitionQueries = () => {
   const changeStatusMutation = useMutation<
     ISuccessResponse<ITuition> | IErrorResponse,
     Error,
-    { id: string; status: ETuitionStatus; isBeautifyDate?: boolean }
+    { id: string; status: ETuitionStatus }
   >({
-    mutationFn: ({ id, status, isBeautifyDate }) =>
-      TuitionService.changeStatus(id, status, isBeautifyDate),
+    mutationFn: ({ id, status }) => TuitionService.changeStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TUITION_QUERY_KEYS.tuitions })
     },

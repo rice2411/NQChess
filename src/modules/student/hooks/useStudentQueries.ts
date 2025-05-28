@@ -30,7 +30,7 @@ export const useStudentQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         STUDENT_QUERY_KEYS.getById
       )
-      return StudentService.getById(params?.id || "", params?.isBeautifyDate)
+      return StudentService.getById(params?.id || "")
     },
     enabled: false,
   })

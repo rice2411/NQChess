@@ -27,7 +27,7 @@ export const useUserQueries = () => {
       const params: IGetRequest | undefined =
         queryClient.getQueryData<IGetRequest>(USER_QUERY_KEYS.getById)
 
-      return UserService.getById(params?.id || "", params?.isBeautifyDate)
+      return UserService.getById(params?.id || "")
     },
     enabled: false,
   })
@@ -47,7 +47,7 @@ export const useUserQueries = () => {
 
   // Mutation để tạo/cập nhật user
   const createOrUpdateMutation = useMutation({
-    mutationFn: (data: any) => UserService.createOrUpdater(data, true),
+    mutationFn: (data: any) => UserService.createOrUpdater(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.getAll })
     },

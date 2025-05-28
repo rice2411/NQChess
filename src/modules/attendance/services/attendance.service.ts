@@ -53,14 +53,9 @@ export const AttendanceService = {
   },
 
   getAttendanceById: async (
-    id: string,
-    isBeautifyDate: boolean = true
+    id: string
   ): Promise<ISuccessResponse<IAttendance> | IErrorResponse> => {
-    const result = await readDocument<IAttendance>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<IAttendance>(COLLECTION_NAME, id)
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<IAttendance>
   },
@@ -136,14 +131,9 @@ export const AttendanceService = {
   changeStatusAttendance: async (
     id: string,
     status: EAttendanceStatus,
-    note?: string,
-    isBeautifyDate: boolean = true
+    note?: string
   ): Promise<ISuccessResponse<IAttendance> | IErrorResponse> => {
-    const result = await readDocument<IAttendance>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<IAttendance>(COLLECTION_NAME, id)
     if (!result.success) return result as IErrorResponse
 
     const attendance = result.data
@@ -165,8 +155,7 @@ export const AttendanceService = {
 
     const updateResult = await createOrUpdateDocument<IAttendance>(
       COLLECTION_NAME,
-      updatedAttendance,
-      isBeautifyDate
+      updatedAttendance
     )
 
     if (!updateResult.success) return updateResult as IErrorResponse

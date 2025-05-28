@@ -81,7 +81,6 @@ export default function StudentModal({
             .map((c) => c.trim())
             .filter(Boolean),
         },
-        isBeautifyDate: true,
       },
       {
         onSuccess: (res) => {

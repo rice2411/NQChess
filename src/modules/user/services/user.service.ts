@@ -19,8 +19,7 @@ const COLLECTION_NAME = "users"
 export const UserService = {
   // Create or Update
   createOrUpdater: async (
-    data: Omit<IUser, "id">,
-    isBeautifyDate: boolean = true
+    data: Omit<IUser, "id">
   ): Promise<ISuccessResponse<IUser> | IErrorResponse> => {
     if (!data.username || !data.password || !data.role) {
       return {
@@ -39,8 +38,7 @@ export const UserService = {
 
     const result = await createOrUpdateDocument<Omit<IUser, "id">>(
       COLLECTION_NAME,
-      newUser,
-      isBeautifyDate
+      newUser
     )
 
     if (!result.success) {
@@ -60,7 +58,7 @@ export const UserService = {
 
   // Read
   getAll: async (
-    params: IGetRequest = { isBeautifyDate: true }
+    params: IGetRequest
   ): Promise<ISuccessResponse<IUser[]> | IErrorResponse> => {
     const result = await readDocuments<IUser>(
       COLLECTION_NAME,
@@ -80,14 +78,9 @@ export const UserService = {
   },
 
   getById: async (
-    id: string,
-    isBeautifyDate: boolean = true
+    id: string
   ): Promise<ISuccessResponse<IUser> | IErrorResponse> => {
-    const result = await readDocument<IUser>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<IUser>(COLLECTION_NAME, id)
     if (!result.success) {
       return {
         success: false,

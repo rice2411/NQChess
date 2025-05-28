@@ -26,14 +26,9 @@ export const TuitionService = {
   },
 
   getById: async (
-    id: string,
-    isBeautifyDate: boolean = true
+    id: string
   ): Promise<ISuccessResponse<ITuition> | IErrorResponse> => {
-    const result = await readDocument<ITuition>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<ITuition>(COLLECTION_NAME, id)
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<ITuition>
   },
@@ -104,14 +99,9 @@ export const TuitionService = {
   // Update tuition status
   changeStatus: async (
     id: string,
-    status: ETuitionStatus,
-    isBeautifyDate: boolean = true
+    status: ETuitionStatus
   ): Promise<ISuccessResponse<ITuition> | IErrorResponse> => {
-    const result = await readDocument<ITuition>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<ITuition>(COLLECTION_NAME, id)
     if (!result.success) return result as IErrorResponse
 
     const tuition = result.data
@@ -132,8 +122,7 @@ export const TuitionService = {
 
     const updateResult = await createOrUpdateDocument<ITuition>(
       COLLECTION_NAME,
-      updatedTuition,
-      isBeautifyDate
+      updatedTuition
     )
 
     if (!updateResult.success) return updateResult as IErrorResponse

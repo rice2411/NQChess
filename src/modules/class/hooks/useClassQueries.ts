@@ -30,7 +30,7 @@ export const useClassQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         CLASS_QUERY_KEYS.getById
       )
-      return ClassService.getById(params?.id || "", params?.isBeautifyDate)
+      return ClassService.getById(params?.id || "")
     },
     enabled: false,
   })
@@ -39,10 +39,9 @@ export const useClassQueries = () => {
   const createOrUpdateMutation = useMutation<
     ISuccessResponse<IClass> | IErrorResponse,
     Error,
-    { data: Omit<IClass, "id">; isBeautifyDate: boolean }
+    { data: Omit<IClass, "id"> }
   >({
-    mutationFn: ({ data, isBeautifyDate }) =>
-      ClassService.createOrUpdate(data, isBeautifyDate),
+    mutationFn: ({ data }) => ClassService.createOrUpdate(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEYS.classes })
     },

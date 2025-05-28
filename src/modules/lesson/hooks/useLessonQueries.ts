@@ -31,7 +31,7 @@ export const useLessonQueries = () => {
       const params = queryClient.getQueryData<IGetRequest>(
         LESSON_QUERY_KEYS.getById
       )
-      return LessonService.getById(params?.id || "", params?.isBeautifyDate)
+      return LessonService.getById(params?.id || "")
     },
     enabled: false,
   })

@@ -207,7 +207,6 @@ export default function ClassModal({
     createOrUpdateMutation.mutate(
       {
         data: newClass,
-        isBeautifyDate: true,
       },
       {
         onSuccess: (res) => {

@@ -34,10 +34,7 @@ export const useAttendanceQueries = () => {
         const params = queryClient.getQueryData<IGetRequest>(
           ATTENDANCE_QUERY_KEYS.getById
         )
-        return AttendanceService.getAttendanceById(
-          params?.id || "",
-          params?.isBeautifyDate
-        )
+        return AttendanceService.getAttendanceById(params?.id || "")
       },
       enabled: false,
     }

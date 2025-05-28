@@ -63,14 +63,9 @@ export const StudentService = {
   },
 
   getById: async (
-    id: string,
-    isBeautifyDate: boolean = true
+    id: string
   ): Promise<ISuccessResponse<IStudent> | IErrorResponse> => {
-    const result = await readDocument<IStudent>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<IStudent>(COLLECTION_NAME, id)
     if (!result.success) {
       return {
         success: false,

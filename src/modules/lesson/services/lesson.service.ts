@@ -54,14 +54,9 @@ export const LessonService = {
   },
 
   getById: async (
-    id: string,
-    isBeautifyDate: boolean = true
+    id: string
   ): Promise<ISuccessResponse<ILesson> | IErrorResponse> => {
-    const result = await readDocument<ILesson>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<ILesson>(COLLECTION_NAME, id)
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<ILesson>
   },
@@ -103,14 +98,9 @@ export const LessonService = {
   // Update lesson status
   changeStatus: async (
     id: string,
-    status: ELessonStatus,
-    isBeautifyDate: boolean = true
+    status: ELessonStatus
   ): Promise<ISuccessResponse<ILesson> | IErrorResponse> => {
-    const result = await readDocument<ILesson>(
-      COLLECTION_NAME,
-      id,
-      isBeautifyDate
-    )
+    const result = await readDocument<ILesson>(COLLECTION_NAME, id)
     if (!result.success) return result as IErrorResponse
 
     const lesson = result.data
@@ -131,8 +121,7 @@ export const LessonService = {
 
     const updateResult = await createOrUpdateDocument<ILesson>(
       COLLECTION_NAME,
-      updatedLesson,
-      isBeautifyDate
+      updatedLesson
     )
 
     if (!updateResult.success) return updateResult as IErrorResponse

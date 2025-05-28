@@ -27,8 +27,7 @@ export async function createOrUpdateDocument<
   T extends DocumentData & { id?: string; createdAt?: any; updatedAt?: any }
 >(
   collectionName: string,
-  data: T,
-  isBeautifyDate: boolean = true
+  data: T
 ): Promise<ISuccessResponse<T> | IErrorResponse> {
   // Check if document exists by checking if it has an id
   const isUpdate = "id" in data && data.id
@@ -42,8 +41,8 @@ export async function createOrUpdateDocument<
     // Only set createdAt for new documents
     if (!isUpdate) {
       docData.createdAt = serverTimestamp()
-      if("id" in docData) {
-        delete docData.id;
+      if ("id" in docData) {
+        delete docData.id
       }
     }
 
@@ -64,10 +63,10 @@ export async function createOrUpdateDocument<
       }
     }
 
-    const formattedData = formatFirestoreData(
-      { ...docSnap.data(), id: docSnap.id } as unknown as T,
-      isBeautifyDate
-    )
+    const formattedData = formatFirestoreData({
+      ...docSnap.data(),
+      id: docSnap.id,
+    } as unknown as T)
 
     return {
       success: true,
@@ -91,8 +90,7 @@ export async function createOrUpdateDocument<
 // Read single document
 export async function readDocument<T extends DocumentData>(
   collectionName: string,
-  id: string,
-  isBeautifyDate: boolean = true
+  id: string
 ): Promise<ISuccessResponse<T> | IErrorResponse> {
   if (!id) {
     return {
@@ -114,10 +112,10 @@ export async function readDocument<T extends DocumentData>(
       }
     }
 
-    const formattedData = formatFirestoreData(
-      { ...docSnap.data(), id: docSnap.id } as unknown as T,
-      isBeautifyDate
-    )
+    const formattedData = formatFirestoreData({
+      ...docSnap.data(),
+      id: docSnap.id,
+    } as unknown as T)
 
     return {
       success: true,
@@ -138,22 +136,22 @@ export async function readDocument<T extends DocumentData>(
 export async function readDocuments<T extends DocumentData>(
   collectionName: string,
   constraints: QueryConstraint[] = [],
-  options: IGetRequest = { isBeautifyDate: true }
+  options?: IGetRequest
 ): Promise<ISuccessResponse<T[]> | IErrorResponse> {
   try {
     const queryConstraints = [...constraints]
 
     // Add sorting if specified
-    if (options.sortBy) {
+    if (options?.sortBy) {
       queryConstraints.push(orderBy(options.sortBy, options.sortOrder || "asc"))
     }
     // Add limit if specified
-    if (options.limit) {
+    if (options?.limit) {
       queryConstraints.push(limit(options.limit))
     }
 
     // Add pagination if last document is provided
-    if (options.lastDoc) {
+    if (options?.lastDoc) {
       queryConstraints.push(startAfter(options.lastDoc))
     }
 
@@ -164,15 +162,11 @@ export async function readDocuments<T extends DocumentData>(
       ...doc.data(),
       id: doc.id,
     })) as unknown as T[]
-    const formattedData = formatFirestoreData(
-      documents,
-      options.isBeautifyDate
-    ) as T[]
 
     return {
       success: true,
       message: "Documents retrieved successfully",
-      data: formattedData,
+      data: documents,
     }
   } catch (err) {
     console.error("Error reading documents: ", err)
@@ -188,8 +182,7 @@ export async function readDocuments<T extends DocumentData>(
 export async function updateDocument<T extends DocumentData>(
   collectionName: string,
   id: string,
-  data: Partial<T>,
-  isBeautifyDate: boolean = true
+  data: Partial<T>
 ): Promise<ISuccessResponse<T> | IErrorResponse> {
   try {
     const docRef = doc(db, collectionName, id)
@@ -207,10 +200,10 @@ export async function updateDocument<T extends DocumentData>(
       }
     }
 
-    const formattedData = formatFirestoreData(
-      { ...docSnap.data(), id: docSnap.id } as unknown as T,
-      isBeautifyDate
-    )
+    const formattedData = formatFirestoreData({
+      ...docSnap.data(),
+      id: docSnap.id,
+    } as unknown as T)
 
     return {
       success: true,
