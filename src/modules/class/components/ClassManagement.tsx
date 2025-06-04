@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Users, PlusCircle } from "lucide-react"
+import { Users, PlusCircle, Eye } from "lucide-react"
 import { useClassQueries } from "@/modules/class/hooks/useClassQueries"
 import { IClass } from "@/modules/class/interfaces/class.interface"
 import ManagementBase from "@/core/components/layout/admin/management/ManagementBase"
@@ -16,14 +16,15 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/core/components/ui/alert-dialog"
-import ClassModal from "./ClassModal"
+import ModalModifyClass from "./modal/ModalModifyClass"
 import { EClassStatus } from "../enums/class.enum"
 import toast from "react-hot-toast"
-import StatusBadge from "./StatusBadge"
+import StatusBadge from "./modal/ModalDetailClass/StatusBadge"
 import { formatCurrencyVND } from "@/core/utils/currency.util"
 import { useQueryClient } from "@tanstack/react-query"
 import { CLASS_QUERY_KEYS } from "@/modules/class/constants/classQueryKey"
 import { Button } from "@/core/components/ui/button"
+import ModalDetailClass from "./modal/ModalDetailClass"
 
 const columns = [
   {
@@ -33,7 +34,6 @@ const columns = [
   },
   { key: "name", title: "Tên lớp" },
   { key: "startDate", title: "Ngày bắt đầu" },
-  { key: "endDate", title: "Ngày kết thúc" },
   {
     key: "status",
     title: "Trạng thái",
@@ -51,8 +51,10 @@ export default function ClassManagement() {
   const queryClient = useQueryClient()
   const modal = useModal()
   const confirmModal = useModal()
+  const detailModal = useModal()
   const [editClass, setEditClass] = useState<IClass | null>(null)
   const [classToDelete, setClassToDelete] = useState<IClass | null>(null)
+  const [selectedClass, setSelectedClass] = useState<IClass | null>(null)
 
   useEffect(() => {
     getAllQuery.refetch()
@@ -72,14 +74,14 @@ export default function ClassManagement() {
       icon: <Users />,
       title: "Số lớp đang mở",
       value: classes.filter(
-        (classItem) => classItem.status !== EClassStatus.INACTIVE
+        (classItem) => classItem.status !== EClassStatus.NOT_STARTED
       ).length,
     },
     {
       icon: <Users />,
       title: "Số lớp đã kết thúc",
       value: classes.filter(
-        (classItem) => classItem.status === EClassStatus.INACTIVE
+        (classItem) => classItem.status === EClassStatus.ENDED
       ).length,
     },
   ]
@@ -94,33 +96,15 @@ export default function ClassManagement() {
     confirmModal.open()
   }
 
-  const handleConfirmDelete = () => {
-    if (classToDelete) {
-      deleteMutation.mutate(classToDelete.id, {
-        onSuccess: () => {
-          queryClient.setQueryData(CLASS_QUERY_KEYS.getAll, (oldData: any) => {
-            if (!oldData?.data) return oldData
-            return {
-              ...oldData,
-              data: oldData.data.filter(
-                (item: IClass) => item.id !== classToDelete.id
-              ),
-            }
-          })
-          confirmModal.close()
-          setClassToDelete(null)
-          toast.success("Xóa lớp học thành công")
-        },
-        onError: () => {
-          toast.error("Xóa lớp học thất bại")
-        },
-      })
-    }
+  const handleViewDetail = (classItem: IClass) => {
+    setSelectedClass(classItem)
+    detailModal.open()
   }
 
   const addButton = (
     <Button
-      className="flex items-center gap-2 px-4 py-2 mt-2 ml-0 text-sm font-semibold text-white transition bg-green-500 rounded-full shadow-lg md:ml-auto sm:px-5 hover:bg-green-600 md:mt-0 sm:text-base"
+      variant="primary"
+      className="ml-auto"
       onClick={() => {
         setEditClass(null)
         modal.open()
@@ -144,6 +128,15 @@ export default function ClassManagement() {
           <div className="flex gap-2">
             <Button
               size="sm"
+              variant="info"
+              className="p-2"
+              title="Xem chi tiết"
+              onClick={() => handleViewDetail(row)}
+            >
+              Chi tiết
+            </Button>
+            <Button
+              size="sm"
               variant="secondary"
               className="p-2"
               title="Sửa"
@@ -163,7 +156,7 @@ export default function ClassManagement() {
           </div>
         )}
       />
-      <ClassModal
+      <ModalModifyClass
         open={modal.isOpen}
         onClose={modal.close}
         initialData={editClass}
@@ -199,6 +192,13 @@ export default function ClassManagement() {
           setEditClass(null)
         }}
       />
+      {selectedClass && (
+        <ModalDetailClass
+          open={detailModal.isOpen}
+          onClose={detailModal.close}
+          classData={selectedClass}
+        />
+      )}
       <AlertDialog
         open={confirmModal.isOpen}
         onOpenChange={(v) => !v && confirmModal.close()}
@@ -213,10 +213,34 @@ export default function ClassManagement() {
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmDelete}
-              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (classToDelete) {
+                  deleteMutation.mutate(classToDelete.id, {
+                    onSuccess: () => {
+                      queryClient.setQueryData(
+                        CLASS_QUERY_KEYS.getAll,
+                        (oldData: any) => {
+                          if (!oldData?.data) return oldData
+                          return {
+                            ...oldData,
+                            data: oldData.data.filter(
+                              (item: IClass) => item.id !== classToDelete.id
+                            ),
+                          }
+                        }
+                      )
+                      toast.success("Xóa lớp học thành công!")
+                      confirmModal.close()
+                      setClassToDelete(null)
+                    },
+                    onError: () => {
+                      toast.error("Có lỗi xảy ra khi xóa lớp học!")
+                    },
+                  })
+                }
+              }}
             >
-              {deleteMutation.isPending ? "Đang xóa..." : "Xác nhận"}
+              Xóa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

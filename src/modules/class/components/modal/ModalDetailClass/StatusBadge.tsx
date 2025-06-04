@@ -1,4 +1,5 @@
 import React from "react"
+import { EClassStatus } from "../../../enums/class.enum"
 
 export type ClassStatus =
   | "ACTIVE"
@@ -8,7 +9,7 @@ export type ClassStatus =
   | "FULL"
 
 const STATUS_MAP: Record<
-  ClassStatus,
+  EClassStatus,
   { label: string; bg: string; border: string; text: string }
 > = {
   ACTIVE: {
@@ -17,34 +18,22 @@ const STATUS_MAP: Record<
     border: "border-green-400",
     text: "text-green-700",
   },
-  INACTIVE: {
+  NOT_STARTED: {
     label: "Chưa khai giảng",
     bg: "bg-orange-100",
     border: "border-orange-400",
     text: "text-orange-700",
   },
-  FINISHED: {
+  ENDED: {
     label: "Đã kết thúc",
     bg: "bg-gray-100",
     border: "border-gray-400",
     text: "text-gray-700",
   },
-  CANCELLED: {
-    label: "Đã hủy",
-    bg: "bg-red-100",
-    border: "border-red-400",
-    text: "text-red-700",
-  },
-  FULL: {
-    label: "Đã đầy",
-    bg: "bg-blue-100",
-    border: "border-blue-400",
-    text: "text-blue-700",
-  },
 }
 
 interface StatusBadgeProps {
-  status: ClassStatus
+  status: EClassStatus
   className?: string
 }
 
@@ -52,7 +41,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
   className,
 }) => {
-  const info = STATUS_MAP[status] || STATUS_MAP.FINISHED
+  const info = STATUS_MAP[status] || STATUS_MAP.ENDED
   return (
     <span
       className={`inline-block px-4 py-1 rounded-2xl font-bold text-sm shadow-sm border ${

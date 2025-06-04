@@ -18,6 +18,10 @@ body {
   overflow-x: hidden;
 }
 
+input {
+  user-select: text !important;
+}
+
 /* Fix for Radix UI dropdown portal */
 [data-radix-popper-content-wrapper] {
   position: fixed !important;
