@@ -1,20 +1,12 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
+import { format, parse } from "date-fns"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogFooter,
 } from "@/core/components/ui/dialog"
 import { Button } from "@/core/components/ui/button"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/core/components/ui/tabs"
 import { Alert, AlertDescription } from "@/core/components/ui/alert"
-import { Eye, Calendar, Clock, Users } from "lucide-react"
 import {
   EClassStatus,
   EStudentClassStatus,
@@ -27,7 +19,6 @@ import {
   IStudentClass,
   IClass,
 } from "@/modules/class/interfaces/class.interface"
-import { format, parse } from "date-fns"
 import BasicInfoTab from "./BasicInfoTab"
 import ScheduleTab from "./ScheduleTab"
 import StudentTab from "./StudentTab"
@@ -43,6 +34,10 @@ function getToday() {
 function formatCurrency(value: string) {
   return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
+
+type CustomChangeEvent =
+  | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  | { target: { name: string; value: string } }
 
 export default function ModalModifyClass({
   open,
@@ -138,9 +133,7 @@ export default function ModalModifyClass({
     if (open) getAllStudentsQuery.refetch()
   }, [open])
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: CustomChangeEvent) => {
     const { name, value } = e.target
     if (name === "tuition") {
       setForm((prev) => ({ ...prev, [name]: formatCurrency(value) }))
@@ -160,12 +153,13 @@ export default function ModalModifyClass({
     setSchedules((schs) => schs.filter((_, i) => i !== idx))
 
   // Thêm/xóa học sinh vào lớp
-  const handleAddStudent = (student: IStudent) => {
+  const handleAddStudent = (
+    student: IStudent & { type?: string; session?: string }
+  ) => {
     const baseTuition = Number(form.tuition.replace(/,/g, ""))
+    const type = (student.type as EStudentClassType) || EStudentClassType.FULL
     const studentTuition =
-      selectedStudentType === EStudentClassType.HALF
-        ? baseTuition / 2
-        : baseTuition
+      type === EStudentClassType.HALF ? baseTuition / 2 : baseTuition
 
     setForm((prev) => ({
       ...prev,
@@ -175,11 +169,9 @@ export default function ModalModifyClass({
           studentId: student.id,
           joinDate: new Date(),
           status: EStudentClassStatus.ONLINE,
-          type: selectedStudentType,
+          type,
           session:
-            selectedStudentType === EStudentClassType.HALF
-              ? selectedStudentSession
-              : undefined,
+            type === EStudentClassType.HALF ? student.session : undefined,
           tuition: studentTuition,
         },
       ],
@@ -254,126 +246,93 @@ export default function ModalModifyClass({
   return (
     <>
       <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-        <DialogContent className="w-full bg-white !max-w-2xl transition-all duration-500 ease-in-out">
-          <DialogHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-lg font-medium">
-                {initialData ? "Sửa lớp học" : "Thêm lớp học mới"}
-              </DialogTitle>
-              {initialData && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowDetail(true)}
-                  className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700"
+        <DialogContent className="!fixed !top-1/2 !left-1/2 !-translate-x-1/2 !-translate-y-1/2 z-50 bg-white p-0 rounded-2xl shadow-lg !max-w-11/12 overflow-x-auto max-h-[90vh] overflow-y-auto px-4 md:px-8">
+          {/* Header Figma */}
+          <div className="relative flex flex-col rounded-t-2xl bg-white">
+            <div className="flex items-center gap-4 px-8 pt-8 pb-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary-100">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#6941C6"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-building-2 w-8 h-8"
                 >
-                  <Eye className="w-4 h-4" />
-                  Xem chi tiết
-                </Button>
-              )}
+                  <rect x="3" y="7" width="18" height="13" rx="2" />
+                  <path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+                  <path d="M9 17v2" />
+                  <path d="M15 17v2" />
+                </svg>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xl font-semibold text-gray-900">
+                  {initialData ? "Sửa lớp học" : "Thêm lớp học mới"}
+                </span>
+                <span className="text-sm text-gray-500">
+                  Tạo hoặc chỉnh sửa thông tin lớp học
+                </span>
+              </div>
+              <div className="flex-1" />
             </div>
-          </DialogHeader>
+            <div className="h-px bg-gray-200 w-full" />
+          </div>
+          {/* Super Modal Content - 3 columns */}
           <form
             onSubmit={handleSubmit}
-            className="space-y-6"
+            className="pt-8 pb-0 bg-white"
             autoComplete="off"
           >
-            <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
-                <TabsTrigger
-                  value="basic"
-                  className="data-[state=active]:bg-white data-[state=active]:text-primary-600 data-[state=active]:shadow-sm rounded-md transition-all duration-200"
-                >
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Thông tin cơ bản
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="schedule"
-                  className="data-[state=active]:bg-white data-[state=active]:text-primary-600 data-[state=active]:shadow-sm rounded-md transition-all duration-200"
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Lịch học
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="students"
-                  className="data-[state=active]:bg-white data-[state=active]:text-primary-600 data-[state=active]:shadow-sm rounded-md transition-all duration-200"
-                >
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Học sinh
-                  </div>
-                </TabsTrigger>
-              </TabsList>
-
-              <div className="mt-4 relative">
-                <TabsContent
-                  value="basic"
-                  className="transition-transform duration-300 ease-in-out data-[state=inactive]:opacity-0 data-[state=active]:opacity-100"
-                >
-                  <BasicInfoTab form={form} handleChange={handleChange} />
-                </TabsContent>
-
-                <TabsContent
-                  value="schedule"
-                  className="transition-transform duration-300 ease-in-out data-[state=inactive]:opacity-0 data-[state=active]:opacity-100"
-                >
-                  <ScheduleTab
-                    schedules={schedules}
-                    handleScheduleChange={handleScheduleChange}
-                    addSchedule={addSchedule}
-                    removeSchedule={removeSchedule}
-                    days={days}
-                  />
-                </TabsContent>
-
-                <TabsContent
-                  value="students"
-                  className="transition-transform duration-300 ease-in-out data-[state=inactive]:opacity-0 data-[state=active]:opacity-100"
-                >
-                  <StudentTab
-                    selectedStudentType={selectedStudentType}
-                    setSelectedStudentType={setSelectedStudentType}
-                    selectedStudentSession={selectedStudentSession}
-                    setSelectedStudentSession={setSelectedStudentSession}
-                    studentSearch={studentSearch}
-                    setStudentSearch={setStudentSearch}
-                    filteredStudents={filteredStudents}
-                    selectedStudentIds={selectedStudentIds}
-                    handleAddStudent={handleAddStudent}
-                    form={form}
-                    handleRemoveStudent={handleRemoveStudent}
-                    allStudents={allStudents}
-                    schedules={schedules}
-                  />
-                </TabsContent>
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex-1 flex flex-col gap-6">
+                <BasicInfoTab form={form} handleChange={handleChange} />
+                <ScheduleTab
+                  schedules={schedules}
+                  handleScheduleChange={handleScheduleChange}
+                  addSchedule={addSchedule}
+                  removeSchedule={removeSchedule}
+                  days={days}
+                />
               </div>
-            </Tabs>
-
+              <div className="flex-1 flex flex-col gap-6">
+                <StudentTab
+                  studentSearch={studentSearch}
+                  setStudentSearch={setStudentSearch}
+                  filteredStudents={filteredStudents}
+                  selectedStudentIds={selectedStudentIds}
+                  handleAddStudent={handleAddStudent}
+                  form={form}
+                  handleRemoveStudent={handleRemoveStudent}
+                  allStudents={allStudents}
+                  schedules={schedules}
+                />
+              </div>
+            </div>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
-            <DialogFooter>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={createOrUpdateMutation.isPending}
-                  className="px-6"
-                >
-                  {createOrUpdateMutation.isPending ? "Đang lưu..." : "Lưu"}
-                </Button>
-                <Button type="button" variant="dark" onClick={onClose}>
-                  Hủy
-                </Button>
-              </div>
+            <div className="h-px bg-gray-200 w-full my-6" />
+            <DialogFooter className="flex flex-row justify-end gap-3 px-0 pb-8">
+              <Button
+                type="button"
+                variant="dark"
+                onClick={onClose}
+                className="min-w-[120px]"
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                className="min-w-[120px]"
+                disabled={createOrUpdateMutation.isPending}
+              >
+                {createOrUpdateMutation.isPending ? "Đang lưu..." : "Lưu"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

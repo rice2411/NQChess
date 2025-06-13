@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Users, PlusCircle, Eye } from "lucide-react"
+import { Users, PlusCircle } from "lucide-react"
 import { useClassQueries } from "@/modules/class/hooks/useClassQueries"
 import { IClass } from "@/modules/class/interfaces/class.interface"
 import ManagementBase from "@/core/components/layout/admin/management/ManagementBase"
@@ -19,12 +19,12 @@ import {
 import ModalModifyClass from "./modal/ModalModifyClass"
 import { EClassStatus } from "../enums/class.enum"
 import toast from "react-hot-toast"
-import StatusBadge from "./modal/ModalDetailClass/StatusBadge"
 import { formatCurrencyVND } from "@/core/utils/currency.util"
 import { useQueryClient } from "@tanstack/react-query"
 import { CLASS_QUERY_KEYS } from "@/modules/class/constants/classQueryKey"
 import { Button } from "@/core/components/ui/button"
 import ModalDetailClass from "./modal/ModalDetailClass"
+import { Badge } from "@/core/components/ui/badge"
 
 const columns = [
   {
@@ -45,6 +45,26 @@ const columns = [
     renderCell: (row: IClass) => formatCurrencyVND(row.tuition),
   },
 ]
+
+const StatusBadge = ({ status }: { status: EClassStatus }) => {
+  const statusMap: Record<EClassStatus, { label: string; color: string }> = {
+    [EClassStatus.NOT_STARTED]: {
+      label: "Chưa mở",
+      color: "bg-gray-200 text-gray-700",
+    },
+    [EClassStatus.ACTIVE]: {
+      label: "Đang hoạt động",
+      color: "bg-green-200 text-green-700",
+    },
+    [EClassStatus.ENDED]: {
+      label: "Đã kết thúc",
+      color: "bg-red-200 text-red-700",
+    },
+  }
+  return (
+    <Badge className={statusMap[status].color}>{statusMap[status].label}</Badge>
+  )
+}
 
 export default function ClassManagement() {
   const { getAllQuery, deleteMutation } = useClassQueries()
