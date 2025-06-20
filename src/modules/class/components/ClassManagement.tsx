@@ -65,6 +65,19 @@ const StatusBadge = ({ status }: { status: EClassStatus }) => {
   )
 }
 
+// Tạo dữ liệu mẫu cho lớp học mới
+const createNewClassData = (): IClass => ({
+  id: "",
+  name: "",
+  startDate: new Date().toISOString().split('T')[0], // Ngày hôm nay
+  status: EClassStatus.NOT_STARTED,
+  tuition: 0,
+  schedules: [],
+  students: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+})
+
 export default function ClassManagement() {
   const { getAllQuery, deleteMutation } = useClassQueries()
   const queryClient = useQueryClient()
@@ -72,6 +85,7 @@ export default function ClassManagement() {
   const detailModal = useModal()
   const [classToDelete, setClassToDelete] = useState<IClass | null>(null)
   const [selectedClass, setSelectedClass] = useState<IClass | null>(null)
+  const [isAddingNew, setIsAddingNew] = useState(false)
 
   useEffect(() => {
     getAllQuery.refetch()
@@ -110,25 +124,68 @@ export default function ClassManagement() {
 
   const handleViewDetail = (classItem: IClass) => {
     setSelectedClass(classItem)
+    setIsAddingNew(false)
+    detailModal.open()
+  }
+
+  const handleAddNew = () => {
+    setSelectedClass(createNewClassData())
+    setIsAddingNew(true)
     detailModal.open()
   }
 
   const handleSaveSuccess = (updatedClass: IClass) => {
-    queryClient.setQueryData(
-      CLASS_QUERY_KEYS.getAll,
-      (oldData: any) => {
-        if (!oldData?.data) return oldData
-        return {
-          ...oldData,
-          data: oldData.data.map((item: IClass) =>
-            item.id === updatedClass.id ? updatedClass : item
-          ),
+    if (isAddingNew) {
+      // Thêm lớp mới vào danh sách
+      queryClient.setQueryData(
+        CLASS_QUERY_KEYS.getAll,
+        (oldData: any) => {
+          if (!oldData?.data) return oldData
+          return {
+            ...oldData,
+            data: [...oldData.data, updatedClass],
+          }
         }
-      }
-    )
+      )
+      toast.success("Thêm lớp học thành công!")
+    } else {
+      // Cập nhật lớp hiện có
+      queryClient.setQueryData(
+        CLASS_QUERY_KEYS.getAll,
+        (oldData: any) => {
+          if (!oldData?.data) return oldData
+          return {
+            ...oldData,
+            data: oldData.data.map((item: IClass) =>
+              item.id === updatedClass.id ? updatedClass : item
+            ),
+          }
+        }
+      )
+      toast.success("Cập nhật lớp học thành công!")
+    }
+    
+    // Reset state
+    setIsAddingNew(false)
+    setSelectedClass(null)
   }
 
-  const addButton = null
+  const handleModalClose = () => {
+    setIsAddingNew(false)
+    setSelectedClass(null)
+    detailModal.close()
+  }
+
+ const addButton = (
+    <Button
+      variant="primary"
+      className="ml-auto"
+      onClick={handleAddNew}
+    >
+      <PlusCircle className="w-5 h-5" />
+      Thêm lớp học
+    </Button>
+  )
 
   return (
     <>
@@ -165,9 +222,10 @@ export default function ClassManagement() {
       {selectedClass && (
         <ModalDetailClass
           open={detailModal.isOpen}
-          onClose={detailModal.close}
+          onClose={handleModalClose}
           classData={selectedClass}
           onSaveSuccess={handleSaveSuccess}
+          isAddingNew={isAddingNew}
         />
       )}
       <AlertDialog

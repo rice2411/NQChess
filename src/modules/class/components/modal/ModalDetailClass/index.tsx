@@ -57,6 +57,7 @@ interface ModalDetailClassProps {
   onClose: () => void
   classData: IClass
   onSaveSuccess?: (updatedClass: IClass) => void
+  isAddingNew?: boolean
 }
 
 const statusMap: Record<EClassStatus, { label: string; color: string }> = {
@@ -90,6 +91,7 @@ const ModalDetailClass: React.FC<ModalDetailClassProps> = ({
   onClose,
   classData,
   onSaveSuccess,
+  isAddingNew,
 }) => {
   const [tab, setTab] = useState<"info" | "schedule" | "students">("info")
   const [isEditing, setIsEditing] = useState(false)
@@ -122,11 +124,15 @@ const ModalDetailClass: React.FC<ModalDetailClassProps> = ({
         return match ? { start: match[1], end: match[2], day: match[3] } : { start: "", end: "", day: daysOfWeek[0] }
       })
       setEditableSchedules(parsedSchedules.length > 0 ? parsedSchedules : [{ start: "", end: "", day: daysOfWeek[0] }])
+      
+      if (isAddingNew) {
+        setIsEditing(true)
+      }
     } else {
       setIsEditing(false)
       setTab("info")
     }
-  }, [classData, open])
+  }, [classData, open, isAddingNew])
 
   useEffect(() => {
     if (open && isEditing) {
@@ -646,9 +652,14 @@ const ModalDetailClass: React.FC<ModalDetailClassProps> = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="min-w-4xl w-full h-min-content">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Chi tiết lớp học: {classData.name}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            {isAddingNew ? "Thêm lớp học mới" : `Chi tiết lớp học: ${classData.name}`}
+          </DialogTitle>
           <DialogDescription>
-            Xem và chỉnh sửa thông tin lớp học, lịch học và danh sách học sinh.
+            {isAddingNew 
+              ? "Nhập thông tin để tạo lớp học mới."
+              : "Xem và chỉnh sửa thông tin lớp học, lịch học và danh sách học sinh."
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -664,21 +675,24 @@ const ModalDetailClass: React.FC<ModalDetailClassProps> = ({
         
         <DialogFooter className="mt-6">
           <div className="flex justify-between w-full">
-            <Button
-              variant={isEditing ? "light" : "secondary"}
-              onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center gap-2"
-            >
-              <Pencil className="w-4 h-4" />
-              {isEditing ? "Hủy" : "Chỉnh sửa"}
-            </Button>
+            {!isAddingNew && (
+              <Button
+                variant={isEditing ? "light" : "secondary"}
+                onClick={() => setIsEditing(!isEditing)}
+                className="flex items-center gap-2"
+              >
+                <Pencil className="w-4 h-4" />
+                {isEditing ? "Hủy" : "Chỉnh sửa"}
+              </Button>
+            )}
             {isEditing && (
               <Button
                 variant="primary"
                 onClick={handleSave}
                 disabled={createOrUpdateMutation.isPending}
+                className={isAddingNew ? "ml-auto" : ""}
               >
-                {createOrUpdateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                {createOrUpdateMutation.isPending ? "Đang lưu..." : (isAddingNew ? "Tạo lớp học" : "Lưu thay đổi")}
               </Button>
             )}
           </div>

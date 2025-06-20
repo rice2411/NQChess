@@ -1,11 +1,8 @@
 "use client"
 
 import {
-  ClipboardCheck,
   School,
-  User,
   Users,
-  Wallet,
   Menu,
   Settings,
   LogOut,
@@ -23,13 +20,13 @@ export default function SidebarAdmin() {
   const pathname = usePathname().split("/")[2]
   const systemItems = [
     { icon: <Users />, key: "students" },
-    {
-      icon: <ClipboardCheck />,
-      key: "attendances",
-    },
+    // {
+    //   icon: <ClipboardCheck />,
+    //   key: "attendances",
+    // },
     { icon: <School />, key: "classes" },
-    { icon: <Wallet />, key: "tuitions" },
-    { icon: <User />, key: "users" },
+    // { icon: <Wallet />, key: "tuitions" },
+    // { icon: <User />, key: "users" },
   ]
   const settingItems = [
     { icon: <Settings />, key: "settings" },
