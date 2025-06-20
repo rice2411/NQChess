@@ -7,6 +7,7 @@ import {
 
 export interface IStudentClass {
   studentId: string
+  fullName?: string
   joinDate: Date
   status: EStudentClassStatus
   type: EStudentClassType // Loại học (full/nửa buổi)

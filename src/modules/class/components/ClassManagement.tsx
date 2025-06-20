@@ -16,7 +16,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/core/components/ui/alert-dialog"
-import ModalModifyClass from "./modal/ModalModifyClass"
 import { EClassStatus } from "../enums/class.enum"
 import toast from "react-hot-toast"
 import { formatCurrencyVND } from "@/core/utils/currency.util"
@@ -69,10 +68,8 @@ const StatusBadge = ({ status }: { status: EClassStatus }) => {
 export default function ClassManagement() {
   const { getAllQuery, deleteMutation } = useClassQueries()
   const queryClient = useQueryClient()
-  const modal = useModal()
   const confirmModal = useModal()
   const detailModal = useModal()
-  const [editClass, setEditClass] = useState<IClass | null>(null)
   const [classToDelete, setClassToDelete] = useState<IClass | null>(null)
   const [selectedClass, setSelectedClass] = useState<IClass | null>(null)
 
@@ -106,11 +103,6 @@ export default function ClassManagement() {
     },
   ]
 
-  const handleEdit = (classItem: IClass) => {
-    setEditClass(classItem)
-    modal.open()
-  }
-
   const handleDelete = (classItem: IClass) => {
     setClassToDelete(classItem)
     confirmModal.open()
@@ -121,19 +113,22 @@ export default function ClassManagement() {
     detailModal.open()
   }
 
-  const addButton = (
-    <Button
-      variant="primary"
-      className="ml-auto"
-      onClick={() => {
-        setEditClass(null)
-        modal.open()
-      }}
-    >
-      <PlusCircle className="w-5 h-5" />
-      Thêm lớp học
-    </Button>
-  )
+  const handleSaveSuccess = (updatedClass: IClass) => {
+    queryClient.setQueryData(
+      CLASS_QUERY_KEYS.getAll,
+      (oldData: any) => {
+        if (!oldData?.data) return oldData
+        return {
+          ...oldData,
+          data: oldData.data.map((item: IClass) =>
+            item.id === updatedClass.id ? updatedClass : item
+          ),
+        }
+      }
+    )
+  }
+
+  const addButton = null
 
   return (
     <>
@@ -157,15 +152,6 @@ export default function ClassManagement() {
             </Button>
             <Button
               size="sm"
-              variant="secondary"
-              className="p-2"
-              title="Sửa"
-              onClick={() => handleEdit(row)}
-            >
-              Chỉnh sửa
-            </Button>
-            <Button
-              size="sm"
               variant="danger"
               className="p-2"
               title="Xóa"
@@ -176,47 +162,12 @@ export default function ClassManagement() {
           </div>
         )}
       />
-      <ModalModifyClass
-        open={modal.isOpen}
-        onClose={modal.close}
-        initialData={editClass}
-        onSave={(newClass) => {
-          if (editClass && editClass.id) {
-            // Sửa
-            queryClient.setQueryData(
-              CLASS_QUERY_KEYS.getAll,
-              (oldData: any) => {
-                if (!oldData?.data) return oldData
-                return {
-                  ...oldData,
-                  data: oldData.data.map((item: IClass) =>
-                    item.id === newClass.id ? newClass : item
-                  ),
-                }
-              }
-            )
-          } else {
-            // Thêm
-            queryClient.setQueryData(
-              CLASS_QUERY_KEYS.getAll,
-              (oldData: any) => {
-                if (!oldData?.data) return oldData
-                return {
-                  ...oldData,
-                  data: [newClass, ...oldData.data],
-                }
-              }
-            )
-          }
-          modal.close()
-          setEditClass(null)
-        }}
-      />
       {selectedClass && (
         <ModalDetailClass
           open={detailModal.isOpen}
           onClose={detailModal.close}
           classData={selectedClass}
+          onSaveSuccess={handleSaveSuccess}
         />
       )}
       <AlertDialog

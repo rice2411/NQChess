@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useMemo, useRef } from "react"
-import { Plus, Search } from "lucide-react"
+import React, { useState, useMemo, useRef, useEffect } from "react"
+import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/core/components/ui/button"
 import { Input } from "@/core/components/ui/input"
 import type { BaseTableProps } from "./BaseTable.types"
@@ -15,6 +15,9 @@ export default function BaseTable<T extends { id: string | number }>({
   isLoading,
   isError,
   filters = [],
+  itemsPerPage = 10,
+  searchPlaceholder = "Tìm kiếm...",
+  searchKeys,
 }: BaseTableProps<T>) {
   const [search, setSearch] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
@@ -22,17 +25,22 @@ export default function BaseTable<T extends { id: string | number }>({
     Record<string, any>
   >({})
   const dropdownRef = useRef<any>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const allColumns = renderAction
-    ? [
-        ...columns,
-        {
-          key: "actions",
-          title: "Tùy chọn",
-          renderCell: renderAction,
-        },
-      ]
-    : columns
+  const allColumns = useMemo(
+    () =>
+      renderAction
+        ? [
+            ...columns,
+            {
+              key: "actions",
+              title: "Tùy chọn",
+              renderCell: renderAction,
+            },
+          ]
+        : columns,
+    [columns, renderAction]
+  )
 
   // Lọc data theo search và filter
   const filteredData = useMemo(() => {
@@ -54,23 +62,78 @@ export default function BaseTable<T extends { id: string | number }>({
         })
       }
     })
+
     // Lọc theo search toàn cục
     if (!search.trim()) return result
     const lowerSearch = search.toLowerCase()
+
+    const keysToSearch = searchKeys || allColumns.map((c) => c.key as keyof T)
+
     return result.filter((row) =>
-      allColumns.some((col) => {
-        const value = row[col.key as keyof T]
+      keysToSearch.some((key) => {
+        const value = row[key]
         if (typeof value === "string" || typeof value === "number") {
           return String(value).toLowerCase().includes(lowerSearch)
         }
         return false
       })
     )
-  }, [search, data, allColumns, filters, filterValues])
+  }, [search, data, allColumns, filters, filterValues, searchKeys])
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentData = useMemo(
+    () => filteredData.slice(startIndex, endIndex),
+    [filteredData, startIndex, endIndex]
+  )
+
+  // Reset page khi search hoặc filter thay đổi
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, filterValues])
 
   // Khi mở dropdown, đồng bộ pendingFilterValues với filterValues
   const handleOpenChange = (open: boolean) => {
     if (open) setPendingFilterValues(filterValues)
+  }
+
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxPagesToShow = 5
+    const halfPagesToShow = Math.floor(maxPagesToShow / 2)
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else if (currentPage <= halfPagesToShow) {
+      for (let i = 1; i <= maxPagesToShow; i++) {
+        pageNumbers.push(i)
+      }
+      pageNumbers.push("...")
+      pageNumbers.push(totalPages)
+    } else if (currentPage > totalPages - halfPagesToShow) {
+      pageNumbers.push(1)
+      pageNumbers.push("...")
+      for (let i = totalPages - maxPagesToShow + 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      pageNumbers.push(1)
+      pageNumbers.push("...")
+      for (
+        let i = currentPage - halfPagesToShow;
+        i <= currentPage + halfPagesToShow;
+        i++
+      ) {
+        pageNumbers.push(i)
+      }
+      pageNumbers.push("...")
+      pageNumbers.push(totalPages)
+    }
+    return pageNumbers
   }
 
   return (
@@ -80,7 +143,7 @@ export default function BaseTable<T extends { id: string | number }>({
           <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
           <Input
             type="text"
-            placeholder="Tìm kiếm..."
+            placeholder={searchPlaceholder}
             className="py-2 pl-10 pr-4 "
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -97,13 +160,8 @@ export default function BaseTable<T extends { id: string | number }>({
           />
         )}
 
-        {addButton ? (
+        {addButton && (
           addButton
-        ) : (
-          <Button variant="primary" size="sm">
-            <Plus className="w-5 h-5" />
-            Thêm mới
-          </Button>
         )}
       </div>
 
@@ -144,7 +202,7 @@ export default function BaseTable<T extends { id: string | number }>({
                   Lỗi tải dữ liệu
                 </td>
               </tr>
-            ) : filteredData.length === 0 ? (
+            ) : currentData.length === 0 ? (
               <tr>
                 <td
                   colSpan={allColumns.length}
@@ -154,7 +212,7 @@ export default function BaseTable<T extends { id: string | number }>({
                 </td>
               </tr>
             ) : (
-              filteredData.map((row, rowIndex) => (
+              currentData.map((row, rowIndex) => (
                 <tr
                   key={row.id}
                   className="transition border-b last:border-b-0 hover:bg-primary-50/60 group"
@@ -165,7 +223,7 @@ export default function BaseTable<T extends { id: string | number }>({
                       className="px-3 py-3 sm:py-4 sm:px-5"
                     >
                       {col.renderCell
-                        ? col.renderCell(row, rowIndex)
+                        ? col.renderCell(row, startIndex + rowIndex)
                         : (row[col.key as keyof T] as React.ReactNode)}
                     </td>
                   ))}
@@ -175,6 +233,56 @@ export default function BaseTable<T extends { id: string | number }>({
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-gray-700">
+            Hiển thị {startIndex + 1} đến{" "}
+            {Math.min(endIndex, filteredData.length)} trong tổng số{" "}
+            {filteredData.length} mục
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="light"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Trước
+            </Button>
+            <div className="flex items-center gap-1">
+              {getPageNumbers().map((page, index) =>
+                page === "..." ? (
+                  <span key={index} className="px-2 py-1">
+                    ...
+                  </span>
+                ) : (
+                  <Button
+                    key={index}
+                    variant={currentPage === page ? "primary" : "light"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page as number)}
+                    className="w-8 h-8 p-0"
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
+            </div>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+            >
+              Sau
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

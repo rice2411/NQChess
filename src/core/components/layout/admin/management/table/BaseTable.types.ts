@@ -20,4 +20,7 @@ export interface BaseTableProps<T> {
   isLoading?: boolean
   isError?: boolean
   filters?: FilterOption[]
+  itemsPerPage?: number
+  searchPlaceholder?: string
+  searchKeys?: (keyof T)[]
 }

@@ -39,7 +39,7 @@ interface StudentTabProps {
   schedules: { start: string; end: string; day: string }[]
 }
 
-export default function StudentTab({
+export default function StudentTabForEditing({
   studentSearch,
   setStudentSearch,
   filteredStudents,
@@ -231,4 +231,4 @@ export default function StudentTab({
       </div>
     </form>
   )
-}
+} 

@@ -11,3 +11,11 @@ export function formatCurrencyVND(
   const formatted = number.toLocaleString("vi-VN")
   return withSuffix ? `${formatted} đ` : formatted
 }
+
+export function formatCurrencyString(value: string): string {
+  if (!value) return ""
+  // Remove all non-digit characters
+  const numberValue = value.replace(/\D/g, "")
+  // Format with commas
+  return numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}

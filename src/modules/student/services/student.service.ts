@@ -9,7 +9,7 @@ import {
   IErrorResponse,
   ISuccessResponse,
 } from "@/core/types/api/response.interface"
-import { serverTimestamp } from "firebase/firestore"
+import { serverTimestamp, where, documentId } from "firebase/firestore"
 import { EGender } from "@/modules/student/enum/student.enum"
 import { IGetRequest } from "@/core/types/api/request.interface"
 import { StudentValidator } from "../validators/student.validator"
@@ -29,7 +29,6 @@ export const StudentService = {
       ...data,
       gender: data.gender || EGender.MALE,
       avatar: data.avatar || "",
-      classes: data.classes || [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
@@ -58,6 +57,23 @@ export const StudentService = {
     params: IGetRequest
   ): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
     const result = await readDocuments<IStudent>(COLLECTION_NAME, [], params)
+    if (!result.success) return result as IErrorResponse
+    return result as ISuccessResponse<IStudent[]>
+  },
+
+  getByIds: async (
+    ids: string[]
+  ): Promise<ISuccessResponse<IStudent[]> | IErrorResponse> => {
+    if (!ids || ids.length === 0) {
+      return {
+        success: true,
+        data: [],
+        message: "No IDs provided.",
+      }
+    }
+    const result = await readDocuments<IStudent>(COLLECTION_NAME, [
+      where(documentId(), "in", ids),
+    ])
     if (!result.success) return result as IErrorResponse
     return result as ISuccessResponse<IStudent[]>
   },

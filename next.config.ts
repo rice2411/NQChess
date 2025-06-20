@@ -17,6 +17,18 @@ const nextConfig = {
   analyticsId: process.env.NEXT_PUBLIC_ANALYTICS_ID,
   optimizeFonts: true,
   outputFileTracing: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+    ],
+  },
 }
 
 const config = withPWA(nextConfig) as NextConfig

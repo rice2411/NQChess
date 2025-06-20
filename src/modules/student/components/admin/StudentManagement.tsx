@@ -20,9 +20,12 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { STUDENT_QUERY_KEYS } from "@/modules/student/constants/studentQueryKey"
 import { Button } from "@/core/components/ui/button"
+import { Avatar } from "@/core/components/ui/avatar"
+import Image from "next/image"
 
 export default function StudentManagement() {
   const { getAllQuery, deleteMutation } = useStudentQueries()
+  const { refetch } = getAllQuery
   const queryClient = useQueryClient()
   const modal = useModal()
   const [editStudent, setEditStudent] = useState<IStudent | null>(null)
@@ -30,8 +33,8 @@ export default function StudentManagement() {
   const [studentToDelete, setStudentToDelete] = useState<IStudent | null>(null)
 
   useEffect(() => {
-    getAllQuery.refetch()
-  }, [])
+    refetch()
+  }, [refetch])
 
   const students = getAllQuery.data?.success ? getAllQuery.data.data || [] : []
   const isLoading = getAllQuery.isLoading || getAllQuery.isFetching
@@ -99,6 +102,7 @@ export default function StudentManagement() {
   return (
     <>
       <ManagementBase
+        title="Quản lý học sinh"
         statistics={[
           {
             icon: <User />,
@@ -108,7 +112,7 @@ export default function StudentManagement() {
           {
             icon: <UserMinus />,
             title: "Học sinh chưa có lớp",
-            value: students.filter((student) => !student.classes).length,
+            value: students.length,
           },
           {
             icon: <UserRoundCheck />,
@@ -128,6 +132,27 @@ export default function StudentManagement() {
             key: "STT",
             title: "STT",
             renderCell: (_row: IStudent, index: number) => index + 1,
+          },
+          {
+            key: "avatar",
+            title: "Ảnh đại diện",
+            renderCell: (row: IStudent) => (
+              <Avatar className="w-10 h-10">
+                {row.avatar ? (
+                  <Image
+                    src={row.avatar}
+                    alt={row.fullName}
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-semibold text-white bg-gray-500 flex items-center justify-center w-full h-full">
+                    {row.fullName?.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </Avatar>
+            ),
           },
           { key: "fullName", title: "Tên học sinh" },
           { key: "phoneNumber", title: "Số điện thoại" },
@@ -179,24 +204,9 @@ export default function StudentManagement() {
             </Button>
           </div>
         )}
-        filters={[
-          {
-            key: "gender",
-            label: "Giới tính",
-            type: "select",
-            options: [
-              { label: "Tất cả", value: "" },
-              { label: "Nam", value: "male" },
-              { label: "Nữ", value: "female" },
-              { label: "Khác", value: "other" },
-            ],
-          },
-          {
-            key: "classes",
-            label: "Lớp",
-            type: "text",
-          },
-        ]}
+        itemsPerPage={20}
+        searchPlaceholder="Tìm kiếm theo tên và số điện thoại"
+        searchKeys={["fullName", "phoneNumber"]}
       />
       <StudentModal
         open={modal.isOpen}

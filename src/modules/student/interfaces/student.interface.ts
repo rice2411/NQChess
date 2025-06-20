@@ -7,5 +7,4 @@ export interface IStudent extends IBaseEntity {
   dateOfBirth: string
   avatar: string
   gender: EGender
-  classes: string[]
 }

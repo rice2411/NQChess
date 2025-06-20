@@ -23,6 +23,14 @@ export const useStudentQueries = () => {
     enabled: false,
   })
 
+  // Query để lấy học sinh theo danh sách ID
+  const getByIdsQuery = (ids: string[]) =>
+    useQuery<ISuccessResponse<IStudent[]> | IErrorResponse>({
+      queryKey: [STUDENT_QUERY_KEYS.getByIds, ids],
+      queryFn: () => StudentService.getByIds(ids),
+      enabled: !!ids && ids.length > 0,
+    })
+
   // Query để lấy học sinh theo ID
   const getByIdQuery = useQuery<ISuccessResponse<IStudent> | IErrorResponse>({
     queryKey: STUDENT_QUERY_KEYS.getById,
@@ -85,6 +93,7 @@ export const useStudentQueries = () => {
   return {
     getAllQuery,
     getByIdQuery,
+    getByIdsQuery,
     absoluteSearchQuery,
     createOrUpdateMutation,
     deleteMutation,

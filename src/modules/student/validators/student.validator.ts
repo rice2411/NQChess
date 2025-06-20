@@ -15,8 +15,6 @@ export class StudentValidator extends BaseValidator {
     // Chuyển đổi thành Date object
     const date = new Date(dob) // month - 1 vì tháng trong JS bắt đầu từ 0
 
-
-
     // Kiểm tra ngày phải trong quá khứ
     const now = new Date()
     return  date < now
@@ -28,10 +26,6 @@ export class StudentValidator extends BaseValidator {
 
   validateGender(gender: string): boolean {
     return Object.values(EGender).includes(gender as EGender)
-  }
-
-  validateClasses(classes: string[]): boolean {
-    return this.validateArrayOfStrings(classes)
   }
 
   validateAvatar(avatar: string): boolean {
@@ -88,14 +82,6 @@ export class StudentValidator extends BaseValidator {
       )
     }
 
-    // Validate classes if provided
-    if (data.classes && !this.validateClasses(data.classes)) {
-      return this.createErrorResponse(
-        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_CLASSES,
-        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_CLASSES
-      )
-    }
-
     // Validate avatar if provided
     if (data.avatar && !this.validateAvatar(data.avatar)) {
       return this.createErrorResponse(
@@ -133,13 +119,6 @@ export class StudentValidator extends BaseValidator {
       return this.createErrorResponse(
         STUDENT_MESSAGE.VALIDATION.CODES.INVALID_GENDER,
         STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_GENDER
-      )
-    }
-
-    if (data.classes && !this.validateClasses(data.classes)) {
-      return this.createErrorResponse(
-        STUDENT_MESSAGE.VALIDATION.CODES.INVALID_CLASSES,
-        STUDENT_MESSAGE.VALIDATION.MESSAGES.INVALID_CLASSES
       )
     }
 

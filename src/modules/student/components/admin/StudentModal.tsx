@@ -11,7 +11,10 @@ import { EGender } from "@/modules/student/enum/student.enum"
 import { Input } from "@/core/components/ui/input"
 import { Button } from "@/core/components/ui/button"
 import { Label } from "@/core/components/ui/label"
+import { Avatar } from "@/core/components/ui/avatar"
+import { Upload, X } from "lucide-react"
 import toast from "react-hot-toast"
+import { StringValidator } from "@/core/validators/string.validator"
 
 export default function StudentModal({
   open,
@@ -31,9 +34,10 @@ export default function StudentModal({
     dateOfBirth: "",
     avatar: "",
     gender: EGender.MALE,
-    classes: "",
   })
   const [error, setError] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (initialData) {
@@ -43,7 +47,6 @@ export default function StudentModal({
         dateOfBirth: initialData.dateOfBirth || "",
         avatar: initialData.avatar || "",
         gender: initialData.gender || EGender.MALE,
-        classes: initialData.classes ? initialData.classes.join(", ") : "",
       })
     } else {
       setForm({
@@ -52,34 +55,145 @@ export default function StudentModal({
         dateOfBirth: "",
         avatar: "",
         gender: EGender.MALE,
-        classes: "",
       })
     }
+    setFieldErrors({})
   }, [initialData, open])
+
+  const validateField = (name: string, value: string) => {
+    const errors: Record<string, string> = {}
+    
+    if (name === 'phoneNumber' && value) {
+      const stringValidator = new StringValidator()
+      if (!stringValidator.validatePhoneNumber(value)) {
+        errors.phoneNumber = 'Số điện thoại phải có 10 chữ số'
+      }
+    }
+    
+    if (name === 'dateOfBirth' && value) {
+      const selectedDate = new Date(value)
+      const today = new Date()
+      const minDate = new Date('1900-01-01')
+      
+      if (selectedDate > today) {
+        errors.dateOfBirth = 'Ngày sinh không thể là ngày trong tương lai'
+      } else if (selectedDate < minDate) {
+        errors.dateOfBirth = 'Ngày sinh không hợp lệ'
+      }
+    }
+    
+    if (name === 'fullName' && value) {
+      if (value.length < 2) {
+        errors.fullName = 'Họ tên phải có ít nhất 2 ký tự'
+      } else if (value.length > 50) {
+        errors.fullName = 'Họ tên không được vượt quá 50 ký tự'
+      }
+    }
+    
+    return errors
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    const errors = validateField(name, value)
+    setFieldErrors(prev => ({ ...prev, ...errors }))
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file ảnh hợp lệ')
+      return
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Kích thước file không được vượt quá 5MB')
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const result = await response.json()
+      setForm(prev => ({ ...prev, avatar: result.secure_url }))
+      toast.success('Upload ảnh thành công!')
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Upload ảnh thất bại, vui lòng thử lại!')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleRemoveAvatar = () => {
+    setForm(prev => ({ ...prev, avatar: '' }))
   }
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     setError(null)
-    if (!form.fullName || !form.phoneNumber || !form.dateOfBirth) {
-      setError("Vui lòng nhập đầy đủ thông tin bắt buộc.")
+    
+    // Validate all fields
+    const allErrors: Record<string, string> = {}
+    
+    if (!form.fullName) {
+      allErrors.fullName = 'Họ tên là bắt buộc'
+    } else {
+      const nameErrors = validateField('fullName', form.fullName)
+      Object.assign(allErrors, nameErrors)
+    }
+    
+    if (!form.phoneNumber) {
+      allErrors.phoneNumber = 'Số điện thoại là bắt buộc'
+    } else {
+      const phoneErrors = validateField('phoneNumber', form.phoneNumber)
+      Object.assign(allErrors, phoneErrors)
+    }
+    
+    if (!form.dateOfBirth) {
+      allErrors.dateOfBirth = 'Ngày sinh là bắt buộc'
+    } else {
+      const dateErrors = validateField('dateOfBirth', form.dateOfBirth)
+      Object.assign(allErrors, dateErrors)
+    }
+    
+    if (Object.keys(allErrors).length > 0) {
+      setFieldErrors(allErrors)
       return
     }
+    
     createOrUpdateMutation.mutate(
       {
         data: {
           ...form,
           id: initialData?.id,
-          classes: form.classes
-            .split(",")
-            .map((c) => c.trim())
-            .filter(Boolean),
         },
       },
       {
@@ -94,7 +208,6 @@ export default function StudentModal({
               dateOfBirth: "",
               avatar: "",
               gender: EGender.MALE,
-              classes: "",
             })
             toast.success(
               initialData
@@ -112,7 +225,7 @@ export default function StudentModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {initialData ? "Sửa học sinh" : "Thêm học sinh mới"}
@@ -133,9 +246,15 @@ export default function StudentModal({
               placeholder="Họ tên"
               value={form.fullName}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
-              className="rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400"
+              className={`rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400 ${
+                fieldErrors.fullName ? 'border-red-500' : ''
+              }`}
             />
+            {fieldErrors.fullName && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.fullName}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="phoneNumber" className="block mb-1 font-bold">
@@ -147,9 +266,15 @@ export default function StudentModal({
               placeholder="Số điện thoại"
               value={form.phoneNumber}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
-              className="rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400"
+              className={`rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400 ${
+                fieldErrors.phoneNumber ? 'border-red-500' : ''
+              }`}
             />
+            {fieldErrors.phoneNumber && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.phoneNumber}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="dateOfBirth" className="block mb-1 font-bold">
@@ -162,22 +287,15 @@ export default function StudentModal({
               placeholder="Ngày sinh"
               value={form.dateOfBirth}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
-              className="rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400"
+              className={`rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400 ${
+                fieldErrors.dateOfBirth ? 'border-red-500' : ''
+              }`}
             />
-          </div>
-          <div>
-            <Label htmlFor="avatar" className="block mb-1 font-bold">
-              Link ảnh đại diện
-            </Label>
-            <Input
-              id="avatar"
-              name="avatar"
-              placeholder="Link ảnh đại diện"
-              value={form.avatar}
-              onChange={handleChange}
-              className="rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400"
-            />
+            {fieldErrors.dateOfBirth && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.dateOfBirth}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="gender" className="block mb-1 font-bold">
@@ -195,18 +313,50 @@ export default function StudentModal({
               <option value={EGender.OTHER}>Khác</option>
             </select>
           </div>
-          <div>
-            <Label htmlFor="classes" className="block mb-1 font-bold">
-              Lớp (cách nhau bởi dấu phẩy)
+          <div className="sm:col-span-2">
+            <Label className="block mb-1 font-bold">
+              Ảnh đại diện
             </Label>
-            <Input
-              id="classes"
-              name="classes"
-              placeholder="VD: 10A1, 10A2"
-              value={form.classes}
-              onChange={handleChange}
-              className="rounded-lg shadow-sm focus:ring-2 focus:ring-primary-400"
-            />
+            <div className="flex items-center gap-4">
+              {form.avatar ? (
+                <div className="relative">
+                  <Avatar className="w-20 h-20">
+                    <img src={form.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  </Avatar>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
+                    onClick={handleRemoveAvatar}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-gray-400" />
+                </div>
+              )}
+              <div className="flex-1">
+                <Label
+                  className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-black rounded-lg hover:bg-primary-600 transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  {isUploading ? "Đang upload..." : "Chọn ảnh"}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                    className="hidden"
+                  />
+                </Label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Hỗ trợ: JPG, PNG, WebP. Tối đa 5MB
+                </p>
+              </div>
+            </div>
           </div>
           {error && (
             <div className="col-span-1 mt-2 text-sm text-center text-red-500 sm:col-span-2">
