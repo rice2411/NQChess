@@ -1,95 +1,83 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import Post, { PostData } from '@/components/ui/Post';
+import { Box, Container, Typography } from '@mui/material';
+
+const staticPosts: PostData[] = [
+  {
+    id: '1',
+    author: {
+      name: 'Nguyễn Văn A',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      role: 'Học viên',
+    },
+    content: '<p>Đây là bài viết đầu tiên! <b>Chào mọi người!</b></p>',
+    images: [
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+    ],
+    createdAt: '2024-06-01T10:00:00.000Z',
+    likes: 12,
+    comments: 3,
+    shares: 1,
+    isLiked: false,
+    tags: ['chess', 'welcome'],
+  },
+  {
+    id: '2',
+    author: {
+      name: 'Trần Thị B',
+      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      role: 'Giáo viên',
+    },
+    content: '<p>Hôm nay lớp mình học rất vui! <img src="https://cdn-icons-png.flaticon.com/512/616/616489.png" width="20" /></p>',
+    images: [
+      'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
+    ],
+    createdAt: '2024-05-31T15:00:00.000Z',
+    likes: 25,
+    comments: 7,
+    shares: 2,
+    isLiked: true,
+    tags: ['class', 'fun'],
+  },
+  {
+    id: '3',
+    author: {
+      name: 'Lê Văn C',
+      avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
+      role: 'Học viên',
+    },
+    content: '<p>Mọi người có ai muốn giao lưu cờ vua không? <i>Comment bên dưới nhé!</i></p>',
+    createdAt: '2024-05-30T08:00:00.000Z',
+    likes: 5,
+    comments: 1,
+    shares: 0,
+    isLiked: false,
+    tags: ['giao_luu'],
+  },
+];
+
+export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <Container maxWidth="sm" disableGutters sx={{ py: 4, pt: { xs: 10, sm: 12 } }}>
+      <Typography variant="h5" fontWeight={700} mb={3} align="center" color="primary">
+        Bảng tin lớp học
+      </Typography>
+      <Box>
+        {staticPosts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
+      </Box>
+    </Container>
   );
 }

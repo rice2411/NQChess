@@ -1,0 +1,15 @@
+adpyke.codesnap
+bradlc.vscode-tailwindcss
+eamodio.gitlens
+esbenp.prettier-vscode
+evondev.dracula-high-contrast
+evondev.evondev-snippets
+evondev.generate-css-class
+evondev.indent-rainbow-palettes
+formulahendry.auto-close-tag
+formulahendry.auto-rename-tag
+heybourn.headwind
+pkief.material-icon-theme
+ritwickdey.liveserver
+shd101wyy.markdown-preview-enhanced
+steoates.autoimport
