@@ -1,19 +1,26 @@
 const ROUTES = {
   ANONYMOUS: {
     LOGIN: '/login',
-    REGISTER: '/register',
-    FORGOT_PASSWORD: '/forgot-password',
-    RESET_PASSWORD: '/reset-password',
   },
-  AUTHENTICATED: {
+  DEFAULT: {
     HOME: '/',
-    PROFILE: '/profile',
-    SETTINGS: '/settings',
-    ADMIN: '/admin',
+  },
+  ADMIN: {
+    DASHBOARD: '/dashboard',
+    STUDENTS: 'students',
+    CLASSES: 'classes',
+    ATTENDANCE: 'attendance',
+    TUITION: 'tuition',
+    POSTS: 'posts',
+    REPORTS: 'reports',
+    SETTINGS: 'settings',
+    ACCOUNT: 'account',
+    LOGOUT: '/logout',
   },
 };
 
 export default ROUTES;
 
 export const ROUTES_ANONYMOUS = ROUTES.ANONYMOUS;
-export const ROUTES_AUTHENTICATED = ROUTES.AUTHENTICATED;
+export const ROUTE_DEFAULT = ROUTES.DEFAULT;
+export const ROUTES_ADMIN = ROUTES.ADMIN;

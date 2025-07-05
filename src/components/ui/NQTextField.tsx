@@ -53,14 +53,15 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
     pointerEvents: 'none',
     transition: 'all 0.2s cubic-bezier(0.4,0,0.2,1) 0ms',
   },
-  '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled': {
-    color: theme.palette.primary.main,
-    fontWeight: 600,
-    top: 0,
-    left: 0,
-    transform: 'translate(14px, -9px) scale(0.75)',
-    pointerEvents: 'auto',
-  },
+  '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled':
+    {
+      color: theme.palette.primary.main,
+      fontWeight: 600,
+      top: 0,
+      left: 0,
+      transform: 'translate(14px, -9px) scale(0.75)',
+      pointerEvents: 'auto',
+    },
   '& .MuiInputAdornment-root': {
     height: '100%',
   },
@@ -74,11 +75,11 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-export type BaseInputProps = TextFieldProps & {
+export type NQTextFieldProps = TextFieldProps & {
   endAdornment?: ReactNode;
 };
 
-const BaseInput = ({ endAdornment, ...props }: BaseInputProps) => {
+const NQTextField = ({ endAdornment, ...props }: NQTextFieldProps) => {
   return (
     <CustomTextField
       {...props}
@@ -90,4 +91,4 @@ const BaseInput = ({ endAdornment, ...props }: BaseInputProps) => {
   );
 };
 
-export default BaseInput; 
+export default NQTextField;

@@ -3,7 +3,7 @@ import { Container } from '@mui/material';
 import ThemeRegistry from '@/providers/ThemeRegistry';
 import AuthInitProvider from '@/providers/AuthInitProvider';
 import GlobalLoading from '@/providers/GlobalLoading';
-import Navbar from '@/components/ui/layout/Navbar';
+import Navbar from '@/components/layout/Navbar';
 
 export default function DefaultLayout({
   children,

@@ -12,7 +12,7 @@ import {
   Box,
   Chip,
   Divider,
-  Button
+  Button,
 } from '@mui/material';
 import {
   ThumbUp,
@@ -20,8 +20,6 @@ import {
   ChatBubbleOutline,
   Share,
   MoreVert,
-  Favorite,
-  FavoriteBorder
 } from '@mui/icons-material';
 
 export interface PostData {
@@ -61,8 +59,10 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
     if (diffInHours < 1) return 'Vừa xong';
     if (diffInHours < 24) return `${diffInHours} giờ trước`;
     if (diffInHours < 48) return 'Hôm qua';
@@ -70,11 +70,13 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
   };
 
   return (
-    <Card sx={{ mb: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+    <Card
+      sx={{ mb: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+    >
       <CardHeader
         avatar={
-          <Avatar 
-            src={post.author.avatar} 
+          <Avatar
+            src={post.author.avatar}
             alt={post.author.name}
             sx={{ width: 48, height: 48 }}
           />
@@ -95,44 +97,50 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
           </Box>
         }
       />
-      
+
       <CardContent sx={{ pt: 0 }}>
-        <Typography 
-          variant="body1" 
-          sx={{ 
-            mb: 2, 
+        <Typography
+          variant="body1"
+          sx={{
+            mb: 2,
             lineHeight: 1.6,
-            '& img': { maxWidth: '100%', height: 'auto' }
+            '& img': { maxWidth: '100%', height: 'auto' },
           }}
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
-        
+
         {post.images && post.images.length > 0 && (
           <Box sx={{ mb: 2 }}>
             {post.images.length === 1 ? (
-              <img 
-                src={post.images[0]} 
-                alt="Post image" 
-                style={{ 
-                  width: '100%', 
-                  maxHeight: 400, 
+              <img
+                src={post.images[0]}
+                alt="Post image"
+                style={{
+                  width: '100%',
+                  maxHeight: 400,
                   objectFit: 'cover',
-                  borderRadius: 8 
-                }} 
+                  borderRadius: 8,
+                }}
               />
             ) : (
-              <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gap: 1,
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                }}
+              >
                 {post.images.map((image, index) => (
-                  <img 
+                  <img
                     key={index}
-                    src={image} 
-                    alt={`Post image ${index + 1}`} 
-                    style={{ 
-                      width: '100%', 
-                      height: 200, 
+                    src={image}
+                    alt={`Post image ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: 200,
                       objectFit: 'cover',
-                      borderRadius: 8 
-                    }} 
+                      borderRadius: 8,
+                    }}
                   />
                 ))}
               </Box>
@@ -143,11 +151,11 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
         {post.tags && post.tags.length > 0 && (
           <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {post.tags.map((tag, index) => (
-              <Chip 
-                key={index} 
-                label={`#${tag}`} 
-                size="small" 
-                color="primary" 
+              <Chip
+                key={index}
+                label={`#${tag}`}
+                size="small"
+                color="primary"
                 variant="outlined"
               />
             ))}
@@ -182,12 +190,14 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
       <CardActions sx={{ px: 0, py: 0 }}>
         <Button
           fullWidth
-          startIcon={isLiked ? <ThumbUp color="primary" /> : <ThumbUpOutlined />}
+          startIcon={
+            isLiked ? <ThumbUp color="primary" /> : <ThumbUpOutlined />
+          }
           onClick={handleLike}
-          sx={{ 
+          sx={{
             color: isLiked ? 'primary.main' : 'text.secondary',
             textTransform: 'none',
-            py: 1.5
+            py: 1.5,
           }}
         >
           Thích
@@ -196,10 +206,10 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
           fullWidth
           startIcon={<ChatBubbleOutline />}
           onClick={() => onComment?.(post.id)}
-          sx={{ 
+          sx={{
             color: 'text.secondary',
             textTransform: 'none',
-            py: 1.5
+            py: 1.5,
           }}
         >
           Bình luận
@@ -208,10 +218,10 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
           fullWidth
           startIcon={<Share />}
           onClick={() => onShare?.(post.id)}
-          sx={{ 
+          sx={{
             color: 'text.secondary',
             textTransform: 'none',
-            py: 1.5
+            py: 1.5,
           }}
         >
           Chia sẻ
@@ -219,4 +229,4 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
       </CardActions>
     </Card>
   );
-} 
+}

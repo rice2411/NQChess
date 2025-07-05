@@ -12,7 +12,6 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  MenuList,
   ListItemText,
   Divider,
   Tooltip,
@@ -22,7 +21,6 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import GroupsIcon from '@mui/icons-material/Groups';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
@@ -154,8 +152,8 @@ export default function Navbar() {
                     content: '""',
                     position: 'absolute',
                     bottom: 0,
-                    left: `${(NAV_ICONS.findIndex(item => item.key === selected) * 100) / NAV_ICONS.length}%`,
-                    width: `${100 / NAV_ICONS.length}%`,
+                    left: `calc(${(NAV_ICONS.findIndex(item => item.key === selected) * 90) / NAV_ICONS.length}% + ${15 * NAV_ICONS.findIndex(item => item.key === selected)}px)`,
+                    width: `${90 / NAV_ICONS.length}%`,
                     height: '3px',
                     backgroundColor: theme.palette.primary.main,
                     transition: 'left 0.3s ease-in-out',
@@ -163,7 +161,7 @@ export default function Navbar() {
                   },
                 }}
               >
-                {NAV_ICONS.map((item, idx) => {
+                {NAV_ICONS.map(item => {
                   const isActive = selected === item.key;
                   return (
                     <Tooltip

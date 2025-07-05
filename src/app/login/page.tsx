@@ -11,12 +11,12 @@ import {
   Alert,
   Divider,
   IconButton,
-  InputAdornment
+  InputAdornment,
 } from '@mui/material';
 import { Visibility, VisibilityOff, Google } from '@mui/icons-material';
 import { signInWithEmail, signInWithGoogle } from '@/lib/firebase-auth';
-import BaseInput from '@/components/ui/input/BaseInput';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
+import NQTextField from '@/components/ui/NQTextField';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,13 +48,13 @@ export default function LoginPage() {
     }
 
     const result = await signInWithEmail(email, password);
-    
+
     if (result.error) {
       setError(result.error);
     } else {
       router.push('/');
     }
-    
+
     setLoading(false);
     useGlobalLoadingStore.getState().setLoading(false);
   };
@@ -64,13 +64,13 @@ export default function LoginPage() {
     setError('');
 
     const result = await signInWithGoogle();
-    
+
     if (result.error) {
       setError(result.error);
     } else {
       router.push('/');
     }
-    
+
     setLoading(false);
   };
 
@@ -87,16 +87,27 @@ export default function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: 2
+        padding: 2,
       }}
     >
       <Card sx={{ maxWidth: 400, width: '100%' }}>
         <CardContent sx={{ padding: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            align="center"
+            color="primary"
+          >
             Đăng nhập
           </Typography>
-          
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            align="center"
+            sx={{ mb: 3 }}
+          >
             Chào mừng bạn đến với NQ-Chess
           </Typography>
 
@@ -107,23 +118,23 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin}>
-            <BaseInput
+            <NQTextField
               fullWidth
               label="Email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               margin="normal"
               required
               disabled={loading}
             />
-            
-            <BaseInput
+
+            <NQTextField
               fullWidth
               label="Mật khẩu"
               type={showPassword ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               margin="normal"
               required
               disabled={loading}
@@ -186,4 +197,4 @@ export default function LoginPage() {
       </Card>
     </Box>
   );
-} 
+}
