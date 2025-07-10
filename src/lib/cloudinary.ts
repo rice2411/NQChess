@@ -1,30 +1,30 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-// Cấu hình Cloudinary
+// Cấu hình Cloudinary (chỉ sử dụng ở server-side)
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Upload hình ảnh
+// Upload hình ảnh (sử dụng API route)
 export const uploadImage = async (file: File, folder: string = 'nq-chess') => {
   try {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'nq-chess');
     formData.append('folder', folder);
 
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
+    const response = await fetch('/api/cloudinary/upload', {
+      method: 'POST',
+      body: formData,
+    });
 
     const data = await response.json();
-    return { url: data.secure_url, publicId: data.public_id, error: null };
+    if (data.success) {
+      return { url: data.url, publicId: data.publicId, error: null };
+    } else {
+      return { url: null, publicId: null, error: data.error };
+    }
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
     return { url: null, publicId: null, error: errMsg };
@@ -51,20 +51,23 @@ export const deleteImage = async (publicId: string) => {
 };
 
 // Transform hình ảnh
-export const getOptimizedImageUrl = (url: string, options: {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: 'auto' | 'webp' | 'jpg' | 'png';
-} = {}) => {
+export const getOptimizedImageUrl = (
+  url: string,
+  options: {
+    width?: number;
+    height?: number;
+    quality?: number;
+    format?: 'auto' | 'webp' | 'jpg' | 'png';
+  } = {}
+) => {
   const { width, height, quality = 80, format = 'auto' } = options;
-  
+
   if (!url.includes('cloudinary.com')) {
     return url;
   }
 
   const transformations = [];
-  
+
   if (width) transformations.push(`w_${width}`);
   if (height) transformations.push(`h_${height}`);
   transformations.push(`q_${quality}`);
@@ -76,7 +79,7 @@ export const getOptimizedImageUrl = (url: string, options: {
 
   const baseUrl = url.split('/upload/')[0];
   const imagePath = url.split('/upload/')[1];
-  
+
   return `${baseUrl}/upload/${transformations.join(',')}/${imagePath}`;
 };
 
@@ -92,4 +95,4 @@ export const getImagesFromFolder = async (folder: string = 'nq-chess') => {
   }
 };
 
-export default cloudinary; 
+export default cloudinary;

@@ -69,7 +69,17 @@ export default function SidebarAdmin() {
       }}
       open
     >
-      <Box sx={{ p: 2, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box
+        sx={{
+          p: 2,
+          pb: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          height: 64,
+          bgcolor: '#fff',
+        }}
+      >
         <Avatar
           sx={{ width: 36, height: 36, bgcolor: theme.palette.primary.main }}
         >

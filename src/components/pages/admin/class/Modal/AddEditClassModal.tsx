@@ -1,0 +1,250 @@
+import React from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Stepper,
+  Step,
+  StepLabel,
+  Box,
+  Typography,
+} from '@mui/material';
+import { useForm, useFieldArray, Control, FieldErrors } from 'react-hook-form';
+import StepClassInfo from './Steps/StepClassInfo';
+import StepSchedules from './Steps/StepSchedules';
+import StepStudents from './Steps/StepStudents';
+import {
+  EClassStatus,
+  IClass,
+  IStudentClass,
+} from '@/interfaces/class.interface';
+import { parseVND } from '@/utils/format';
+import { format } from 'date-fns';
+
+/**
+ * Modal quản lý lớp học đa bước (Stepper)
+ *
+ * Cấu trúc 3 bước:
+ * 1. StepClassInfo: Thông tin cơ bản của lớp (tên, học phí, trạng thái, ngày bắt đầu)
+ * 2. StepSchedules: Quản lý lịch học (giờ bắt đầu, kết thúc, thứ, buổi học)
+ * 3. StepStudents: Quản lý học sinh trong lớp (thêm/xóa/cập nhật học sinh)
+ *
+ * Tính năng:
+ * - Sử dụng react-hook-form với useFieldArray
+ * - Validation từng bước và tổng thể
+ * - UI/UX hiện đại với Material-UI
+ * - Không cho phép skip step, chỉ điều hướng bằng nút
+ * - Responsive design
+ * - DatePicker cho ngày bắt đầu lớp học
+ */
+
+export interface ClassFormValues {
+  name: string;
+  tuition: string;
+  status: EClassStatus;
+  startDate: Date;
+  startTime: Date;
+  endTime: Date;
+  weekday: string;
+  schedules: { label: string }[];
+  students: IStudentClass[];
+}
+
+interface AddEditClassModalProps {
+  open: boolean;
+  editing: IClass | null;
+  onClose: () => void;
+  onSave: (data: Partial<IClass>) => void;
+  loading?: boolean;
+}
+
+export default function AddEditClassModal({
+  open,
+  editing,
+  onClose,
+  onSave,
+  loading,
+}: AddEditClassModalProps) {
+  const steps = ['Thông tin lớp', 'Buổi học', 'Học sinh'];
+  const [activeStep, setActiveStep] = React.useState(0);
+
+  // React Hook Form setup
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    getValues,
+    trigger,
+    formState: { errors, isValid },
+  } = useForm<ClassFormValues>({
+    defaultValues: {
+      name: '',
+      tuition: '',
+      status: EClassStatus.NOT_STARTED,
+      startDate: new Date(),
+      startTime: new Date(0, 0, 0, 0, 0), // 00:00
+      endTime: new Date(0, 0, 0, 23, 59), // 23:59
+      weekday: 'Thứ 2',
+      schedules: [],
+      students: [],
+    },
+    mode: 'onChange', // Validate real-time
+  });
+  const {
+    fields: scheduleFields,
+    append: appendSchedule,
+    remove: removeSchedule,
+  } = useFieldArray({ control, name: 'schedules' } as any);
+  const {
+    fields: studentFields,
+    append: appendStudent,
+    remove: removeStudent,
+    update: updateStudent,
+  } = useFieldArray({ control, name: 'students' });
+
+  const handleNext = async () => {
+    if (activeStep === 0) {
+      const isValid = await trigger(['name', 'tuition', 'startDate']);
+      if (!isValid) {
+        return;
+      }
+    } else if (activeStep === 1) {
+      const currentValues = getValues();
+      if (!currentValues.schedules || currentValues.schedules.length === 0) {
+        return;
+      }
+    }
+
+    setActiveStep(prev => prev + 1);
+  };
+
+  // Kiểm tra xem bước hiện tại có thể chuyển tiếp không
+  const canProceed = () => {
+    if (activeStep === 0) {
+      const currentValues = getValues();
+      const requiredFieldsValid =
+        !errors.name && !errors.tuition && !errors.startDate;
+      const hasRequiredValues =
+        currentValues.name?.trim() &&
+        currentValues.tuition &&
+        currentValues.startDate;
+
+      return requiredFieldsValid && hasRequiredValues;
+    }
+
+    if (activeStep === 1) {
+      const currentValues = getValues();
+      return currentValues.schedules && currentValues.schedules.length > 0;
+    }
+
+    return true;
+  };
+
+  const handleBack = () => setActiveStep(prev => prev - 1);
+
+  const onSubmit = (data: ClassFormValues) => {
+    const tuitionValue =
+      typeof data.tuition === 'string'
+        ? parseInt(parseVND(data.tuition))
+        : data.tuition;
+
+    // Convert schedules từ {label: string}[] thành string[]
+    const schedulesStrings = (data.schedules || []).map(
+      schedule => schedule.label
+    );
+
+    // Clean students data - loại bỏ session undefined
+    const cleanStudents = (data.students || []).map(student => {
+      const cleanStudent = { ...student };
+      if (cleanStudent.session === undefined) {
+        delete cleanStudent.session;
+      }
+      return cleanStudent;
+    });
+
+    // Loại bỏ các field undefined để tránh lỗi Firebase
+    const cleanData = {
+      name: data.name,
+      tuition: tuitionValue,
+      startDate: format(data.startDate, 'yyyy-MM-dd'),
+      status: data.status,
+      schedules: schedulesStrings,
+      students: cleanStudents,
+    };
+
+    // Filter out undefined values
+    const filteredData = Object.fromEntries(
+      Object.entries(cleanData).filter(([_, value]) => value !== undefined)
+    );
+
+    onSave(filteredData);
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        <Stepper activeStep={activeStep} sx={{ mt: 2 }}>
+          {steps.map(label => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </DialogTitle>
+      <DialogContent
+        sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}
+      >
+        {activeStep === 0 && (
+          <StepClassInfo control={control} errors={errors} />
+        )}
+        {activeStep === 1 && (
+          <StepSchedules
+            control={control}
+            errors={errors}
+            scheduleFields={scheduleFields}
+            appendSchedule={appendSchedule}
+            removeSchedule={removeSchedule}
+          />
+        )}
+        {activeStep === 2 && (
+          <StepStudents
+            control={control}
+            errors={errors}
+            studentFields={studentFields}
+            appendStudent={appendStudent}
+            removeStudent={removeStudent}
+            updateStudent={updateStudent}
+            setValue={setValue}
+            getValues={getValues}
+          />
+        )}
+      </DialogContent>
+      <DialogActions>
+        {activeStep > 0 && <Button onClick={handleBack}>Quay lại</Button>}
+        {activeStep < steps.length - 1 && (
+          <Button
+            onClick={handleNext}
+            variant="contained"
+            disabled={!canProceed()}
+            sx={{ minWidth: 100 }}
+          >
+            Tiếp
+          </Button>
+        )}
+        {activeStep === steps.length - 1 && (
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="contained"
+            disabled={loading}
+            sx={{ minWidth: 100 }}
+          >
+            {editing ? 'Lưu' : 'Thêm'}
+          </Button>
+        )}
+      </DialogActions>
+      {/* Helper text cho validation */}
+    </Dialog>
+  );
+}

@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EGender, IStudent } from '@/interfaces/student.interface';
+import { CloudinaryService } from '@/services/cloudinary.service';
 
 // Collection names
 const COLLECTIONS = {
@@ -140,6 +141,15 @@ export class StudentService {
     studentData: Partial<Omit<IStudent, 'id' | 'createdAt'>>
   ): Promise<void> {
     try {
+      // Lấy thông tin học sinh hiện tại
+      const currentStudent = await this.getStudentById(id);
+      if (!currentStudent) {
+        throw new Error('Không tìm thấy học sinh');
+      }
+
+      // Xử lý avatar nếu có thay đổi
+      await this.handleAvatarUpdate(currentStudent, studentData);
+
       const updateData = {
         ...studentData,
         updatedAt: new Date().toISOString(),
@@ -153,10 +163,70 @@ export class StudentService {
   }
 
   /**
+   * Xử lý cập nhật avatar - xóa avatar cũ nếu có avatar mới
+   */
+  private static async handleAvatarUpdate(
+    currentStudent: IStudent,
+    newStudentData: Partial<Omit<IStudent, 'id' | 'createdAt'>>
+  ): Promise<void> {
+    // Normalize URLs để so sánh chính xác
+    const currentAvatar = this.normalizeUrl(currentStudent.avatar);
+    const newAvatar = this.normalizeUrl(newStudentData.avatar);
+    const areDifferent = currentAvatar !== newAvatar;
+
+    // Chỉ xóa avatar cũ nếu có avatar mới và khác với avatar hiện tại
+    if (newStudentData.avatar && currentStudent.avatar && areDifferent) {
+      await this.deleteStudentAvatar(currentStudent.avatar);
+    }
+  }
+
+  /**
+   * Normalize URL để so sánh chính xác
+   */
+  private static normalizeUrl(url: string | undefined): string {
+    if (!url) return '';
+
+    try {
+      // Loại bỏ protocol và trailing slash
+      return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    } catch (error) {
+      console.warn('Error normalizing URL:', url, error);
+      return url;
+    }
+  }
+
+  /**
+   * Xóa avatar của học sinh từ Cloudinary
+   */
+  static async deleteStudentAvatar(avatarUrl: string): Promise<boolean> {
+    if (!avatarUrl) {
+      return false;
+    }
+
+    try {
+      const deleteResult = await CloudinaryService.deleteImage(avatarUrl);
+
+      if (deleteResult.success) {
+        return true;
+      } else {
+        console.warn('Failed to delete avatar:', deleteResult.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
+      return false;
+    }
+  }
+
+  /**
    * Xóa học sinh
    */
   static async deleteStudent(id: string): Promise<void> {
     try {
+      const student = await this.getStudentById(id);
+      if (student && student.avatar) {
+        await this.deleteStudentAvatar(student.avatar);
+      }
       await deleteDoc(doc(db, COLLECTIONS.STUDENTS, id));
     } catch (error) {
       console.error('Error deleting student:', error);

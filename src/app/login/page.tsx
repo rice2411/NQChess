@@ -12,11 +12,11 @@ import {
   Divider,
   IconButton,
   InputAdornment,
+  TextField,
 } from '@mui/material';
 import { Visibility, VisibilityOff, Google } from '@mui/icons-material';
 import { signInWithEmail, signInWithGoogle } from '@/lib/firebase-auth';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
-import NQTextField from '@/components/ui/NQTextField';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -118,7 +118,7 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin}>
-            <NQTextField
+            <TextField
               fullWidth
               label="Email"
               type="email"
@@ -129,7 +129,7 @@ export default function LoginPage() {
               disabled={loading}
             />
 
-            <NQTextField
+            <TextField
               fullWidth
               label="Mật khẩu"
               type={showPassword ? 'text' : 'password'}
@@ -138,18 +138,20 @@ export default function LoginPage() {
               margin="normal"
               required
               disabled={loading}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                    tabIndex={-1}
-                    aria-label="toggle password visibility"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      tabIndex={-1}
+                      aria-label="toggle password visibility"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <Button

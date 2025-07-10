@@ -6,50 +6,52 @@ import {
   DialogActions,
   Button,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 
-interface DeleteConfirmModalProps {
+interface ModalConfirmProps {
   open: boolean;
-  studentName: string;
-  onClose: () => void;
-  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
   loading?: boolean;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
 }
 
-export default function DeleteConfirmModal({
+export default function ModalConfirm({
   open,
-  studentName,
-  onClose,
-  onConfirm,
+  title,
+  message,
+  confirmText = 'Xác nhận',
+  cancelText = 'Hủy',
   loading = false,
-}: DeleteConfirmModalProps) {
+  onConfirm,
+  onClose,
+}: ModalConfirmProps) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Warning color="warning" />
-        Xác nhận xóa
+        {title}
       </DialogTitle>
       <DialogContent>
-        <Typography>
-          Bạn có chắc chắn muốn xóa học sinh <strong>{studentName}</strong>{' '}
-          không?
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Hành động này không thể hoàn tác.
-        </Typography>
+        <Typography>{message}</Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
-          Hủy
+          {cancelText}
         </Button>
         <Button
           onClick={onConfirm}
           color="error"
           variant="contained"
           disabled={loading}
+          startIcon={loading ? <CircularProgress size={16} /> : undefined}
         >
-          {loading ? 'Đang xóa...' : 'Xóa'}
+          {loading ? 'Đang xử lý...' : confirmText}
         </Button>
       </DialogActions>
     </Dialog>

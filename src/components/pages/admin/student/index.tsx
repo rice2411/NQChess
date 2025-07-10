@@ -15,6 +15,8 @@ import {
   IconButton,
   Snackbar,
   Avatar,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import { Add, Edit, Delete, Search } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
@@ -23,8 +25,8 @@ import StudentService from '@/services/student.service';
 import Pagination from '@/components/ui/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
-import NQTextField from '@/components/ui/NQTextField';
-import { StudentFormModal, DeleteConfirmModal } from './Modal';
+import { StudentFormModal } from './Modal';
+import { useModalConfirm } from '@/hooks/useModalConfirm';
 
 export default function StudentManagement() {
   const [students, setStudents] = useState<IStudent[]>([]);
@@ -40,13 +42,6 @@ export default function StudentManagement() {
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
 
-  // Delete modal state
-  const [deleteModal, setDeleteModal] = useState({
-    open: false,
-    student: null as IStudent | null,
-    loading: false,
-  });
-
   // Pagination hook
   const {
     state: pagination,
@@ -59,6 +54,9 @@ export default function StudentManagement() {
 
   // Global loading store
   const setGlobalLoading = useGlobalLoadingStore(state => state.setLoading);
+
+  // Confirm delete hook
+  const { confirm } = useModalConfirm();
 
   // Fetch students
   useEffect(() => {
@@ -128,59 +126,35 @@ export default function StudentManagement() {
     try {
       setGlobalLoading(true);
 
-      if (editing) {
-        // Update
-        await StudentService.updateStudent(editing.id, form);
-        setSnackbar({ open: true, message: 'Cập nhật thành công!' });
-      } else {
-        // Add
-        await StudentService.createStudent(form);
-        setSnackbar({ open: true, message: 'Thêm học sinh thành công!' });
-      }
-      handleCloseDialog();
+      // Chỉ refresh danh sách, không tạo/cập nhật nữa vì đã làm trong modal
       fetchStudents(search, true); // Reset pagination khi thêm/sửa
+      setSnackbar({
+        open: true,
+        message: editing ? 'Cập nhật thành công!' : 'Thêm học sinh thành công!',
+      });
     } catch (error) {
-      console.error('Error saving student:', error);
-      setSnackbar({ open: true, message: 'Có lỗi xảy ra khi lưu học sinh' });
+      console.error('Error refreshing students:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi tải danh sách học sinh',
+      });
     } finally {
       setGlobalLoading(false);
     }
   }
 
   function handleDeleteClick(student: IStudent) {
-    setDeleteModal({
-      open: true,
-      student,
-      loading: false,
-    });
-  }
-
-  function handleDeleteCancel() {
-    setDeleteModal({
-      open: false,
-      student: null,
-      loading: false,
-    });
-  }
-
-  async function handleDeleteConfirm() {
-    if (!deleteModal.student) return;
-
-    try {
-      setDeleteModal(prev => ({ ...prev, loading: true }));
-      setGlobalLoading(true);
-
-      await StudentService.deleteStudent(deleteModal.student.id);
-      setSnackbar({ open: true, message: 'Đã xóa học sinh!' });
-      fetchStudents(search, true); // Reset pagination khi xóa
-      handleDeleteCancel();
-    } catch (error) {
-      console.error('Error deleting student:', error);
-      setSnackbar({ open: true, message: 'Không thể xóa học sinh' });
-    } finally {
-      setDeleteModal(prev => ({ ...prev, loading: false }));
-      setGlobalLoading(false);
-    }
+    confirm(
+      async () => {
+        setGlobalLoading(true);
+        await StudentService.deleteStudent(student.id);
+        setSnackbar({ open: true, message: 'Đã xóa học sinh!' });
+        fetchStudents(search, true); // Reset pagination khi xóa
+      },
+      {
+        message: `Bạn có chắc chắn muốn xóa học sinh ${student.fullName} không? Hành động này không thể hoàn tác.`,
+      }
+    );
   }
 
   function handleSearch(e: React.FormEvent) {
@@ -207,7 +181,7 @@ export default function StudentManagement() {
         onSubmit={handleSearch}
         sx={{ display: 'flex', gap: 2, mb: 2, height: '40px' }}
       >
-        <NQTextField
+        <TextField
           placeholder="Tìm kiếm theo tên..."
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -219,7 +193,13 @@ export default function StudentManagement() {
 
             width: '30%',
           }}
-          endAdornment={<Search sx={{ mr: 1 }} />}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search sx={{ mr: 1 }} />
+              </InputAdornment>
+            ),
+          }}
         />
         <Button type="submit" variant="outlined">
           Tìm kiếm
@@ -316,13 +296,6 @@ export default function StudentManagement() {
         onFormChange={handleFormChange}
       />
 
-      <DeleteConfirmModal
-        open={deleteModal.open}
-        studentName={deleteModal.student?.fullName || ''}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        loading={deleteModal.loading}
-      />
       <Snackbar
         open={snackbar.open}
         autoHideDuration={2000}

@@ -4,6 +4,7 @@ import ThemeRegistry from '@/providers/ThemeRegistry';
 import AuthInitProvider from '@/providers/AuthInitProvider';
 import GlobalLoading from '@/providers/GlobalLoading';
 import Navbar from '@/components/layout/Navbar';
+import { ModalProvider } from '@/providers/ModalProvider';
 
 export default function DefaultLayout({
   children,
@@ -13,11 +14,13 @@ export default function DefaultLayout({
   return (
     <AuthInitProvider>
       <ThemeRegistry>
-        <GlobalLoading />
-        <Navbar />
-        <Container maxWidth="sm" disableGutters>
-          {children}
-        </Container>
+        <ModalProvider>
+          <GlobalLoading />
+          <Navbar />
+          <Container maxWidth="sm" disableGutters>
+            {children}
+          </Container>
+        </ModalProvider>
       </ThemeRegistry>
     </AuthInitProvider>
   );
