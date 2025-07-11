@@ -12,11 +12,13 @@ import {
   List,
   ListItem,
   ListItemText,
+  ListItemAvatar,
+  Avatar,
   IconButton,
   Chip,
   MenuItem,
 } from '@mui/material';
-import { PersonAdd, PersonRemove } from '@mui/icons-material';
+import { PersonAdd, PersonRemove, Person } from '@mui/icons-material';
 import {
   IStudentClass,
   EStudentClassType,
@@ -146,6 +148,17 @@ export default function StepStudents({
             }
             value={selectedStudents}
             onChange={(_, newValue) => setSelectedStudents(newValue)}
+            renderOption={(props, option) => (
+              <Box component="li" {...props}>
+                <Avatar
+                  src={option.avatar}
+                  sx={{ width: 24, height: 24, mr: 1 }}
+                >
+                  <Person sx={{ fontSize: 14 }} />
+                </Avatar>
+                {option.fullName} - {option.phoneNumber}
+              </Box>
+            )}
             renderInput={params => (
               <TextField
                 {...params}
@@ -176,6 +189,14 @@ export default function StepStudents({
                     key={key}
                     label={`${option.fullName} - ${option.phoneNumber}`}
                     size="small"
+                    avatar={
+                      <Avatar
+                        src={option.avatar}
+                        sx={{ width: 20, height: 20 }}
+                      >
+                        <Person sx={{ fontSize: 12 }} />
+                      </Avatar>
+                    }
                     {...chipProps}
                   />
                 );
@@ -275,6 +296,11 @@ export default function StepStudents({
                     </IconButton>
                   }
                 >
+                  <ListItemAvatar>
+                    <Avatar src={student.avatar} sx={{ width: 40, height: 40 }}>
+                      <Person />
+                    </Avatar>
+                  </ListItemAvatar>
                   <ListItemText
                     primary={student.fullName}
                     secondary={

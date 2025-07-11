@@ -172,15 +172,19 @@ export default function ClassManagement() {
                   </Tooltip>
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton onClick={() => handleOpenModal(cls)}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDeleteClick(cls)}
-                  >
-                    <Delete />
-                  </IconButton>
+                  <Tooltip title="Chỉnh sửa lớp học">
+                    <IconButton onClick={() => handleOpenModal(cls)}>
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Xóa lớp học">
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDeleteClick(cls)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}

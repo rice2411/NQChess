@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -21,7 +21,7 @@ import {
   IStudentClass,
 } from '@/interfaces/class.interface';
 import { parseVND } from '@/utils/format';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 /**
  * Modal quản lý lớp học đa bước (Stepper)
@@ -104,6 +104,50 @@ export default function AddEditClassModal({
     update: updateStudent,
   } = useFieldArray({ control, name: 'students' });
 
+  // Populate form data when editing
+  useEffect(() => {
+    if (editing && open) {
+      // Set basic class info
+      setValue('name', editing.name || '');
+      setValue('tuition', editing.tuition?.toString() || '');
+      setValue('status', editing.status || EClassStatus.NOT_STARTED);
+
+      // Set start date
+      if (editing.startDate) {
+        const startDate =
+          typeof editing.startDate === 'string'
+            ? parse(editing.startDate, 'yyyy-MM-dd', new Date())
+            : editing.startDate;
+        setValue('startDate', startDate);
+      }
+
+      // Set schedules
+      if (editing.schedules && editing.schedules.length > 0) {
+        const scheduleFields = editing.schedules.map(schedule => ({
+          label: schedule,
+        }));
+        setValue('schedules', scheduleFields);
+      }
+
+      // Set students
+      if (editing.students && editing.students.length > 0) {
+        setValue('students', editing.students);
+      }
+
+      // Reset active step to 0 when editing
+      setActiveStep(0);
+    } else if (!editing && open) {
+      // Reset form when adding new class
+      setValue('name', '');
+      setValue('tuition', '');
+      setValue('status', EClassStatus.NOT_STARTED);
+      setValue('startDate', new Date());
+      setValue('schedules', []);
+      setValue('students', []);
+      setActiveStep(0);
+    }
+  }, [editing, open, setValue]);
+
   const handleNext = async () => {
     if (activeStep === 0) {
       const isValid = await trigger(['name', 'tuition', 'startDate']);
@@ -185,6 +229,9 @@ export default function AddEditClassModal({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>
+        <Typography variant="h6" gutterBottom>
+          {editing ? `Chỉnh sửa lớp: ${editing.name}` : 'Thêm lớp học mới'}
+        </Typography>
         <Stepper activeStep={activeStep} sx={{ mt: 2 }}>
           {steps.map(label => (
             <Step key={label}>
