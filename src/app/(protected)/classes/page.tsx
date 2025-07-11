@@ -1,4 +1,4 @@
-import ClassManagement from '@/components/pages/admin/class';
+import ClassManagement from '@/pages/admin/class';
 
 export default function ClassPage() {
   return <ClassManagement />;

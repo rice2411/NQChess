@@ -1,4 +1,4 @@
-import StudentManagement from '@/components/pages/admin/student';
+import StudentManagement from '@/pages/admin/student';
 
 export default function StudentPage() {
   return <StudentManagement />;

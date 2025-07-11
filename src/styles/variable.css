@@ -1,6 +1,9 @@
 :root {
   --primary: #e91e63;
   --primary-light: #ff5983;
+  --primary-lighter: #ff80a0;
+  --primary-lightest: #ffa0c0;
+  --primary-super-light: #ffc0e0;
   --primary-dark: #b0003a;
   --primary-contrast: #ffffff;
 
