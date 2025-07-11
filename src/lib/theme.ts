@@ -1,22 +1,23 @@
 import { createTheme } from '@mui/material/styles';
+import { COLORS } from '@/constants/color';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#e91e63', // Màu hồng đẹp
-      light: '#ff5983',
-      dark: '#b0003a',
-      contrastText: '#ffffff',
+      main: COLORS.primary,
+      light: COLORS.primaryLight,
+      dark: COLORS.primaryDark,
+      contrastText: COLORS.primaryContrast,
     },
     secondary: {
-      main: '#9c27b0', // Màu tím để phối với hồng
-      light: '#d05ce3',
-      dark: '#6a0080',
-      contrastText: '#ffffff',
+      main: COLORS.secondary,
+      light: COLORS.secondaryLight,
+      dark: COLORS.secondaryDark,
+      contrastText: COLORS.secondaryContrast,
     },
     background: {
-      default: '#fafafa',
-      paper: '#ffffff',
+      default: COLORS.backgroundDefault,
+      paper: COLORS.backgroundPaper,
     },
   },
   typography: {
@@ -70,4 +71,4 @@ const theme = createTheme({
   },
 });
 
-export default theme; 
+export default theme;

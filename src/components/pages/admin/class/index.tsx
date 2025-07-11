@@ -100,7 +100,7 @@ export default function ClassManagement() {
   }
 
   return (
-    <Container sx={{ mt: 4, mx: 0, width: '100%' }}>
+    <Container maxWidth={false} sx={{ mt: 4, mx: 0, width: '100%' }}>
       <Typography variant="h4" fontWeight={700} color="primary" mb={3}>
         Quản lý lớp học
       </Typography>

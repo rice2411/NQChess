@@ -32,7 +32,7 @@ import { IClass } from '@/interfaces/class.interface';
 import { IAttendance } from '@/interfaces/attendance.interface';
 import AttendanceModal from './Modal/AttendanceModal';
 
-export default function AttendancesPageComponent() {
+export default function AttendancesManagement() {
   const [classes, setClasses] = useState<IClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [selectedClass, setSelectedClass] = useState<IClass | null>(null);

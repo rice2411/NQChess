@@ -1,5 +1,5 @@
-import AttendancesPageComponent from '@/components/pages/admin/attendance';
+import AttendancesManagement from '@/components/pages/admin/attendance';
 
 export default function AttendancesPage() {
-  return <AttendancesPageComponent />;
+  return <AttendancesManagement />;
 }

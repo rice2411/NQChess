@@ -4,23 +4,17 @@ import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
   Button,
-  Chip,
   Card,
   CardContent,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Box,
   Typography,
   Grid,
   Switch,
   FormControlLabel,
-  Divider,
-  Alert,
+  TextField,
+  Collapse,
+  Chip,
 } from '@mui/material';
 import {
   CheckCircle,
@@ -31,6 +25,8 @@ import {
   CalendarMonth,
   Save,
   Close,
+  ExpandMore,
+  ExpandLess,
 } from '@mui/icons-material';
 import { AttendanceService } from '@/services/attendance.service';
 import {
@@ -56,13 +52,13 @@ export default function AttendanceModal({
   const [attendanceRecords, setAttendanceRecords] = useState<
     IAttendanceRecord[]
   >([]);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [expandedStudents, setExpandedStudents] = useState<Set<string>>(
+    new Set()
+  );
 
   useEffect(() => {
     if (session && classData) {
-      // Dữ liệu đã được filter từ khi tạo buổi điểm danh
-      // Không cần filter lại ở đây
       setAttendanceRecords(session.attendanceRecords);
     }
   }, [session, classData]);
@@ -81,6 +77,26 @@ export default function AttendanceModal({
           : record
       )
     );
+  };
+
+  const handleNoteChange = (studentId: string, note: string) => {
+    setAttendanceRecords(prev =>
+      prev.map(record =>
+        record.studentId === studentId ? { ...record, note } : record
+      )
+    );
+  };
+
+  const toggleStudentExpanded = (studentId: string) => {
+    setExpandedStudents(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(studentId)) {
+        newSet.delete(studentId);
+      } else {
+        newSet.add(studentId);
+      }
+      return newSet;
+    });
   };
 
   const handleSaveAll = async () => {
@@ -163,6 +179,28 @@ export default function AttendanceModal({
     return timeStr;
   };
 
+  const getSessionDisplayText = (studentSession?: string) => {
+    if (!studentSession) return null;
+
+    // Xử lý các trường hợp khác nhau của studentSession
+    if (studentSession.includes('full') || studentSession.includes('Full')) {
+      return 'Full buổi học';
+    }
+    if (
+      studentSession.includes('half') ||
+      studentSession.includes('Half') ||
+      studentSession.includes('nửa')
+    ) {
+      return 'Nửa buổi học';
+    }
+    if (studentSession.includes('session')) {
+      return `Buổi ${studentSession.replace('session-', '')}`;
+    }
+
+    // Trường hợp khác, hiển thị nguyên gốc
+    return studentSession;
+  };
+
   return (
     <Dialog
       open={true}
@@ -170,7 +208,9 @@ export default function AttendanceModal({
       maxWidth="lg"
       fullWidth
       PaperProps={{
-        sx: { maxHeight: '90vh' },
+        sx: {
+          maxHeight: '90vh',
+        },
       }}
     >
       <DialogContent>
@@ -333,9 +373,32 @@ export default function AttendanceModal({
                             <Typography variant="body1" fontWeight="medium">
                               {record.studentName}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              ID: {record.studentId}
-                            </Typography>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                mt: 0.5,
+                              }}
+                            >
+                              {getSessionDisplayText(record.studentSession) ? (
+                                <Chip
+                                  label={getSessionDisplayText(
+                                    record.studentSession
+                                  )}
+                                  size="small"
+                                  color="primary"
+                                  variant="outlined"
+                                />
+                              ) : (
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Học đầy đủ
+                                </Typography>
+                              )}
+                            </Box>
                           </Box>
                         </Box>
                       </Box>
@@ -370,11 +433,26 @@ export default function AttendanceModal({
                             </Box>
                           }
                         />
+
+                        {/* Nút mở rộng để thêm ghi chú */}
+                        <Button
+                          size="small"
+                          onClick={() =>
+                            toggleStudentExpanded(record.studentId)
+                          }
+                          sx={{ minWidth: 'auto', p: 1 }}
+                        >
+                          {expandedStudents.has(record.studentId) ? (
+                            <ExpandLess />
+                          ) : (
+                            <ExpandMore />
+                          )}
+                        </Button>
                       </Box>
                     </Box>
 
-                    {/* Ghi chú nếu có */}
-                    {record.note && (
+                    {/* Phần ghi chú có thể mở rộng */}
+                    <Collapse in={expandedStudents.has(record.studentId)}>
                       <Box
                         sx={{
                           mt: 2,
@@ -383,8 +461,105 @@ export default function AttendanceModal({
                           borderColor: 'divider',
                         }}
                       >
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Ghi chú:</strong> {record.note}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2,
+                          }}
+                        >
+                          <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            label="Đánh giá chi tiết học sinh"
+                            placeholder="Nhập đánh giá về: thái độ học tập, mức độ hiểu bài, bài tập về nhà, góp ý..."
+                            value={record.note || ''}
+                            onChange={e =>
+                              handleNoteChange(record.studentId, e.target.value)
+                            }
+                            variant="outlined"
+                            size="small"
+                            helperText="Ghi chú về thái độ, hiểu bài, bài tập về nhà và các góp ý khác"
+                          />
+
+                          {/* Hiển thị thống kê nhanh về ghi chú */}
+                          {record.note && (
+                            <Box
+                              sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}
+                            >
+                              <Chip
+                                label={`${record.note.length} ký tự`}
+                                size="small"
+                                color="info"
+                                variant="outlined"
+                              />
+                              {record.note.length > 100 && (
+                                <Chip
+                                  label="Đánh giá chi tiết"
+                                  size="small"
+                                  color="success"
+                                  variant="outlined"
+                                />
+                              )}
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    </Collapse>
+
+                    {/* Hiển thị ghi chú đã có (nếu không mở rộng) */}
+                    {record.note && !expandedStudents.has(record.studentId) && (
+                      <Box
+                        sx={{
+                          mt: 2,
+                          pt: 2,
+                          borderTop: 1,
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            fontWeight="medium"
+                            color="primary"
+                          >
+                            Đánh giá học sinh:
+                          </Typography>
+                          <Chip
+                            label={`${record.note.length} ký tự`}
+                            size="small"
+                            color="info"
+                            variant="outlined"
+                          />
+                          {record.note.length > 100 && (
+                            <Chip
+                              label="Chi tiết"
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {record.note}
                         </Typography>
                       </Box>
                     )}

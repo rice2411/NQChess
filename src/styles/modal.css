@@ -1,0 +1,49 @@
+/* Prevent scroll on modal backdrop */
+.MuiBackdrop-root {
+  overflow: hidden !important;
+  touch-action: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.MuiDialog-container {
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Auto-disable body scroll when any modal is open */
+.MuiModal-root ~ body,
+.MuiModal-root ~ html {
+  overflow: hidden !important;
+}
+
+/* Alternative: Use CSS-only approach with :has() selector (modern browsers) */
+html:has(.MuiModal-root) {
+  overflow: hidden !important;
+}
+
+body:has(.MuiModal-root) {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Fallback for older browsers */
+.MuiModal-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1300 !important;
+}
+
+/* Ensure body scroll is disabled when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
