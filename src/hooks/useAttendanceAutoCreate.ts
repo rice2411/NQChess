@@ -17,7 +17,10 @@ export const useAttendanceAutoCreate = () => {
         setIsCreating(true);
 
         // Kiểm tra xem đã tạo buổi điểm danh cho tháng hiện tại chưa
-        const currentMonth = format(new Date(), 'yyyy-MM');
+        const currentMonth = format(
+          typeof window !== 'undefined' ? new Date() : new Date(0),
+          'yyyy-MM'
+        );
 
         // Lưu tháng đã tạo vào localStorage để tránh tạo lại
         const storedMonth = localStorage.getItem('lastAttendanceCreatedMonth');
@@ -52,7 +55,8 @@ export const useAttendanceAutoCreate = () => {
 
   // Hàm tạo buổi điểm danh cho tháng hiện tại
   const createAttendanceForCurrentMonth = async (createdBy?: string) => {
-    const currentDate = new Date();
+    const currentDate =
+      typeof window !== 'undefined' ? new Date() : new Date(0);
     const currentMonth = format(currentDate, 'yyyy-MM');
 
     try {

@@ -57,16 +57,26 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-    );
+    // Kiểm tra xem có đang chạy trên client không
+    if (typeof window === 'undefined') {
+      return dateString; // Fallback cho server-side rendering
+    }
 
-    if (diffInHours < 1) return 'Vừa xong';
-    if (diffInHours < 24) return `${diffInHours} giờ trước`;
-    if (diffInHours < 48) return 'Hôm qua';
-    return date.toLocaleDateString('vi-VN');
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInHours = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+      );
+
+      if (diffInHours < 1) return 'Vừa xong';
+      if (diffInHours < 24) return `${diffInHours} giờ trước`;
+      if (diffInHours < 48) return 'Hôm qua';
+      return date.toLocaleDateString('vi-VN');
+    } catch (error) {
+      console.error('Lỗi format date:', error);
+      return dateString; // Fallback nếu có lỗi
+    }
   };
 
   return (

@@ -51,7 +51,8 @@ export default function TuitionManagement() {
   // Tạo danh sách tháng (12 tháng gần nhất)
   const generateMonthOptions = () => {
     const months = [];
-    const currentDate = new Date();
+    const currentDate =
+      typeof window !== 'undefined' ? new Date() : new Date(0);
 
     for (let i = 0; i < 12; i++) {
       const date = new Date(
@@ -74,9 +75,12 @@ export default function TuitionManagement() {
     loadClasses();
     // Set default month to current month
     const currentMonth =
-      new Date().getFullYear() +
+      (typeof window !== 'undefined' ? new Date() : new Date(0)).getFullYear() +
       '-' +
-      String(new Date().getMonth() + 1).padStart(2, '0');
+      String(
+        (typeof window !== 'undefined' ? new Date() : new Date(0)).getMonth() +
+          1
+      ).padStart(2, '0');
     setSelectedMonth(currentMonth);
   }, []);
 
@@ -139,7 +143,12 @@ export default function TuitionManagement() {
         tuitionId,
         status,
         paidAmount,
-        status === ETuitionStatus.PAID ? new Date().toISOString() : undefined
+        status === ETuitionStatus.PAID
+          ? (typeof window !== 'undefined'
+              ? new Date()
+              : new Date(0)
+            ).toISOString()
+          : undefined
       );
       setSnackbar({ open: true, message: 'Cập nhật trạng thái thành công!' });
       loadTuitionFees();

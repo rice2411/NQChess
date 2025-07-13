@@ -56,7 +56,9 @@ export default function StudentFormModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loading = useGlobalLoadingStore(state => state.loading);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>(form.avatar || '');
+  const [avatarPreview, setAvatarPreview] = useState<string>(
+    form?.avatar || ''
+  );
 
   const {
     control,
@@ -70,7 +72,7 @@ export default function StudentFormModal({
 
   useEffect(() => {
     reset(form);
-    setAvatarPreview(form.avatar || '');
+    setAvatarPreview(form?.avatar || '');
     setAvatarFile(null);
   }, [open, form, reset]);
 
@@ -88,7 +90,7 @@ export default function StudentFormModal({
   const onSubmit = async (values: FormValues) => {
     useGlobalLoadingStore.getState().setLoading(true);
     try {
-      let avatarUrl = values.avatar;
+      let avatarUrl = values?.avatar;
 
       // Upload avatar nếu có file mới
       if (avatarFile) {

@@ -202,7 +202,7 @@ export default function AttendanceModal({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <CalendarMonth />
           <Typography variant="h6">
-            Điểm danh - Buổi {session.sessionNumber}
+            Điểm danh - Buổi {session?.sessionNumber}
           </Typography>
         </Box>
 

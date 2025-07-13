@@ -16,9 +16,17 @@ export const useTuitionAutoCreate = () => {
 
         // Kiểm tra xem đã tạo học phí cho tháng hiện tại chưa
         const currentMonth =
-          new Date().getFullYear() +
+          (typeof window !== 'undefined'
+            ? new Date()
+            : new Date(0)
+          ).getFullYear() +
           '-' +
-          String(new Date().getMonth() + 1).padStart(2, '0');
+          String(
+            (typeof window !== 'undefined'
+              ? new Date()
+              : new Date(0)
+            ).getMonth() + 1
+          ).padStart(2, '0');
 
         // Lưu tháng đã tạo vào localStorage để tránh tạo lại
         const storedMonth = localStorage.getItem('lastTuitionCreatedMonth');

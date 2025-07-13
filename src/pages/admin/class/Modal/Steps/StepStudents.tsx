@@ -92,7 +92,7 @@ export default function StepStudents({
       student => ({
         studentId: student.id,
         fullName: student.fullName,
-        joinDate: new Date(),
+        joinDate: typeof window !== 'undefined' ? new Date() : new Date(0),
         type: addType,
         session: addType === EStudentClassType.HALF ? addSession : undefined,
         status: EStudentClassStatus.ONLINE,

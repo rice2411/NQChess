@@ -130,13 +130,23 @@ export default function AttendancesManagement() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('vi-VN', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    // Kiểm tra xem có đang chạy trên client không
+    if (typeof window === 'undefined') {
+      return dateStr; // Fallback cho server-side rendering
+    }
+
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch (error) {
+      console.error('Lỗi format date:', error);
+      return dateStr; // Fallback nếu có lỗi
+    }
   };
 
   const formatTime = (timeStr: string) => {

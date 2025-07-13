@@ -408,9 +408,11 @@ export default function PostsPage() {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {format(new Date(post.createdAt), 'dd/MM/yyyy', {
-                      locale: vi,
-                    })}
+                    {typeof window !== 'undefined'
+                      ? format(new Date(post.createdAt), 'dd/MM/yyyy', {
+                          locale: vi,
+                        })
+                      : post.createdAt.split('T')[0]}
                   </Typography>
                 </TableCell>
                 <TableCell align="center">

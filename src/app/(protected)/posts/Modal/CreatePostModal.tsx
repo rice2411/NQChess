@@ -442,7 +442,9 @@ export default function CreatePostModal({
                         Current User
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {new Date().toLocaleDateString('vi-VN')}
+                        {typeof window !== 'undefined'
+                          ? new Date().toLocaleDateString('vi-VN')
+                          : new Date().toISOString().split('T')[0]}
                       </Typography>
                     </Box>
                   </Box>

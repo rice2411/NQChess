@@ -82,7 +82,7 @@ export default function AddEditClassModal({
       name: '',
       tuition: '',
       status: EClassStatus.NOT_STARTED,
-      startDate: new Date(),
+      startDate: typeof window !== 'undefined' ? new Date() : new Date(0),
       startTime: new Date(0, 0, 0, 0, 0), // 00:00
       endTime: new Date(0, 0, 0, 23, 59), // 23:59
       weekday: 'Thứ 2',
@@ -140,7 +140,10 @@ export default function AddEditClassModal({
       setValue('name', '');
       setValue('tuition', '');
       setValue('status', EClassStatus.NOT_STARTED);
-      setValue('startDate', new Date());
+      setValue(
+        'startDate',
+        typeof window !== 'undefined' ? new Date() : new Date(0)
+      );
       setValue('schedules', []);
       setValue('students', []);
       setActiveStep(0);
