@@ -28,7 +28,9 @@ export class AttendanceService {
   static async createAttendance(
     data: Omit<IAttendance, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<IAttendance> {
-    const now = new Date().toISOString();
+    const now = (
+      typeof window !== 'undefined' ? new Date() : new Date(0)
+    ).toISOString();
     const newAttendance = {
       ...data,
       createdAt: now,
@@ -91,7 +93,10 @@ export class AttendanceService {
   ): Promise<void> {
     const updateData = {
       ...data,
-      updatedAt: new Date().toISOString(),
+      updatedAt: (typeof window !== 'undefined'
+        ? new Date()
+        : new Date(0)
+      ).toISOString(),
     };
     await updateDoc(doc(db, COLLECTION, id), updateData);
   }
@@ -131,13 +136,16 @@ export class AttendanceService {
     }
 
     // Tính toán các ngày học trong tháng
-    const monthStart = new Date(`${month}-01`);
-    const monthEnd = new Date(
-      monthStart.getFullYear(),
-      monthStart.getMonth() + 1,
-      0
-    );
-    const startDate = new Date(classData.startDate);
+    const monthStart =
+      typeof window !== 'undefined' ? new Date(`${month}-01`) : new Date(0);
+    const monthEnd =
+      typeof window !== 'undefined'
+        ? new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0)
+        : new Date(0);
+    const startDate =
+      typeof window !== 'undefined'
+        ? new Date(classData.startDate)
+        : new Date(0);
 
     // Chỉ tạo buổi điểm danh nếu tháng này >= tháng bắt đầu lớp học
     if (
@@ -148,7 +156,8 @@ export class AttendanceService {
     }
 
     // Tạo buổi điểm danh cho từng ngày học trong tháng
-    const currentDate = new Date(monthStart);
+    const currentDate =
+      typeof window !== 'undefined' ? new Date(monthStart) : new Date(0);
     let sessionNumber = 1;
 
     while (currentDate <= monthEnd) {
@@ -310,7 +319,10 @@ export class AttendanceService {
     await updateDoc(doc(db, COLLECTION, attendanceId), {
       attendanceRecords: updatedRecords,
       ...stats,
-      updatedAt: new Date().toISOString(),
+      updatedAt: (typeof window !== 'undefined'
+        ? new Date()
+        : new Date(0)
+      ).toISOString(),
     });
   }
 
