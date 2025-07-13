@@ -12,10 +12,10 @@ export default function LayoutSelector({
 }) {
   const pathname = usePathname();
   const isAnonymous = Object.values(ROUTES_ANONYMOUS).some(route =>
-    pathname.includes(route)
+    pathname?.includes(route)
   );
   const isAdmin = Object.values(ROUTES_ADMIN).some(route =>
-    pathname.includes(route)
+    pathname?.includes(route)
   );
 
   if (isAdmin) {

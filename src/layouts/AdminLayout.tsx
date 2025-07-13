@@ -6,12 +6,20 @@ import SidebarAdmin from '@/components/layout/admin/SidebarAdmin';
 import NavbarAdmin from '@/components/layout/admin/NavbarAdmin';
 import { Box } from '@mui/material';
 import { ModalProvider } from '@/providers/ModalProvider';
+import { useTuitionAutoCreate } from '@/hooks/useTuitionAutoCreate';
+import { useAttendanceAutoCreate } from '@/hooks/useAttendanceAutoCreate';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Tự động tạo học phí khi admin đăng nhập
+  useTuitionAutoCreate();
+
+  // Tự động tạo buổi điểm danh khi admin đăng nhập
+  useAttendanceAutoCreate();
+
   return (
     <AuthInitProvider>
       <ThemeRegistry>

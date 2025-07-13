@@ -104,6 +104,127 @@ export class AttendanceService {
     await deleteDoc(doc(db, COLLECTION, id));
   }
 
+  // Tạo buổi điểm danh cho tháng mới
+  static async createAttendanceForMonth(
+    classId: string,
+    month: string, // Format: YYYY-MM
+    createdBy?: string
+  ): Promise<void> {
+    const classData = await ClassService.getClassById(classId);
+    if (!classData) {
+      throw new Error('Class not found');
+    }
+
+    // Kiểm tra xem đã tạo buổi điểm danh cho tháng này chưa
+    const existingAttendance = await this.getAttendanceByClass(
+      classId,
+      1,
+      1000
+    );
+    const monthAttendance = existingAttendance.attendance.filter(att => {
+      const attendanceMonth = att.sessionDate.substring(0, 7); // Lấy YYYY-MM
+      return attendanceMonth === month;
+    });
+
+    if (monthAttendance.length > 0) {
+      console.log(
+        `Đã tạo buổi điểm danh cho lớp ${classData.name} tháng ${month}`
+      );
+      return;
+    }
+
+    // Tính toán các ngày học trong tháng
+    const monthStart = new Date(`${month}-01`);
+    const monthEnd = new Date(
+      monthStart.getFullYear(),
+      monthStart.getMonth() + 1,
+      0
+    );
+    const startDate = new Date(classData.startDate);
+
+    // Chỉ tạo buổi điểm danh nếu tháng này >= tháng bắt đầu lớp học
+    if (
+      monthStart < new Date(startDate.getFullYear(), startDate.getMonth(), 1)
+    ) {
+      console.log(`Lớp ${classData.name} chưa bắt đầu trong tháng ${month}`);
+      return;
+    }
+
+    // Tạo buổi điểm danh cho từng ngày học trong tháng
+    const currentDate = new Date(monthStart);
+    let sessionNumber = 1;
+
+    while (currentDate <= monthEnd) {
+      const dayOfWeek = currentDate.getDay();
+      const weekdays = [
+        'Chủ nhật',
+        'Thứ 2',
+        'Thứ 3',
+        'Thứ 4',
+        'Thứ 5',
+        'Thứ 6',
+        'Thứ 7',
+      ];
+      const currentWeekday = weekdays[dayOfWeek];
+
+      // Kiểm tra xem có lịch học nào vào thứ này không
+      const hasSchedule = classData.schedules.some(schedule =>
+        schedule.includes(currentWeekday)
+      );
+
+      // Chỉ tạo buổi điểm danh nếu:
+      // 1. Có lịch học vào thứ này
+      // 2. Ngày hiện tại >= ngày bắt đầu lớp học
+      if (hasSchedule && currentDate >= startDate) {
+        const sessionDate = currentDate.toISOString().split('T')[0];
+
+        // Tạo buổi điểm danh cho từng lịch học trong ngày
+        for (const schedule of classData.schedules) {
+          if (schedule.includes(currentWeekday)) {
+            try {
+              // Kiểm tra xem buổi điểm danh đã tồn tại chưa
+              const exists = await this.checkAttendanceExists(
+                classId,
+                sessionNumber,
+                sessionDate
+              );
+
+              if (!exists) {
+                await this.createAttendanceSession(
+                  classId,
+                  sessionNumber,
+                  sessionDate,
+                  schedule,
+                  createdBy
+                );
+                console.log(
+                  `✅ Đã tạo buổi điểm danh số ${sessionNumber} cho ${sessionDate} (${schedule})`
+                );
+              } else {
+                console.log(
+                  `⏭️ Buổi điểm danh số ${sessionNumber} cho ${sessionDate} đã tồn tại`
+                );
+              }
+
+              sessionNumber++;
+            } catch (error) {
+              console.error(
+                `❌ Lỗi khi tạo buổi điểm danh số ${sessionNumber}:`,
+                error
+              );
+            }
+          }
+        }
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    console.log(
+      `Đã tạo ${sessionNumber - 1} buổi điểm danh cho lớp ${classData.name} tháng ${month}`
+    );
+  }
+
   // Lấy danh sách điểm danh theo lớp học
   static async getAttendanceByClass(
     classId: string,

@@ -17,7 +17,7 @@ export default function DefaultLayout({
         <ModalProvider>
           <GlobalLoading />
           <Navbar />
-          <Container maxWidth="sm" disableGutters>
+          <Container maxWidth={false} disableGutters>
             {children}
           </Container>
         </ModalProvider>
