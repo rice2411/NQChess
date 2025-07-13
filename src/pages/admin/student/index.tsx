@@ -25,7 +25,7 @@ import StudentService from '@/services/student.service';
 import Pagination from '@/components/ui/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
-import { StudentFormModal } from './Modal';
+import StudentFormModal from './Modal/StudentFormModal';
 import { useModalConfirm } from '@/hooks/useModalConfirm';
 
 export default function StudentManagement() {
