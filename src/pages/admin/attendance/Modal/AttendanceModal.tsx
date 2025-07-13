@@ -35,6 +35,7 @@ import {
   EAttendanceStatus,
 } from '@/interfaces/attendance.interface';
 import { IClass } from '@/interfaces/class.interface';
+import { formatSafeLocaleDate } from '@/utils/ssrUtils';
 
 interface AttendanceModalProps {
   session: IAttendance;
@@ -151,8 +152,7 @@ export default function AttendanceModal({
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('vi-VN', {
+    return formatSafeLocaleDate(dateStr, 'vi-VN', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -217,7 +217,9 @@ export default function AttendanceModal({
                       Ngày học
                     </Typography>
                     <Typography variant="h6" fontWeight="bold">
-                      {formatDate(session.sessionDate)}
+                      {session?.sessionDate
+                        ? formatDate(session.sessionDate)
+                        : 'N/A'}
                     </Typography>
                   </Box>
                 </Grid>
@@ -227,7 +229,9 @@ export default function AttendanceModal({
                       Thời gian
                     </Typography>
                     <Typography variant="h6" fontWeight="bold">
-                      {formatTime(session.sessionTime)}
+                      {session?.sessionTime
+                        ? formatTime(session.sessionTime)
+                        : 'N/A'}
                     </Typography>
                   </Box>
                 </Grid>
@@ -237,7 +241,7 @@ export default function AttendanceModal({
                       Lớp học
                     </Typography>
                     <Typography variant="h6" fontWeight="bold">
-                      {session.className}
+                      {session?.className || 'N/A'}
                     </Typography>
                   </Box>
                 </Grid>

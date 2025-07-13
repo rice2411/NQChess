@@ -27,6 +27,7 @@ import {
 import { IStudent } from '@/interfaces/student.interface';
 import { StudentService } from '@/services/student.service';
 import React from 'react';
+import { useClientEffect } from '@/hooks/useSSR';
 
 interface StepStudentsProps {
   studentFields: any[];
@@ -56,14 +57,17 @@ export default function StepStudents({
   const [addSession, setAddSession] = React.useState<string>('');
 
   // Lấy schedules từ form
-  const schedules = getValues('schedules') || [];
+  const schedules =
+    typeof window !== 'undefined' && getValues
+      ? getValues('schedules') || []
+      : [];
   const sessionOptions = schedules.map((schedule: any) => ({
     value: schedule.label,
     label: schedule.label,
   }));
 
   // Load danh sách học sinh từ Firebase
-  React.useEffect(() => {
+  useClientEffect(() => {
     const loadStudents = async () => {
       try {
         setLoading(true);
@@ -81,7 +85,9 @@ export default function StepStudents({
     loadStudents();
   }, []);
 
-  const availableStudents = allStudents.filter(
+  const availableStudents = (
+    typeof window !== 'undefined' ? allStudents : []
+  ).filter(
     student => !studentFields.some(field => field.studentId === student.id)
   );
 
@@ -122,7 +128,10 @@ export default function StepStudents({
   const getSessionName = (sessionId?: string) => {
     if (!sessionId) return 'Full buổi';
 
-    const schedules = getValues('schedules') || [];
+    const schedules =
+      typeof window !== 'undefined' && getValues
+        ? getValues('schedules') || []
+        : [];
     const sessionIndex = parseInt(sessionId.split('-')[1]);
 
     if (sessionIndex >= 0 && sessionIndex < schedules.length) {

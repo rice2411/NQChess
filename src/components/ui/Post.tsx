@@ -21,6 +21,7 @@ import {
   Share,
   MoreVert,
 } from '@mui/icons-material';
+import { formatSafeLocaleDate } from '@/utils/ssrUtils';
 
 export interface PostData {
   id: string;
@@ -72,7 +73,7 @@ export default function Post({ post, onLike, onComment, onShare }: PostProps) {
       if (diffInHours < 1) return 'Vừa xong';
       if (diffInHours < 24) return `${diffInHours} giờ trước`;
       if (diffInHours < 48) return 'Hôm qua';
-      return date.toLocaleDateString('vi-VN');
+      return formatSafeLocaleDate(date, 'vi-VN');
     } catch (error) {
       console.error('Lỗi format date:', error);
       return dateString; // Fallback nếu có lỗi
