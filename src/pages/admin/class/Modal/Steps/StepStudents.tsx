@@ -88,11 +88,12 @@ export default function StepStudents({
   const availableStudents = (
     typeof window !== 'undefined' ? allStudents : []
   ).filter(
-    student => !studentFields.some(field => field.studentId === student.id)
+    student =>
+      !(studentFields || []).some(field => field.studentId === student.id)
   );
 
   const handleAddStudents = () => {
-    if (selectedStudents.length === 0) return;
+    if (!selectedStudents || selectedStudents.length === 0) return;
 
     const newStudentClasses: IStudentClass[] = selectedStudents.map(
       student => ({
@@ -122,7 +123,7 @@ export default function StepStudents({
   };
 
   const getStudentById = (studentId: string) => {
-    return allStudents.find(student => student.id === studentId);
+    return (allStudents || []).find(student => student.id === studentId);
   };
 
   const getSessionName = (sessionId?: string) => {
@@ -134,7 +135,7 @@ export default function StepStudents({
         : [];
     const sessionIndex = parseInt(sessionId.split('-')[1]);
 
-    if (sessionIndex >= 0 && sessionIndex < schedules.length) {
+    if (sessionIndex >= 0 && schedules && sessionIndex < schedules.length) {
       return schedules[sessionIndex].label;
     }
 
@@ -182,7 +183,7 @@ export default function StepStudents({
                 inputProps={{
                   ...params.inputProps,
                   placeholder:
-                    selectedStudents.length === 0
+                    !selectedStudents || selectedStudents.length === 0
                       ? loading
                         ? 'Đang tải...'
                         : 'Chọn một hoặc nhiều học sinh'
@@ -191,7 +192,7 @@ export default function StepStudents({
               />
             )}
             renderTags={(value, getTagProps) =>
-              value.map((option, index) => {
+              (value || []).map((option, index) => {
                 const { key, ...chipProps } = getTagProps({ index });
                 return (
                   <Chip
@@ -253,7 +254,7 @@ export default function StepStudents({
               sx={{ mb: 2 }}
               InputLabelProps={{ shrink: true }}
             >
-              {sessionOptions.map(
+              {(sessionOptions || []).map(
                 (option: { value: string; label: string }) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
@@ -268,13 +269,14 @@ export default function StepStudents({
             startIcon={<PersonAdd />}
             onClick={handleAddStudents}
             disabled={
+              !selectedStudents ||
               selectedStudents.length === 0 ||
               (addType === EStudentClassType.HALF && !addSession) ||
               loading
             }
           >
             Thêm{' '}
-            {selectedStudents.length > 0
+            {selectedStudents && selectedStudents.length > 0
               ? `${selectedStudents.length} học sinh`
               : 'học sinh'}{' '}
             vào lớp
@@ -285,80 +287,86 @@ export default function StepStudents({
       <Card>
         <CardContent>
           <Typography variant="h6" mb={2}>
-            Học sinh trong lớp ({studentFields.length})
+            Học sinh trong lớp ({(studentFields || []).length})
           </Typography>
           <List dense>
-            {studentFields.map((studentClass: IStudentClass, index: number) => {
-              const student = getStudentById(studentClass.studentId);
-              if (!student) return null;
-              return (
-                <ListItem
-                  key={studentClass.studentId}
-                  divider
-                  secondaryAction={
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleRemoveStudent(index)}
-                    >
-                      <PersonRemove />
-                    </IconButton>
-                  }
-                >
-                  <ListItemAvatar>
-                    <Avatar src={student.avatar} sx={{ width: 40, height: 40 }}>
-                      <Person />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={student.fullName}
-                    secondary={
-                      <Box>
-                        <Box
-                          component="span"
-                          sx={{
-                            color: 'text.secondary',
-                            fontSize: 13,
-                            display: 'block',
-                          }}
-                        >
-                          {student.phoneNumber}
-                        </Box>
-                        <Box
-                          sx={{
-                            mt: 1,
-                            display: 'flex',
-                            gap: 1,
-                            flexWrap: 'wrap',
-                          }}
-                        >
-                          <Chip
-                            label={getSessionName(studentClass.session)}
-                            size="small"
-                            color={
-                              studentClass.type === EStudentClassType.FULL
-                                ? 'primary'
-                                : 'secondary'
-                            }
-                          />
-                          <Chip
-                            label={
-                              studentClass.status === EStudentClassStatus.ONLINE
-                                ? 'Online'
-                                : 'Offline'
-                            }
-                            size="small"
-                            variant="outlined"
-                          />
-                        </Box>
-                      </Box>
+            {(studentFields || []).map(
+              (studentClass: IStudentClass, index: number) => {
+                const student = getStudentById(studentClass.studentId);
+                if (!student) return null;
+                return (
+                  <ListItem
+                    key={studentClass.studentId}
+                    divider
+                    secondaryAction={
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleRemoveStudent(index)}
+                      >
+                        <PersonRemove />
+                      </IconButton>
                     }
-                    disableTypography
-                  />
-                </ListItem>
-              );
-            })}
-            {studentFields.length === 0 && (
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        src={student.avatar}
+                        sx={{ width: 40, height: 40 }}
+                      >
+                        <Person />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={student.fullName}
+                      secondary={
+                        <Box>
+                          <Box
+                            component="span"
+                            sx={{
+                              color: 'text.secondary',
+                              fontSize: 13,
+                              display: 'block',
+                            }}
+                          >
+                            {student.phoneNumber}
+                          </Box>
+                          <Box
+                            sx={{
+                              mt: 1,
+                              display: 'flex',
+                              gap: 1,
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            <Chip
+                              label={getSessionName(studentClass.session)}
+                              size="small"
+                              color={
+                                studentClass.type === EStudentClassType.FULL
+                                  ? 'primary'
+                                  : 'secondary'
+                              }
+                            />
+                            <Chip
+                              label={
+                                studentClass.status ===
+                                EStudentClassStatus.ONLINE
+                                  ? 'Online'
+                                  : 'Offline'
+                              }
+                              size="small"
+                              variant="outlined"
+                            />
+                          </Box>
+                        </Box>
+                      }
+                      disableTypography
+                    />
+                  </ListItem>
+                );
+              }
+            )}
+            {(studentFields || []).length === 0 && (
               <Typography
                 variant="body2"
                 color="text.secondary"
