@@ -1,16 +1,12 @@
 import {
   collection,
   getDocs,
-  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
   query,
   orderBy,
-  limit,
-  startAfter,
-  QueryConstraint,
   where,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';

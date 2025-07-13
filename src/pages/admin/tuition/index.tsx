@@ -21,25 +21,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
   Card,
   CardContent,
 } from '@mui/material';
-import {
-  Add,
-  Edit,
-  Delete,
-  AttachMoney,
-  CheckCircle,
-  Warning,
-  Schedule,
-  Refresh,
-} from '@mui/icons-material';
+import { Add, CheckCircle, Warning, Refresh } from '@mui/icons-material';
 import { TuitionService } from '@/services/tuition.service';
 import { ClassService } from '@/services/class.service';
 import {
@@ -50,7 +35,6 @@ import {
 import { IClass } from '@/interfaces/class.interface';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { useModalConfirm } from '@/hooks/useModalConfirm';
 
 export default function TuitionManagement() {
   const [tuitionFees, setTuitionFees] = useState<ITuitionFee[]>([]);
@@ -58,15 +42,11 @@ export default function TuitionManagement() {
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [summary, setSummary] = useState<ITuitionSummary | null>(null);
-  const [openModal, setOpenModal] = useState(false);
-  const [editingTuition, setEditingTuition] = useState<ITuitionFee | null>(
-    null
-  );
+
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
   const [loading, setLoading] = useState(false);
 
   // Confirm hook
-  const { confirm } = useModalConfirm();
 
   // Tạo danh sách tháng (12 tháng gần nhất)
   const generateMonthOptions = () => {
@@ -113,6 +93,7 @@ export default function TuitionManagement() {
       const result = await ClassService.getClasses(1, 1000);
       setClasses(result.classes);
     } catch (error) {
+      console.error(error);
       setSnackbar({ open: true, message: 'Không thể tải danh sách lớp học' });
     } finally {
       setLoading(false);
@@ -128,6 +109,7 @@ export default function TuitionManagement() {
       );
       setTuitionFees(fees);
     } catch (error) {
+      console.error(error);
       setSnackbar({ open: true, message: 'Không thể tải danh sách học phí' });
     } finally {
       setLoading(false);
@@ -163,6 +145,7 @@ export default function TuitionManagement() {
       loadTuitionFees();
       loadSummary();
     } catch (error) {
+      console.error(error);
       setSnackbar({ open: true, message: 'Có lỗi khi cập nhật trạng thái' });
     } finally {
       setLoading(false);
@@ -185,6 +168,7 @@ export default function TuitionManagement() {
       loadTuitionFees();
       loadSummary();
     } catch (error) {
+      console.error(error);
       setSnackbar({ open: true, message: 'Có lỗi khi tạo học phí' });
     } finally {
       setLoading(false);

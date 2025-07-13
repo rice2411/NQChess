@@ -77,7 +77,7 @@ export function calculateClassDates(
   }
 
   let sessionNumber = 1;
-  let currentDate = new Date(start);
+  const currentDate = new Date(start);
 
   // Tìm tất cả ngày học trong khoảng thời gian
   while (currentDate <= end) {

@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Add, Delete } from '@mui/icons-material';
 import { Controller, Control, FieldErrors, useWatch } from 'react-hook-form';
 import { ClassFormValues } from '../AddEditClassModal';

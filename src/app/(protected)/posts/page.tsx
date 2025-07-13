@@ -196,6 +196,7 @@ export default function PostsPage() {
           });
           fetchPosts(search, true); // Reset pagination khi xóa
         } catch (error) {
+          console.error('Error deleting post:', error);
           setSnackbar({
             open: true,
             message: 'Không thể xóa bài viết',

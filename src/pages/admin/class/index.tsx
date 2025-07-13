@@ -49,6 +49,7 @@ export default function ClassManagement() {
       setClasses(res.classes);
       setTotal(res.total);
     } catch (error) {
+      console.error(error);
       setSnackbar({ open: true, message: 'Không thể tải danh sách lớp học' });
     } finally {
       setLoading(false);

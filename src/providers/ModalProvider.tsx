@@ -68,6 +68,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       await confirmModal.onConfirm();
       hideConfirm();
     } catch (error) {
+      console.error(error);
       // Có thể xử lý lỗi ở đây nếu muốn
     } finally {
       setConfirmModal(prev => ({ ...prev, loading: false }));

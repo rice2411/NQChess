@@ -150,21 +150,6 @@ export default function AttendanceModal({
     }
   };
 
-  const getStatusColor = (status: EAttendanceStatus) => {
-    switch (status) {
-      case EAttendanceStatus.PRESENT:
-        return 'success';
-      case EAttendanceStatus.ABSENT:
-        return 'error';
-      case EAttendanceStatus.LATE:
-        return 'warning';
-      case EAttendanceStatus.EXCUSED:
-        return 'info';
-      default:
-        return 'default';
-    }
-  };
-
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('vi-VN', {

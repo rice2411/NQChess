@@ -8,10 +8,9 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Box,
   Typography,
 } from '@mui/material';
-import { useForm, useFieldArray, Control, FieldErrors } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import StepClassInfo from './Steps/StepClassInfo';
 import StepSchedules from './Steps/StepSchedules';
 import StepStudents from './Steps/StepStudents';
@@ -77,7 +76,7 @@ export default function AddEditClassModal({
     setValue,
     getValues,
     trigger,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<ClassFormValues>({
     defaultValues: {
       name: '',
@@ -220,6 +219,7 @@ export default function AddEditClassModal({
 
     // Filter out undefined values
     const filteredData = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(cleanData).filter(([_, value]) => value !== undefined)
     );
 

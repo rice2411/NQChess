@@ -8,8 +8,6 @@ import {
   doc,
   query,
   orderBy,
-  limit,
-  startAfter,
   where,
   QueryConstraint,
 } from 'firebase/firestore';
@@ -21,7 +19,6 @@ import {
   IAttendanceFilter,
   EAttendanceStatus,
 } from '@/interfaces/attendance.interface';
-import { IClass } from '@/interfaces/class.interface';
 import { ClassService } from './class.service';
 
 const COLLECTION = 'attendance';
@@ -47,7 +44,7 @@ export class AttendanceService {
     pageSize = 10,
     filters?: IAttendanceFilter
   ): Promise<{ attendance: IAttendance[]; total: number; hasMore: boolean }> {
-    let constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
+    const constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
 
     if (filters?.classId) {
       constraints.push(where('classId', '==', filters.classId));
@@ -260,7 +257,7 @@ export class AttendanceService {
     page = 1,
     pageSize = 10
   ): Promise<{ attendance: IAttendance[]; total: number; hasMore: boolean }> {
-    let constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
+    const constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
 
     if (classId) {
       constraints.push(where('classId', '==', classId));
@@ -417,7 +414,7 @@ export class AttendanceService {
     studentId: string,
     classId?: string
   ): Promise<IAttendanceSummary> {
-    let constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
+    const constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
 
     if (classId) {
       constraints.push(where('classId', '==', classId));

@@ -6,24 +6,19 @@ import {
   CardContent,
   CardHeader,
   Typography,
-  Button,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Chip,
   Box,
-  Grid,
   CircularProgress,
-  Alert,
 } from '@mui/material';
 import {
   CalendarMonth,
   People,
   AccessTime,
   CheckCircle,
-  Cancel,
-  Warning,
   School,
 } from '@mui/icons-material';
 import { ClassService } from '@/services/class.service';
@@ -132,36 +127,6 @@ export default function AttendancesManagement() {
   const handleAttendanceUpdate = async () => {
     // Reload buổi điểm danh sau khi cập nhật
     await loadAttendanceSessions();
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'PRESENT':
-        return <CheckCircle sx={{ color: 'success.main', fontSize: 16 }} />;
-      case 'ABSENT':
-        return <Cancel sx={{ color: 'error.main', fontSize: 16 }} />;
-      case 'LATE':
-        return <Warning sx={{ color: 'warning.main', fontSize: 16 }} />;
-      case 'EXCUSED':
-        return <Warning sx={{ color: 'info.main', fontSize: 16 }} />;
-      default:
-        return <AccessTime sx={{ color: 'text.secondary', fontSize: 16 }} />;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'PRESENT':
-        return 'Có mặt';
-      case 'ABSENT':
-        return 'Vắng mặt';
-      case 'LATE':
-        return 'Đi muộn';
-      case 'EXCUSED':
-        return 'Có phép';
-      default:
-        return 'Chưa điểm danh';
-    }
   };
 
   const formatDate = (dateStr: string) => {

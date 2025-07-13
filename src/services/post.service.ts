@@ -11,16 +11,9 @@ import {
   orderBy,
   QueryConstraint,
   limit,
-  startAfter,
-  Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import {
-  Post,
-  CreatePostRequest,
-  UpdatePostRequest,
-  PostFilters,
-} from '@/interfaces/post.interface';
+import { Post } from '@/interfaces/post.interface';
 import { CloudinaryService } from '@/services/cloudinary.service';
 
 // Collection names

@@ -15,9 +15,7 @@ import {
   Avatar,
   IconButton,
   Card,
-  CardMedia,
   CardContent,
-  Chip,
   ImageList,
   ImageListItem,
   ImageListItemBar,
@@ -26,7 +24,7 @@ import {
 } from '@mui/material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { PhotoCamera, Close, Add, Edit, Visibility } from '@mui/icons-material';
+import { Close, Add, Edit, Visibility } from '@mui/icons-material';
 
 import {
   Post,

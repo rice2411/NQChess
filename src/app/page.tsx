@@ -9,8 +9,6 @@ import {
   CircularProgress,
   Alert,
   Button,
-  Card,
-  CardContent,
   Avatar,
   Chip,
   Divider,
@@ -29,7 +27,6 @@ import {
   LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import { postService } from '@/services/post.service';
-import { Post as PostInterface } from '@/interfaces/post.interface';
 
 // Mock data cho giáo viên
 const mockTeachers = [

@@ -8,16 +8,11 @@ import {
   doc,
   query,
   orderBy,
-  limit,
-  startAfter,
-  QueryConstraint,
-  where,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
   IClass,
   IStudentClass,
-  EClassStatus,
   EStudentClassType,
 } from '@/interfaces/class.interface';
 import { AttendanceService } from './attendance.service';
@@ -121,17 +116,6 @@ export class ClassService {
     if (!classDoc || !classDoc.schedules || classDoc.schedules.length === 0) {
       return;
     }
-
-    // Lấy buổi điểm danh cuối cùng để biết sessionNumber tiếp theo
-    const attendanceList = await AttendanceService.getAttendanceByClass(
-      classId,
-      1,
-      1
-    );
-    const lastSessionNumber =
-      attendanceList.attendance.length > 0
-        ? Math.max(...attendanceList.attendance.map(a => a.sessionNumber))
-        : 0;
 
     // Tính toán các ngày học từ ngày hiện tại trở đi
     const currentDate = new Date();
@@ -320,11 +304,7 @@ export class ClassService {
 
     // Tạo danh sách tháng cần tạo học phí (từ tháng hiện tại đến tháng tiếp theo)
     const currentDate = new Date();
-    const currentMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
+
     const nextMonth = new Date(currentDate);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
 
