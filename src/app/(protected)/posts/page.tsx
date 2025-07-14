@@ -7,9 +7,7 @@ import {
   Card,
   CardContent,
   Chip,
-  Grid,
   IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -35,7 +33,6 @@ import {
   Publish as PublishIcon,
   Archive as ArchiveIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -90,7 +87,6 @@ export default function PostsPage() {
     initialPage: 1,
   });
 
-  const modalAlert = useModalAlert();
   const modalConfirm = useModalConfirm();
   const { setLoading: setGlobalLoading } = useGlobalLoadingStore();
 
