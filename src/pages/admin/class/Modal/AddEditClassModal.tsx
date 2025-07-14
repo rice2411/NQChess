@@ -12,9 +12,6 @@ import {
 } from '@mui/material';
 import { useForm, useFieldArray } from 'react-hook-form';
 import dynamic from 'next/dynamic';
-import StepClassInfo from './Steps/StepClassInfo';
-import StepSchedules from './Steps/StepSchedules';
-import StepStudents from './Steps/StepStudents';
 import {
   EClassStatus,
   IClass,
