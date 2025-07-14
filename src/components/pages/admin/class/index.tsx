@@ -35,7 +35,7 @@ export default function ClassManagement() {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Confirm delete hook - chỉ sử dụng khi đã mounted
+  // Confirm delete hook
   const modalConfirm = useModalConfirm();
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function ClassManagement() {
   }
 
   function handleDeleteClick(cls: IClass) {
-    if (!mounted || !modalConfirm) return;
+    if (!mounted) return;
 
     modalConfirm.confirm(
       async () => {
