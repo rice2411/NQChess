@@ -1,3 +1,4 @@
+'use client';
 import { TextField, MenuItem, Box, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';

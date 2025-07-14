@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useState } from 'react';
 import { AttendanceService } from '@/services/attendance.service';
 import { ClassService } from '@/services/class.service';

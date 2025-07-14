@@ -1,3 +1,4 @@
+'use client';
 import { create } from 'zustand';
 
 interface GlobalLoadingState {
@@ -5,7 +6,7 @@ interface GlobalLoadingState {
   setLoading: (loading: boolean) => void;
 }
 
-export const useGlobalLoadingStore = create<GlobalLoadingState>((set) => ({
+export const useGlobalLoadingStore = create<GlobalLoadingState>(set => ({
   loading: false,
-  setLoading: (loading) => set({ loading }),
-})); 
+  setLoading: loading => set({ loading }),
+}));

@@ -1,3 +1,4 @@
+'use client';
 import { create } from 'zustand';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';

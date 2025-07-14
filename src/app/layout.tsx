@@ -1,18 +1,18 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 import LayoutSelector from '../layouts/LayoutSelector';
+import { ModalProvider } from '@/providers/ModalProvider';
 
-
-const inter = Inter({ 
-  subsets: ["latin"],
+const inter = Inter({
+  subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
-  title: "Như Quỳnh Chess",
-  description: "Nền tảng quản lý lớp học cờ vua",
+  title: 'Như Quỳnh Chess',
+  description: 'Nền tảng quản lý lớp học cờ vua',
 };
 
 export default function RootLayout({
@@ -20,7 +20,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="vi" className={inter.variable}>
       <head>
@@ -30,7 +29,9 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <LayoutSelector>{children}</LayoutSelector>
+        <ModalProvider>
+          <LayoutSelector>{children}</LayoutSelector>
+        </ModalProvider>
       </body>
     </html>
   );

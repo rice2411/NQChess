@@ -1,3 +1,4 @@
+'use client';
 import { useModalContext } from '@/providers/ModalProvider';
 
 interface ConfirmConfig {

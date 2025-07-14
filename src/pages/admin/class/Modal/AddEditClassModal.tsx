@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useForm, useFieldArray } from 'react-hook-form';
+import dynamic from 'next/dynamic';
 import StepClassInfo from './Steps/StepClassInfo';
 import StepSchedules from './Steps/StepSchedules';
 import StepStudents from './Steps/StepStudents';
@@ -59,6 +60,17 @@ interface AddEditClassModalProps {
   loading?: boolean;
 }
 
+// Dynamic imports để tránh SSR issues
+const DynamicStepClassInfo = dynamic(() => import('./Steps/StepClassInfo'), {
+  ssr: false,
+});
+const DynamicStepSchedules = dynamic(() => import('./Steps/StepSchedules'), {
+  ssr: false,
+});
+const DynamicStepStudents = dynamic(() => import('./Steps/StepStudents'), {
+  ssr: false,
+});
+
 export default function AddEditClassModal({
   open,
   editing,
@@ -68,6 +80,7 @@ export default function AddEditClassModal({
 }: AddEditClassModalProps) {
   const steps = ['Thông tin lớp', 'Buổi học', 'Học sinh'];
   const [activeStep, setActiveStep] = React.useState(0);
+  const [isClient, setIsClient] = useState(false);
 
   // React Hook Form setup
   const {
@@ -103,8 +116,15 @@ export default function AddEditClassModal({
     update: updateStudent,
   } = useFieldArray({ control, name: 'students' });
 
+  // Kiểm tra client-side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Populate form data when editing
   useEffect(() => {
+    if (!isClient) return;
+
     if (editing && open) {
       // Set basic class info
       setValue('name', editing.name || '');
@@ -148,7 +168,7 @@ export default function AddEditClassModal({
       setValue('students', []);
       setActiveStep(0);
     }
-  }, [editing, open, setValue]);
+  }, [editing, open, setValue, isClient]);
 
   const handleNext = async () => {
     if (activeStep === 0) {
@@ -246,11 +266,11 @@ export default function AddEditClassModal({
       <DialogContent
         sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}
       >
-        {activeStep === 0 && (
-          <StepClassInfo control={control} errors={errors} />
+        {activeStep === 0 && isClient && (
+          <DynamicStepClassInfo control={control} errors={errors} />
         )}
-        {activeStep === 1 && (
-          <StepSchedules
+        {activeStep === 1 && isClient && (
+          <DynamicStepSchedules
             control={control}
             errors={errors}
             scheduleFields={scheduleFields}
@@ -258,8 +278,8 @@ export default function AddEditClassModal({
             removeSchedule={removeSchedule}
           />
         )}
-        {activeStep === 2 && (
-          <StepStudents
+        {activeStep === 2 && isClient && (
+          <DynamicStepStudents
             control={control}
             errors={errors}
             studentFields={studentFields}
