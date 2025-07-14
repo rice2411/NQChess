@@ -154,19 +154,21 @@ export default function StepStudents({
             multiple
             options={availableStudents}
             getOptionLabel={option =>
-              `${option.fullName} - ${option.phoneNumber}`
+              option
+                ? `${option.fullName || ''} - ${option.phoneNumber || ''}`
+                : ''
             }
             value={selectedStudents}
             onChange={(_, newValue) => setSelectedStudents(newValue)}
             renderOption={(props, option) => (
               <Box component="li" {...props}>
                 <Avatar
-                  src={option.avatar}
+                  src={option?.avatar}
                   sx={{ width: 24, height: 24, mr: 1 }}
                 >
                   <Person sx={{ fontSize: 14 }} />
                 </Avatar>
-                {option.fullName} - {option.phoneNumber}
+                {option?.fullName || ''} - {option?.phoneNumber || ''}
               </Box>
             )}
             renderInput={params => (
@@ -197,11 +199,11 @@ export default function StepStudents({
                 return (
                   <Chip
                     key={key}
-                    label={`${option.fullName} - ${option.phoneNumber}`}
+                    label={`${option?.fullName || ''} - ${option?.phoneNumber || ''}`}
                     size="small"
                     avatar={
                       <Avatar
-                        src={option.avatar}
+                        src={option?.avatar}
                         sx={{ width: 20, height: 20 }}
                       >
                         <Person sx={{ fontSize: 12 }} />
@@ -270,7 +272,7 @@ export default function StepStudents({
             onClick={handleAddStudents}
             disabled={
               !selectedStudents ||
-              selectedStudents.length === 0 ||
+              (selectedStudents && selectedStudents.length === 0) ||
               (addType === EStudentClassType.HALF && !addSession) ||
               loading
             }
@@ -292,11 +294,12 @@ export default function StepStudents({
           <List dense>
             {(studentFields || []).map(
               (studentClass: IStudentClass, index: number) => {
-                const student = getStudentById(studentClass.studentId);
+                if (!studentClass) return null;
+                const student = getStudentById(studentClass?.studentId);
                 if (!student) return null;
                 return (
                   <ListItem
-                    key={studentClass.studentId}
+                    key={studentClass?.studentId || index}
                     divider
                     secondaryAction={
                       <IconButton
@@ -310,14 +313,14 @@ export default function StepStudents({
                   >
                     <ListItemAvatar>
                       <Avatar
-                        src={student.avatar}
+                        src={student?.avatar}
                         sx={{ width: 40, height: 40 }}
                       >
                         <Person />
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
-                      primary={student.fullName}
+                      primary={student?.fullName || ''}
                       secondary={
                         <Box>
                           <Box
@@ -328,7 +331,7 @@ export default function StepStudents({
                               display: 'block',
                             }}
                           >
-                            {student.phoneNumber}
+                            {student?.phoneNumber || ''}
                           </Box>
                           <Box
                             sx={{
@@ -339,17 +342,17 @@ export default function StepStudents({
                             }}
                           >
                             <Chip
-                              label={getSessionName(studentClass.session)}
+                              label={getSessionName(studentClass?.session)}
                               size="small"
                               color={
-                                studentClass.type === EStudentClassType.FULL
+                                studentClass?.type === EStudentClassType.FULL
                                   ? 'primary'
                                   : 'secondary'
                               }
                             />
                             <Chip
                               label={
-                                studentClass.status ===
+                                studentClass?.status ===
                                 EStudentClassStatus.ONLINE
                                   ? 'Online'
                                   : 'Offline'
