@@ -2,6 +2,7 @@
 import ThemeRegistry from '@/providers/ThemeRegistry';
 import AuthInitProvider from '@/providers/AuthInitProvider';
 import GlobalLoading from '@/providers/GlobalLoading';
+import { ModalProvider } from '@/providers/ModalProvider';
 
 export default function AuthLayout({
   children,
@@ -12,8 +13,10 @@ export default function AuthLayout({
     <>
       <AuthInitProvider>
         <ThemeRegistry>
-          <GlobalLoading />
-          {children}
+          <ModalProvider>
+            <GlobalLoading />
+            {children}
+          </ModalProvider>
         </ThemeRegistry>
       </AuthInitProvider>
     </>
