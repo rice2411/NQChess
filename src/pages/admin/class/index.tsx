@@ -33,14 +33,21 @@ export default function ClassManagement() {
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Confirm delete hook
-  const { confirm } = useModalConfirm();
+  // Confirm delete hook - chỉ sử dụng khi đã mounted
+  const modalConfirm = useModalConfirm();
 
   useEffect(() => {
-    fetchClasses();
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchClasses();
+    }
     // eslint-disable-next-line
-  }, [page]);
+  }, [page, mounted]);
 
   async function fetchClasses() {
     try {
@@ -87,7 +94,9 @@ export default function ClassManagement() {
   }
 
   function handleDeleteClick(cls: IClass) {
-    confirm(
+    if (!mounted || !modalConfirm) return;
+
+    modalConfirm.confirm(
       async () => {
         setLoading(true);
         await ClassService.deleteClass(cls.id);
@@ -97,6 +106,27 @@ export default function ClassManagement() {
       {
         message: `Bạn có chắc chắn muốn xóa lớp học "${cls.name}" không? Hành động này không thể hoàn tác.`,
       }
+    );
+  }
+
+  // Không render cho đến khi mounted
+  if (!mounted) {
+    return (
+      <Container maxWidth={false} sx={{ mt: 4, mx: 0, width: '100%' }}>
+        <Typography variant="h4" fontWeight={700} color="primary" mb={3}>
+          Quản lý lớp học
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '200px',
+          }}
+        >
+          <Typography>Đang tải...</Typography>
+        </Box>
+      </Container>
     );
   }
 

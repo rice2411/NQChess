@@ -78,6 +78,7 @@ export default function PostsPage() {
     message: string;
     severity: 'success' | 'error' | 'info';
   }>({ open: false, message: '', severity: 'success' });
+  const [mounted, setMounted] = useState(false);
 
   // Pagination hook
   const {
@@ -89,18 +90,27 @@ export default function PostsPage() {
     initialPage: 1,
   });
 
-  const { alert } = useModalAlert();
-  const { confirm } = useModalConfirm();
+  const modalAlert = useModalAlert();
+  const modalConfirm = useModalConfirm();
   const { setLoading: setGlobalLoading } = useGlobalLoadingStore();
+
+  // Kiểm tra mounted
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch posts
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    if (mounted) {
+      fetchPosts();
+    }
+  }, [mounted]);
 
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (mounted) {
+      loadCategories();
+    }
+  }, [mounted]);
 
   async function fetchPosts(searchText = '', resetPagination = true) {
     try {
@@ -184,7 +194,9 @@ export default function PostsPage() {
   }
 
   function handleDeleteClick(post: Post) {
-    confirm(
+    if (!mounted || !modalConfirm) return;
+
+    modalConfirm.confirm(
       async () => {
         setGlobalLoading(true);
         try {
@@ -199,7 +211,7 @@ export default function PostsPage() {
           console.error('Error deleting post:', error);
           setSnackbar({
             open: true,
-            message: 'Không thể xóa bài viết',
+            message: 'Có lỗi khi xóa bài viết',
             severity: 'error',
           });
         } finally {
@@ -213,15 +225,29 @@ export default function PostsPage() {
   }
 
   function handlePublishClick(post: Post) {
-    confirm(
+    if (!mounted || !modalConfirm) return;
+
+    modalConfirm.confirm(
       async () => {
         setGlobalLoading(true);
-        await postService.publishPost(post.id);
-        alert({
-          title: 'Thành công',
-          message: 'Đã xuất bản bài viết!',
-        });
-        fetchPosts(search, false);
+        try {
+          await postService.updatePost(post.id, { status: 'published' });
+          setSnackbar({
+            open: true,
+            message: 'Đã xuất bản bài viết!',
+            severity: 'success',
+          });
+          fetchPosts(search, true);
+        } catch (error) {
+          console.error('Error publishing post:', error);
+          setSnackbar({
+            open: true,
+            message: 'Có lỗi khi xuất bản bài viết',
+            severity: 'error',
+          });
+        } finally {
+          setGlobalLoading(false);
+        }
       },
       {
         message: `Bạn có chắc chắn muốn xuất bản bài viết "${post.title}" không?`,
@@ -230,15 +256,29 @@ export default function PostsPage() {
   }
 
   function handleArchiveClick(post: Post) {
-    confirm(
+    if (!mounted || !modalConfirm) return;
+
+    modalConfirm.confirm(
       async () => {
         setGlobalLoading(true);
-        await postService.archivePost(post.id);
-        alert({
-          title: 'Thành công',
-          message: 'Đã lưu trữ bài viết!',
-        });
-        fetchPosts(search, false);
+        try {
+          await postService.updatePost(post.id, { status: 'archived' });
+          setSnackbar({
+            open: true,
+            message: 'Đã lưu trữ bài viết!',
+            severity: 'success',
+          });
+          fetchPosts(search, true);
+        } catch (error) {
+          console.error('Error archiving post:', error);
+          setSnackbar({
+            open: true,
+            message: 'Có lỗi khi lưu trữ bài viết',
+            severity: 'error',
+          });
+        } finally {
+          setGlobalLoading(false);
+        }
       },
       {
         message: `Bạn có chắc chắn muốn lưu trữ bài viết "${post.title}" không?`,
@@ -267,235 +307,247 @@ export default function PostsPage() {
   }
 
   function handleCloseSnackbar() {
-    setSnackbar(prev => ({ ...prev, open: false }));
+    setSnackbar({ open: false, message: '', severity: 'success' });
+  }
+
+  // Không render cho đến khi mounted
+  if (!mounted) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Typography variant="h4" fontWeight={700} color="primary" mb={3}>
+          Quản lý bài viết
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '200px',
+          }}
+        >
+          <Typography>Đang tải...</Typography>
+        </Box>
+      </Container>
+    );
   }
 
   return (
-    <Container maxWidth={false} sx={{ mt: 4, mx: 0, width: '100%' }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h4" fontWeight={700} color="primary" mb={3}>
         Quản lý bài viết
       </Typography>
 
-      {/* Filters */}
+      {/* Search and Filter Bar */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid sx={{ xs: 12, md: 3 }}>
-              <TextField
-                fullWidth
-                placeholder="Tìm kiếm bài viết..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                onKeyPress={e => e.key === 'Enter' && handleSearch(e)}
-                InputProps={{
-                  startAdornment: (
-                    <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 3 }}>
-              <FormControl fullWidth>
-                <InputLabel>Trạng thái</InputLabel>
-                <Select
-                  value={statusFilter}
-                  onChange={e => handleStatusFilterChange(e.target.value)}
-                  label="Trạng thái"
-                >
-                  <MenuItem value="">Tất cả</MenuItem>
-                  <MenuItem value="draft">Bản nháp</MenuItem>
-                  <MenuItem value="published">Đã xuất bản</MenuItem>
-                  <MenuItem value="archived">Đã lưu trữ</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid sx={{ xs: 12, md: 3 }}>
-              <FormControl fullWidth>
-                <InputLabel>Danh mục</InputLabel>
-                <Select
-                  value={categoryFilter}
-                  onChange={e => handleCategoryFilterChange(e.target.value)}
-                  label="Danh mục"
-                >
-                  <MenuItem value="">Tất cả</MenuItem>
-                  {categories.map(category => (
-                    <MenuItem key={category} value={category}>
-                      {category}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid sx={{ xs: 12, md: 3 }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<FilterIcon />}
-                onClick={e => handleSearch(e)}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <Box sx={{ flex: 1, minWidth: 300 }}>
+              <form onSubmit={handleSearch}>
+                <TextField
+                  fullWidth
+                  placeholder="Tìm kiếm bài viết..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton type="submit">
+                        <SearchIcon />
+                      </IconButton>
+                    ),
+                  }}
+                />
+              </form>
+            </Box>
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Trạng thái</InputLabel>
+              <Select
+                value={statusFilter}
+                label="Trạng thái"
+                onChange={e => handleStatusFilterChange(e.target.value)}
               >
-                Lọc
-              </Button>
-            </Grid>
-          </Grid>
+                <MenuItem value="">Tất cả</MenuItem>
+                <MenuItem value="draft">Bản nháp</MenuItem>
+                <MenuItem value="published">Đã xuất bản</MenuItem>
+                <MenuItem value="archived">Đã lưu trữ</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Danh mục</InputLabel>
+              <Select
+                value={categoryFilter}
+                label="Danh mục"
+                onChange={e => handleCategoryFilterChange(e.target.value)}
+              >
+                <MenuItem value="">Tất cả</MenuItem>
+                {categories.map(category => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpenCreateDialog}
+            >
+              Thêm bài viết
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 
-      {/* Action Bar */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, height: '40px' }}>
-        <Box flexGrow={1} />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenCreateDialog}
-        >
-          Thêm bài viết
-        </Button>
-      </Box>
-
       {/* Posts Table */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Tiêu đề</TableCell>
-              <TableCell>Tác giả</TableCell>
-              <TableCell>Danh mục</TableCell>
-              <TableCell>Trạng thái</TableCell>
-              <TableCell>Lượt xem</TableCell>
-              <TableCell>Ngày tạo</TableCell>
-              <TableCell align="center">Thao tác</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {posts.map(post => (
-              <TableRow key={post.id} hover>
-                <TableCell>
-                  <Box>
-                    <Typography variant="subtitle2" noWrap>
-                      {post.title}
-                    </Typography>
-                    {post.excerpt && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        noWrap
-                      >
-                        {post.excerpt}
-                      </Typography>
-                    )}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
-                      {post.authorName.charAt(0)}
-                    </Avatar>
-                    <Typography variant="body2">{post.authorName}</Typography>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Chip label={post.category} size="small" />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={statusLabels[post.status]}
-                    color={statusColors[post.status]}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">{post.viewCount}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">
-                    {typeof window !== 'undefined'
-                      ? format(new Date(post.createdAt), 'dd/MM/yyyy', {
-                          locale: vi,
-                        })
-                      : post.createdAt.split('T')[0]}
-                  </Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Stack direction="row" spacing={1} justifyContent="center">
-                    <Tooltip title="Xem">
-                      <IconButton size="small" color="primary">
-                        <ViewIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleOpenEditDialog(post)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    {post.status === 'draft' && (
-                      <Tooltip title="Xuất bản">
-                        <IconButton
-                          size="small"
-                          color="success"
-                          onClick={() => handlePublishClick(post)}
-                        >
-                          <PublishIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {post.status === 'published' && (
-                      <Tooltip title="Lưu trữ">
-                        <IconButton
-                          size="small"
-                          color="warning"
-                          onClick={() => handleArchiveClick(post)}
-                        >
-                          <ArchiveIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    <Tooltip title="Xóa">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteClick(post)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </TableCell>
+      <Card>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Bài viết</TableCell>
+                <TableCell>Danh mục</TableCell>
+                <TableCell>Trạng thái</TableCell>
+                <TableCell>Ngày tạo</TableCell>
+                <TableCell align="right">Hành động</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {posts.map(post => (
+                <TableRow key={post.id}>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar
+                        src={post.featuredImage}
+                        alt={post.title}
+                        sx={{ width: 48, height: 48 }}
+                      >
+                        {post.title?.charAt(0) || '?'}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          {post.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {post.excerpt}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={post.category} size="small" />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={statusLabels[post.status]}
+                      color={statusColors[post.status]}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(post.createdAt), 'dd/MM/yyyy', {
+                      locale: vi,
+                    })}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      justifyContent="flex-end"
+                    >
+                      <Tooltip title="Xem">
+                        <IconButton size="small">
+                          <ViewIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Chỉnh sửa">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenEditDialog(post)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      {post.status === 'draft' && (
+                        <Tooltip title="Xuất bản">
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handlePublishClick(post)}
+                          >
+                            <PublishIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {post.status === 'published' && (
+                        <Tooltip title="Lưu trữ">
+                          <IconButton
+                            size="small"
+                            color="warning"
+                            onClick={() => handleArchiveClick(post)}
+                          >
+                            <ArchiveIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      <Tooltip title="Xóa">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeleteClick(post)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {posts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    Không có bài viết nào.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
 
       {/* Pagination */}
-      <Pagination
-        currentPage={pagination.currentPage}
-        totalItems={pagination.total}
-        itemsPerPage={pageSize}
-        currentItems={posts.length}
-        hasMore={pagination.hasMore}
-        loading={pagination.loading}
-        onPageChange={handlePageChange}
-        showPagination={true}
-        showInfo={true}
-      />
+      <Box sx={{ mt: 3 }}>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalItems={pagination.total}
+          itemsPerPage={pageSize}
+          currentItems={posts.length}
+          hasMore={pagination.hasMore}
+          loading={false}
+          onPageChange={handlePageChange}
+          showLoadMore={false}
+          infoText={`Hiển thị ${posts.length} / ${pagination.total} bài viết`}
+          loadingText="Đang tải..."
+        />
+      </Box>
 
-      {/* Create Post Modal */}
-      <CreatePostModal
-        open={isCreateModalOpen}
-        onClose={handleCloseCreateDialog}
-        onSuccess={handleSave}
-        setSnackBar={setSnackbar}
-      />
-
-      {/* Edit Post Modal */}
+      {/* Modals */}
       <PostModal
         open={isEditModalOpen}
         post={selectedPost}
         onClose={handleCloseEditDialog}
+        onSuccess={handleSave}
+        setSnackBar={setSnackbar}
+      />
+
+      <CreatePostModal
+        open={isCreateModalOpen}
+        onClose={handleCloseCreateDialog}
         onSuccess={handleSave}
         setSnackBar={setSnackbar}
       />
@@ -505,11 +557,8 @@ export default function PostsPage() {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <MuiAlert
-          elevation={6}
-          variant="filled"
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
           sx={{ width: '100%' }}

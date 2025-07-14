@@ -41,6 +41,7 @@ export default function StudentManagement() {
     gender: EGender.MALE,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
+  const [mounted, setMounted] = useState(false);
 
   // Pagination hook
   const {
@@ -55,13 +56,20 @@ export default function StudentManagement() {
   // Global loading store
   const setGlobalLoading = useGlobalLoadingStore(state => state.setLoading);
 
-  // Confirm delete hook
-  const { confirm } = useModalConfirm();
+  // Confirm delete hook - chỉ sử dụng khi đã mounted
+  const modalConfirm = useModalConfirm();
+
+  // Kiểm tra mounted
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch students
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (mounted) {
+      fetchStudents();
+    }
+  }, [mounted]);
 
   async function fetchStudents(searchText = '', resetPagination = true) {
     try {
@@ -144,7 +152,9 @@ export default function StudentManagement() {
   }
 
   function handleDeleteClick(student: IStudent) {
-    confirm(
+    if (!mounted || !modalConfirm) return;
+
+    modalConfirm.confirm(
       async () => {
         setGlobalLoading(true);
         await StudentService.deleteStudent(student.id);
@@ -169,6 +179,27 @@ export default function StudentManagement() {
 
   function handleFormChange(field: string, value: string | EGender) {
     setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  // Không render cho đến khi mounted
+  if (!mounted) {
+    return (
+      <Container maxWidth={false} sx={{ mt: 4, mx: 0, width: '100%' }}>
+        <Typography variant="h4" fontWeight={700} color="primary" mb={3}>
+          Quản lý học sinh
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '200px',
+          }}
+        >
+          <Typography>Đang tải...</Typography>
+        </Box>
+      </Container>
+    );
   }
 
   return (
@@ -201,7 +232,7 @@ export default function StudentManagement() {
             ),
           }}
         />
-        <Button type="submit" variant="outlined">
+        <Button type="submit" variant="contained" sx={{ height: '40px' }}>
           Tìm kiếm
         </Button>
         <Box flexGrow={1} />
@@ -209,6 +240,7 @@ export default function StudentManagement() {
           variant="contained"
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
+          sx={{ height: '40px' }}
         >
           Thêm học sinh
         </Button>
@@ -221,6 +253,7 @@ export default function StudentManagement() {
               <TableCell>Học sinh</TableCell>
               <TableCell>Số điện thoại</TableCell>
               <TableCell>Ngày sinh</TableCell>
+              <TableCell>Giới tính</TableCell>
               <TableCell align="right">Hành động</TableCell>
             </TableRow>
           </TableHead>
@@ -234,20 +267,16 @@ export default function StudentManagement() {
                       alt={student.fullName}
                       sx={{ width: 40, height: 40 }}
                     >
-                      {student.fullName.charAt(0)}
+                      {student.fullName?.charAt(0) || '?'}
                     </Avatar>
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>
-                        {student.fullName}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {student.gender === EGender.MALE ? 'Nam' : 'Nữ'}
-                      </Typography>
-                    </Box>
+                    <Typography fontWeight={600}>{student.fullName}</Typography>
                   </Box>
                 </TableCell>
                 <TableCell>{student.phoneNumber}</TableCell>
                 <TableCell>{student.dateOfBirth}</TableCell>
+                <TableCell>
+                  {student.gender === EGender.MALE ? 'Nam' : 'Nữ'}
+                </TableCell>
                 <TableCell align="right">
                   <IconButton onClick={() => handleOpenDialog(student)}>
                     <Edit />
@@ -263,7 +292,7 @@ export default function StudentManagement() {
             ))}
             {students.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={5} align="center">
                   Không có học sinh nào.
                 </TableCell>
               </TableRow>
@@ -279,7 +308,7 @@ export default function StudentManagement() {
         itemsPerPage={pageSize}
         currentItems={students.length}
         hasMore={pagination.hasMore}
-        loading={pagination.loading}
+        loading={false}
         onPageChange={handlePageChange}
         showLoadMore={false}
         infoText={`Hiển thị ${students.length} / ${pagination.total} học sinh`}
