@@ -1,5 +1,5 @@
 'use client';
-import TuitionManagement from '@/pages/admin/tuition';
+import TuitionManagement from '@/components/pages/admin/tuition';
 
 export default function TuitionPage() {
   return <TuitionManagement />;
