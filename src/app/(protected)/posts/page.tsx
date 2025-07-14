@@ -39,7 +39,6 @@ import { vi } from 'date-fns/locale';
 
 import { Post } from '@/interfaces/post.interface';
 import { postService } from '@/services/post.service';
-import { useModalAlert } from '@/hooks/useModalAlert';
 import { useModalConfirm } from '@/hooks/useModalConfirm';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import { usePagination } from '@/hooks/usePagination';
