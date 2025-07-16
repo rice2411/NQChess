@@ -22,7 +22,6 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import dynamic from 'next/dynamic';
 
 import CKEditorWrapper from '@/components/ui/CKEditorWrapper';
 import { CreatePostRequest } from '@/interfaces/post.interface';

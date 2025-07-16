@@ -22,7 +22,6 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import dynamic from 'next/dynamic';
 
 import CKEditorWrapper from '@/components/ui/CKEditorWrapper';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
