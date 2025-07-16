@@ -22,9 +22,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { Close, Add, Edit, Visibility } from '@mui/icons-material';
+import dynamic from 'next/dynamic';
 
 import { CreatePostRequest } from '@/interfaces/post.interface';
 import { postService } from '@/services/post.service';
@@ -32,6 +30,7 @@ import { useModalAlert } from '@/hooks/useModalAlert';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CloudinaryService } from '@/services/cloudinary.service';
+import { Close, Add, Edit, Visibility } from '@mui/icons-material';
 
 interface CreatePostModalProps {
   open: boolean;
@@ -255,6 +254,16 @@ export default function CreatePostModal({
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+
+  // Dynamic import CKEditor và ClassicEditor
+  const CKEditor = dynamic(
+    () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
+    { ssr: false }
+  );
+  const ClassicEditor = dynamic(
+    () => import('@ckeditor/ckeditor5-build-classic').then(mod => mod.default),
+    { ssr: false }
+  );
 
   return (
     <>
