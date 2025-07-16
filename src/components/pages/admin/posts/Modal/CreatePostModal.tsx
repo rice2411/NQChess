@@ -24,6 +24,12 @@ import {
 } from '@mui/material';
 import dynamic from 'next/dynamic';
 
+// Dynamic import for CKEditor to avoid SSR issues
+const CKEditor = dynamic(
+  () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
+  { ssr: false }
+);
+
 import { CreatePostRequest } from '@/interfaces/post.interface';
 import { postService } from '@/services/post.service';
 import { useModalAlert } from '@/hooks/useModalAlert';
@@ -255,12 +261,6 @@ export default function CreatePostModal({
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
-
-  // Dynamic import CKEditor và ClassicEditor
-  const CKEditor = dynamic(
-    () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
-    { ssr: false }
-  );
 
   return (
     <>
