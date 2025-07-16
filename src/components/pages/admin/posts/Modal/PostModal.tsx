@@ -22,8 +22,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import dynamic from 'next/dynamic';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
 
 import {
@@ -311,6 +310,16 @@ export default function PostModal({
     setTabValue(newValue);
   };
 
+  // Dynamic import CKEditor và ClassicEditor
+  const CKEditor = dynamic(
+    () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
+    { ssr: false }
+  );
+  const ClassicEditor = dynamic(
+    () => import('@ckeditor/ckeditor5-build-classic'),
+    { ssr: false }
+  );
+
   return (
     <>
       <Dialog
@@ -477,36 +486,38 @@ export default function PostModal({
                     },
                   }}
                 >
-                  <CKEditor
-                    editor={ClassicEditor as unknown as any}
-                    data={formData.content}
-                    onChange={(event, editor) => {
-                      const data = editor.getData();
-                      handleInputChange('content', data);
-                    }}
-                    config={{
-                      toolbar: [
-                        'heading',
-                        '|',
-                        'bold',
-                        'italic',
-                        'link',
-                        'bulletedList',
-                        'numberedList',
-                        '|',
-                        'outdent',
-                        'indent',
-                        '|',
-                        'imageUpload',
-                        'blockQuote',
-                        'insertTable',
-                        'mediaEmbed',
-                        'undo',
-                        'redo',
-                      ],
-                      language: 'vi',
-                    }}
-                  />
+                  {typeof window !== 'undefined' && (
+                    <CKEditor
+                      editor={ClassicEditor as any}
+                      data={formData.content}
+                      onChange={(event, editor) => {
+                        const data = editor.getData();
+                        handleInputChange('content', data);
+                      }}
+                      config={{
+                        toolbar: [
+                          'heading',
+                          '|',
+                          'bold',
+                          'italic',
+                          'link',
+                          'bulletedList',
+                          'numberedList',
+                          '|',
+                          'outdent',
+                          'indent',
+                          '|',
+                          'imageUpload',
+                          'blockQuote',
+                          'insertTable',
+                          'mediaEmbed',
+                          'undo',
+                          'redo',
+                        ],
+                        language: 'vi',
+                      }}
+                    />
+                  )}
                 </Box>
                 {errors.content && (
                   <FormHelperText error>{errors.content}</FormHelperText>
