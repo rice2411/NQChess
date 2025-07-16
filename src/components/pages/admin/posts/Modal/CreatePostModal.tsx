@@ -31,6 +31,7 @@ import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CloudinaryService } from '@/services/cloudinary.service';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 interface CreatePostModalProps {
   open: boolean;
@@ -260,10 +261,6 @@ export default function CreatePostModal({
     () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
     { ssr: false }
   );
-  const ClassicEditor = dynamic(
-    () => import('@ckeditor/ckeditor5-build-classic').then(mod => mod.default),
-    { ssr: false }
-  );
 
   return (
     <>
@@ -401,36 +398,38 @@ export default function CreatePostModal({
                     },
                   }}
                 >
-                  <CKEditor
-                    editor={ClassicEditor as unknown as any}
-                    data={formData.content}
-                    onChange={(event, editor) => {
-                      const data = editor.getData();
-                      handleInputChange('content', data);
-                    }}
-                    config={{
-                      toolbar: [
-                        'heading',
-                        '|',
-                        'bold',
-                        'italic',
-                        'link',
-                        'bulletedList',
-                        'numberedList',
-                        '|',
-                        'outdent',
-                        'indent',
-                        '|',
-                        'imageUpload',
-                        'blockQuote',
-                        'insertTable',
-                        'mediaEmbed',
-                        'undo',
-                        'redo',
-                      ],
-                      language: 'vi',
-                    }}
-                  />
+                  {typeof window !== 'undefined' && (
+                    <CKEditor
+                      editor={ClassicEditor as any}
+                      data={formData.content}
+                      onChange={(event: any, editor: any) => {
+                        const data = editor.getData();
+                        handleInputChange('content', data);
+                      }}
+                      config={{
+                        toolbar: [
+                          'heading',
+                          '|',
+                          'bold',
+                          'italic',
+                          'link',
+                          'bulletedList',
+                          'numberedList',
+                          '|',
+                          'outdent',
+                          'indent',
+                          '|',
+                          'imageUpload',
+                          'blockQuote',
+                          'insertTable',
+                          'mediaEmbed',
+                          'undo',
+                          'redo',
+                        ],
+                        language: 'vi',
+                      }}
+                    />
+                  )}
                 </Box>
                 {errors.content && (
                   <FormHelperText error>{errors.content}</FormHelperText>
