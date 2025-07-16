@@ -23,6 +23,7 @@ import {
   Tab,
 } from '@mui/material';
 import dynamic from 'next/dynamic';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
 
 import {
@@ -310,15 +311,16 @@ export default function PostModal({
     setTabValue(newValue);
   };
 
-  // Dynamic import CKEditor và ClassicEditor
+  // Dynamic import CKEditor
   const CKEditor = dynamic(
     () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
     { ssr: false }
   );
-  const ClassicEditor = dynamic(
-    () => import('@ckeditor/ckeditor5-build-classic'),
-    { ssr: false }
-  );
+  // Sử dụng CKEditor như sau:
+  // const ClassicEditor = dynamic(
+  //   () => import('@ckeditor/ckeditor5-build-classic'),
+  //   { ssr: false }
+  // );
 
   return (
     <>
