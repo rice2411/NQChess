@@ -24,8 +24,7 @@ import {
 } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-// Import ClassicEditor normally but use it conditionally
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import CKEditorWrapper from '@/components/ui/CKEditorWrapper';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
 
 import {
@@ -313,17 +312,6 @@ export default function PostModal({
     setTabValue(newValue);
   };
 
-  // Dynamic import CKEditor
-  const CKEditor = dynamic(
-    () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
-    { ssr: false }
-  );
-  // Sử dụng CKEditor như sau:
-  // const ClassicEditor = dynamic(
-  //   () => import('@ckeditor/ckeditor5-build-classic'),
-  //   { ssr: false }
-  // );
-
   return (
     <>
       <Dialog
@@ -491,35 +479,9 @@ export default function PostModal({
                   }}
                 >
                   {typeof window !== 'undefined' && (
-                    <CKEditor
-                      editor={ClassicEditor as any}
+                    <CKEditorWrapper
                       data={formData.content}
-                      onChange={(event, editor) => {
-                        const data = editor.getData();
-                        handleInputChange('content', data);
-                      }}
-                      config={{
-                        toolbar: [
-                          'heading',
-                          '|',
-                          'bold',
-                          'italic',
-                          'link',
-                          'bulletedList',
-                          'numberedList',
-                          '|',
-                          'outdent',
-                          'indent',
-                          '|',
-                          'imageUpload',
-                          'blockQuote',
-                          'insertTable',
-                          'mediaEmbed',
-                          'undo',
-                          'redo',
-                        ],
-                        language: 'vi',
-                      }}
+                      onChange={data => handleInputChange('content', data)}
                     />
                   )}
                 </Box>

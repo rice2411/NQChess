@@ -24,12 +24,7 @@ import {
 } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-// Dynamic import for CKEditor to avoid SSR issues
-const CKEditor = dynamic(
-  () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
-  { ssr: false }
-);
-
+import CKEditorWrapper from '@/components/ui/CKEditorWrapper';
 import { CreatePostRequest } from '@/interfaces/post.interface';
 import { postService } from '@/services/post.service';
 import { useModalAlert } from '@/hooks/useModalAlert';
@@ -37,7 +32,6 @@ import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CloudinaryService } from '@/services/cloudinary.service';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 interface CreatePostModalProps {
   open: boolean;
@@ -399,35 +393,9 @@ export default function CreatePostModal({
                   }}
                 >
                   {typeof window !== 'undefined' && (
-                    <CKEditor
-                      editor={ClassicEditor as any}
+                    <CKEditorWrapper
                       data={formData.content}
-                      onChange={(event: any, editor: any) => {
-                        const data = editor.getData();
-                        handleInputChange('content', data);
-                      }}
-                      config={{
-                        toolbar: [
-                          'heading',
-                          '|',
-                          'bold',
-                          'italic',
-                          'link',
-                          'bulletedList',
-                          'numberedList',
-                          '|',
-                          'outdent',
-                          'indent',
-                          '|',
-                          'imageUpload',
-                          'blockQuote',
-                          'insertTable',
-                          'mediaEmbed',
-                          'undo',
-                          'redo',
-                        ],
-                        language: 'vi',
-                      }}
+                      onChange={data => handleInputChange('content', data)}
                     />
                   )}
                 </Box>
