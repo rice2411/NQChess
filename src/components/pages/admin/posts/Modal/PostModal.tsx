@@ -24,12 +24,6 @@ import {
 } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-// Dynamic import for CKEditor to avoid SSR issues
-const CKEditor = dynamic(
-  () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),
-  { ssr: false }
-);
-
 // Import ClassicEditor normally but use it conditionally
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Close, Add, Edit, Visibility } from '@mui/icons-material';
