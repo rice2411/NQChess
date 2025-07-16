@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
 
 // Create a wrapper component for CKEditor
 const CKEditorWrapper = dynamic(() => import('./CKEditorInner'), {
