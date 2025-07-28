@@ -1,26 +1,14 @@
-const ROUTES = {
-  ANONYMOUS: {
-    LOGIN: '/login',
-  },
-  DEFAULT: {
-    HOME: '/',
-  },
-  ADMIN: {
-    DASHBOARD: '/dashboard',
-    STUDENTS: '/students',
-    CLASSES: '/classes',
-    ATTENDANCE: '/attendances',
-    TUITION: '/tuition',
-    POSTS: '/posts',
-    REPORTS: '/reports',
-    SETTINGS: '/settings',
-    ACCOUNT: '/account',
-    LOGOUT: '/logout',
-  },
-};
+export const ROUTES = {
+  // Public routes
+  HOME: '/',
+  LOGIN: '/login',
 
-export default ROUTES;
-
-export const ROUTES_ANONYMOUS = ROUTES.ANONYMOUS;
-export const ROUTE_DEFAULT = ROUTES.DEFAULT;
-export const ROUTES_ADMIN = ROUTES.ADMIN;
+  // Protected routes
+  DASHBOARD: '/dashboard',
+  STUDENTS: '/students',
+  CLASSES: '/classes',
+  ATTENDANCE: '/attendances',
+  TUITION: '/tuition',
+  POSTS: '/posts',
+  USERS: '/users',
+} as const;

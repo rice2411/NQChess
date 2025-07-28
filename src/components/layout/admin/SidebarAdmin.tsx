@@ -19,36 +19,40 @@ import ClassIcon from '@mui/icons-material/Class';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PostAddIcon from '@mui/icons-material/PostAdd';
-import BarChartIcon from '@mui/icons-material/BarChart';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { usePathname } from 'next/navigation';
-import { ROUTES_ADMIN } from '@/constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 const DRAWER_WIDTH = 250;
 
 const mainMenu = [
-  { label: 'Tổng quan', icon: <DashboardIcon />, path: ROUTES_ADMIN.DASHBOARD },
-  { label: 'Học sinh', icon: <PeopleIcon />, path: ROUTES_ADMIN.STUDENTS },
-  { label: 'Lớp học', icon: <ClassIcon />, path: ROUTES_ADMIN.CLASSES },
+  { label: 'Tổng quan', icon: <DashboardIcon />, path: ROUTES.DASHBOARD },
+  { label: 'Học sinh', icon: <PeopleIcon />, path: ROUTES.STUDENTS },
+  { label: 'Lớp học', icon: <ClassIcon />, path: ROUTES.CLASSES },
   {
     label: 'Điểm danh',
     icon: <EventAvailableIcon />,
-    path: ROUTES_ADMIN.ATTENDANCE,
+    path: ROUTES.ATTENDANCE,
   },
-  { label: 'Học phí', icon: <AttachMoneyIcon />, path: ROUTES_ADMIN.TUITION },
-  { label: 'Bài đăng', icon: <PostAddIcon />, path: ROUTES_ADMIN.POSTS },
-  { label: 'Báo cáo', icon: <BarChartIcon />, path: ROUTES_ADMIN.REPORTS },
+  { label: 'Học phí', icon: <AttachMoneyIcon />, path: ROUTES.TUITION },
+  { label: 'Bài đăng', icon: <PostAddIcon />, path: ROUTES.POSTS },
+  {
+    label: 'Quản lý tài khoản',
+    icon: <AdminPanelSettingsIcon />,
+    path: ROUTES.USERS,
+  },
 ];
 const subMenu = [
-  { label: 'Cài đặt', icon: <SettingsIcon />, path: ROUTES_ADMIN.SETTINGS },
+  { label: 'Cài đặt', icon: <SettingsIcon />, path: '/settings' },
   {
     label: 'Tài khoản',
     icon: <AccountCircleIcon />,
-    path: ROUTES_ADMIN.ACCOUNT,
+    path: '/account',
   },
-  { label: 'Đăng xuất', icon: <LogoutIcon />, path: ROUTES_ADMIN.LOGOUT },
+  { label: 'Đăng xuất', icon: <LogoutIcon />, path: '/logout' },
 ];
 
 export default function SidebarAdmin() {

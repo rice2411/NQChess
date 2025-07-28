@@ -9,7 +9,6 @@ import {
   query,
   where,
   orderBy,
-  QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EGender, IStudent } from '@/interfaces/student.interface';
@@ -26,6 +25,7 @@ export class StudentService {
     try {
       const q = query(
         collection(db, COLLECTIONS.STUDENTS),
+        orderBy('fullName'),
         orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(q);
@@ -98,7 +98,8 @@ export class StudentService {
       // Lấy tất cả học sinh và filter ở client side
       const q = query(
         collection(db, COLLECTIONS.STUDENTS),
-        orderBy('fullName')
+        orderBy('fullName'),
+        orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(q);
 
@@ -129,7 +130,8 @@ export class StudentService {
       const q = query(
         collection(db, COLLECTIONS.STUDENTS),
         where('gender', '==', gender),
-        orderBy('fullName')
+        orderBy('fullName'),
+        orderBy('createdAt', 'desc')
       );
 
       const snapshot = await getDocs(q);
@@ -225,9 +227,11 @@ export class StudentService {
         allStudents = await this.searchStudentsByNameAndPhone(searchText);
       } else {
         // Lấy tất cả học sinh nếu không có search
+        // Sử dụng orderBy với createdAt để đảm bảo thứ tự ổn định
         const q = query(
           collection(db, COLLECTIONS.STUDENTS),
-          orderBy('fullName')
+          orderBy('fullName'),
+          orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(q);
         allStudents = snapshot.docs.map(
@@ -280,7 +284,8 @@ export class StudentService {
         // Lấy tất cả học sinh nếu không có search
         const q = query(
           collection(db, COLLECTIONS.STUDENTS),
-          orderBy('fullName')
+          orderBy('fullName'),
+          orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(q);
         allStudents = snapshot.docs.map(

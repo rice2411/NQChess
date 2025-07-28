@@ -7,7 +7,7 @@ import { Controller, Control, FieldErrors } from 'react-hook-form';
 import { EClassStatus } from '@/interfaces/class.interface';
 import { ClassFormValues } from '../AddEditClassModal';
 import { formatVND, parseVND, validateVND } from '@/utils/format';
-import { isValid, isAfter, isBefore } from 'date-fns';
+import { isValid, isBefore } from 'date-fns';
 
 interface StepClassInfoProps {
   control: Control<ClassFormValues>;

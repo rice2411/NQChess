@@ -4,7 +4,7 @@ export const COLLECTIONS = {
   ATTENDANCE: 'attendance',
   TUITIONS: 'tuitions',
   POSTS: 'posts',
-  // USERS: 'users',
+  USERS: 'users',
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];

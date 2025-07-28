@@ -27,7 +27,7 @@ import {
   Visibility,
   GroupAdd,
 } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { EGender, IStudent } from '@/interfaces/student.interface';
 import StudentService from '@/services/student.service';
 import Pagination from '@/components/ui/Pagination';
@@ -84,34 +84,40 @@ export default function StudentManagement() {
   // Fetch students
   useEffect(() => {
     if (mounted) {
-      fetchStudents();
+      fetchStudentsWithPage(pagination.currentPage);
     }
   }, [mounted]);
 
-  async function fetchStudents(searchText = '', resetPagination = true) {
-    try {
-      setGlobalLoading(true);
+  const fetchStudentsWithPage = useCallback(
+    async (page: number, searchText = '', resetPagination = true) => {
+      try {
+        setGlobalLoading(true);
 
-      if (resetPagination) {
-        paginationActions.resetPagination();
+        if (resetPagination) {
+          paginationActions.resetPagination();
+        }
+
+        const result = await StudentService.getStudentsWithPagination(
+          page,
+          pageSize,
+          searchText
+        );
+
+        setStudents(result.students);
+        paginationActions.setHasMore(result.hasMore);
+        paginationActions.setTotal(result.total);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        setSnackbar({
+          open: true,
+          message: 'Không thể tải danh sách học sinh',
+        });
+      } finally {
+        setGlobalLoading(false);
       }
-
-      const result = await StudentService.getStudentsWithPagination(
-        pagination.currentPage,
-        pageSize,
-        searchText
-      );
-
-      setStudents(result.students);
-      paginationActions.setHasMore(result.hasMore);
-      paginationActions.setTotal(result.total);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      setSnackbar({ open: true, message: 'Không thể tải danh sách học sinh' });
-    } finally {
-      setGlobalLoading(false);
-    }
-  }
+    },
+    [pageSize, paginationActions, setGlobalLoading]
+  );
 
   function handleOpenDialog(student?: IStudent) {
     setEditing(student || null);
@@ -150,7 +156,7 @@ export default function StudentManagement() {
 
       // Chỉ refresh danh sách, không tạo/cập nhật nữa vì đã làm trong modal
       setGlobalLoading(false); // Ẩn GlobalLoading trước khi fetch lại
-      fetchStudents(search, true); // Reset pagination khi thêm/sửa
+      fetchStudentsWithPage(1, search, true); // Reset pagination khi thêm/sửa
       setSnackbar({
         open: true,
         message: editing ? 'Cập nhật thành công!' : 'Thêm học sinh thành công!',
@@ -174,7 +180,7 @@ export default function StudentManagement() {
         await StudentService.deleteStudent(student.id);
         setSnackbar({ open: true, message: 'Đã xóa học sinh!' });
         setGlobalLoading(false); // Ẩn GlobalLoading trước khi fetch lại
-        fetchStudents(search, true); // Reset pagination khi xóa
+        fetchStudentsWithPage(1, search, true); // Reset pagination khi xóa
       },
       {
         message: `Bạn có chắc chắn muốn xóa học sinh ${student.fullName} không? Hành động này không thể hoàn tác.`,
@@ -184,12 +190,13 @@ export default function StudentManagement() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    fetchStudents(search, true);
+    fetchStudentsWithPage(1, search, true);
   }
 
   function handlePageChange(page: number) {
+    // Cập nhật state và gọi fetch ngay lập tức
     paginationActions.setCurrentPage(page);
-    fetchStudents(search, false);
+    fetchStudentsWithPage(page, search, false);
   }
 
   function handleFormChange(field: string, value: string | EGender) {
@@ -212,7 +219,7 @@ export default function StudentManagement() {
           message: result.message,
         });
         // Refresh danh sách
-        fetchStudents(search, true);
+        fetchStudentsWithPage(1, search, true);
       } else {
         setSnackbar({
           open: true,

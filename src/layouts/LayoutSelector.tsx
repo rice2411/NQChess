@@ -1,6 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import { ROUTES_ADMIN, ROUTES_ANONYMOUS } from '@/constants/routes';
+import { ROUTES } from '@/constants/routes';
 import AuthLayout from './AuthLayout';
 import DefaultLayout from './DefaultLayout';
 import AdminLayout from './AdminLayout';
@@ -11,12 +11,23 @@ export default function LayoutSelector({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAnonymous = Object.values(ROUTES_ANONYMOUS).some(route =>
-    pathname?.includes(route)
-  );
-  const isAdmin = Object.values(ROUTES_ADMIN).some(route =>
-    pathname?.includes(route)
-  );
+
+  // Routes cho anonymous (public)
+  const anonymousRoutes = [ROUTES.LOGIN];
+
+  // Routes cho admin (protected)
+  const adminRoutes = [
+    ROUTES.DASHBOARD,
+    ROUTES.STUDENTS,
+    ROUTES.CLASSES,
+    ROUTES.ATTENDANCE,
+    ROUTES.TUITION,
+    ROUTES.POSTS,
+    ROUTES.USERS,
+  ];
+
+  const isAnonymous = anonymousRoutes.some(route => pathname?.includes(route));
+  const isAdmin = adminRoutes.some(route => pathname?.includes(route));
 
   if (isAdmin) {
     return <AdminLayout>{children}</AdminLayout>;

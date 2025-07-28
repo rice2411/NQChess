@@ -1,16 +1,5 @@
 'use client';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Paper,
-  InputBase,
-  IconButton,
-  Badge,
-  Avatar,
-  useTheme,
-} from '@mui/material';
-import { Search, CalendarToday, Notifications } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, useTheme } from '@mui/material';
 
 export default function NavbarAdmin() {
   const theme = useTheme();

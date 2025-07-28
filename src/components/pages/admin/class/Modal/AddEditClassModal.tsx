@@ -90,7 +90,7 @@ export default function AddEditClassModal({
     setValue,
     getValues,
     trigger,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<ClassFormValues>({
     defaultValues: {
       name: '',
@@ -214,7 +214,7 @@ export default function AddEditClassModal({
   // Kiểm tra xem bước hiện tại có thể chuyển tiếp không
   const canProceed = useMemo(() => {
     if (activeStep === 0) {
-      const [name, tuition, startDate, endDate] = watchedValues;
+      const [name, tuition, startDate] = watchedValues;
       const requiredFieldsValid =
         !errors.name && !errors.tuition && !errors.startDate && !errors.endDate;
       const hasRequiredValues = name?.trim() && tuition && startDate;
@@ -308,9 +308,9 @@ export default function AddEditClassModal({
       disableScrollLock
     >
       <DialogTitle>
-        <Typography variant="h6" gutterBottom>
+        <Box>
           {editing ? `Chỉnh sửa lớp: ${editing.name}` : 'Thêm lớp học mới'}
-        </Typography>
+        </Box>
         <Stepper activeStep={activeStep} sx={{ mt: 2 }}>
           {steps.map(label => (
             <Step key={label}>

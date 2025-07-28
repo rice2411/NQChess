@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,12 +12,10 @@ import {
   MenuItem,
   TextField,
   Avatar,
-  IconButton,
   Box,
   CircularProgress,
   Typography,
 } from '@mui/material';
-import { PhotoCamera } from '@mui/icons-material';
 import { EGender, IStudent } from '@/interfaces/student.interface';
 import { useForm, Controller } from 'react-hook-form';
 import { StudentService } from '@/services/student.service';

@@ -149,19 +149,6 @@ export default function ClassManagement() {
     setOpenModal(false);
   }
 
-  function showConfirmDialog(
-    title: string,
-    message: string,
-    action: () => void
-  ) {
-    setConfirmDialog({
-      open: true,
-      title,
-      message,
-      action,
-    });
-  }
-
   function handleCloseConfirmDialog() {
     setConfirmDialog({
       open: false,

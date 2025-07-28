@@ -21,9 +21,6 @@ import {
   Checkbox,
   TextField,
   ListItemIcon,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
 } from '@mui/material';
 import {
   PersonAdd,
@@ -31,7 +28,6 @@ import {
   Person,
   Search,
   Clear,
-  ExpandMore,
   CheckBox,
   CheckBoxOutlineBlank,
   IndeterminateCheckBox,
@@ -75,7 +71,6 @@ export default function StepStudents({
     EStudentClassType.FULL
   );
   const [addSession, setAddSession] = React.useState<string>('');
-  const [showQuickSelect, setShowQuickSelect] = React.useState(true);
   const [searchText, setSearchText] = React.useState('');
 
   // Lấy schedules từ form
@@ -227,25 +222,6 @@ export default function StepStudents({
               ? 'Thêm học sinh vào lớp'
               : 'Quản lý học sinh trong lớp'}
           </Typography>
-
-          {/* Helper text */}
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              💡 <strong>Hướng dẫn:</strong> Chọn học sinh từ danh sách bên
-              dưới:
-              <br />• Sử dụng ô tìm kiếm để lọc học sinh
-              <br />• Click checkbox "Chọn tất cả" để chọn tất cả học sinh hiện
-              tại
-              <br />• Hoặc click từng checkbox để chọn học sinh cụ thể
-              <br />• Sau đó cấu hình loại học và thêm vào lớp
-              {!canRemoveStudents && (
-                <>
-                  <br />• ⚠️ <strong>Lưu ý:</strong> Không thể xóa học sinh khi
-                  lớp đang học hoặc đã kết thúc
-                </>
-              )}
-            </Typography>
-          </Alert>
 
           {/* Student Selection Section */}
           <Box sx={{ mb: 3 }}>

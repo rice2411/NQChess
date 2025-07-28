@@ -112,7 +112,7 @@ export default function DashboardPage() {
           }
         >
           <Typography variant="body2">
-            <strong>Cảnh báo:</strong> Nút "Reset Data" sẽ xóa toàn bộ dữ liệu
+            <strong>Cảnh báo:</strong> Nút Reset Data sẽ xóa toàn bộ dữ liệu
             trong hệ thống (trừ dữ liệu người dùng). Chỉ sử dụng khi cần thiết!
           </Typography>
         </Alert>

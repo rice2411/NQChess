@@ -17,19 +17,14 @@ import {
   Grid,
   Card,
   CardContent,
-  Divider,
   Alert,
   IconButton,
-  Tooltip,
 } from '@mui/material';
 import {
   ArrowBack,
   School,
   Payment,
   Schedule,
-  Person,
-  CalendarToday,
-  AttachMoney,
   Warning,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
@@ -334,59 +329,159 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
             </Typography>
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Tên lớp</TableCell>
-                  <TableCell>Trạng thái</TableCell>
-                  <TableCell>Đã đóng</TableCell>
-                  <TableCell>Chưa đóng</TableCell>
-                  <TableCell>Tình trạng</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {studentClasses.map(studentClass => (
-                  <TableRow key={studentClass.class.id}>
-                    <TableCell>
-                      <Typography fontWeight={600}>
-                        {studentClass.class.name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={getClassStatus(studentClass.class.status)}
-                        color={getClassStatusColor(studentClass.class.status)}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography color="success.main" fontWeight={600}>
-                        {studentClass.totalPaid.toLocaleString()} đ
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography color="error.main" fontWeight={600}>
-                        {studentClass.totalUnpaid.toLocaleString()} đ
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {studentClass.isLate ? (
-                        <Chip
-                          label="Trễ học phí"
-                          color="error"
-                          size="small"
-                          icon={<Warning />}
-                        />
-                      ) : (
-                        <Chip label="Đúng hạn" color="success" size="small" />
-                      )}
-                    </TableCell>
+          <Box>
+            {/* Tổng quan học phí */}
+            <Typography variant="subtitle1" fontWeight={600} mb={2}>
+              Tổng quan học phí
+            </Typography>
+            <TableContainer sx={{ mb: 3 }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Tên lớp</TableCell>
+                    <TableCell>Trạng thái</TableCell>
+                    <TableCell>Đã đóng</TableCell>
+                    <TableCell>Chưa đóng</TableCell>
+                    <TableCell>Tình trạng</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {studentClasses.map(studentClass => (
+                    <TableRow key={studentClass.class.id}>
+                      <TableCell>
+                        <Typography fontWeight={600}>
+                          {studentClass.class.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={getClassStatus(studentClass.class.status)}
+                          color={getClassStatusColor(studentClass.class.status)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography color="success.main" fontWeight={600}>
+                          {studentClass.totalPaid.toLocaleString()} đ
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography color="error.main" fontWeight={600}>
+                          {studentClass.totalUnpaid.toLocaleString()} đ
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        {studentClass.isLate ? (
+                          <Chip
+                            label="Trễ học phí"
+                            color="error"
+                            size="small"
+                            icon={<Warning />}
+                          />
+                        ) : (
+                          <Chip label="Đúng hạn" color="success" size="small" />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Chi tiết học phí theo từng tháng */}
+            <Typography variant="subtitle1" fontWeight={600} mb={2}>
+              Chi tiết học phí theo từng tháng
+            </Typography>
+
+            {studentClasses.map(studentClass => (
+              <Card key={studentClass.class.id} sx={{ mb: 2 }}>
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    mb={2}
+                    color="primary"
+                  >
+                    {studentClass.class.name}
+                  </Typography>
+
+                  {studentClass.tuition.length === 0 ? (
+                    <Typography
+                      color="text.secondary"
+                      sx={{ fontStyle: 'italic' }}
+                    >
+                      Chưa có dữ liệu học phí cho lớp này
+                    </Typography>
+                  ) : (
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Tháng</TableCell>
+                            <TableCell>Số tiền</TableCell>
+                            <TableCell>Trạng thái</TableCell>
+                            <TableCell>Ngày đóng</TableCell>
+                            <TableCell>Ghi chú</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {studentClass.tuition
+                            .sort(
+                              (a, b) =>
+                                new Date(b.month).getTime() -
+                                new Date(a.month).getTime()
+                            )
+                            .map(tuition => (
+                              <TableRow key={tuition.id}>
+                                <TableCell>
+                                  <Typography fontWeight={500}>
+                                    {new Date(tuition.month).toLocaleDateString(
+                                      'vi-VN',
+                                      {
+                                        month: 'long',
+                                        year: 'numeric',
+                                      }
+                                    )}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell>
+                                  <Typography fontWeight={600}>
+                                    {tuition.amount.toLocaleString()} đ
+                                  </Typography>
+                                </TableCell>
+                                <TableCell>
+                                  <Chip
+                                    label={
+                                      tuition.status === ETuitionStatus.PAID
+                                        ? 'Đã đóng'
+                                        : 'Chưa đóng'
+                                    }
+                                    color={
+                                      tuition.status === ETuitionStatus.PAID
+                                        ? 'success'
+                                        : 'error'
+                                    }
+                                    size="small"
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  {tuition.paidDate
+                                    ? new Date(
+                                        tuition.paidDate
+                                      ).toLocaleDateString('vi-VN')
+                                    : '-'}
+                                </TableCell>
+                                <TableCell>{tuition.note || '-'}</TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
         )}
       </Paper>
 
@@ -503,7 +598,7 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid sx={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle1" fontWeight={600}>
                     Thông tin chung
                   </Typography>
@@ -528,7 +623,7 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
                       : 'N/A'}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid sx={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle1" fontWeight={600}>
                     Tình hình học phí
                   </Typography>
