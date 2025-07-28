@@ -35,12 +35,16 @@ import {
 import { useRouter } from 'next/navigation';
 import { IStudent, EGender } from '@/interfaces/student.interface';
 import { IClass, EClassStatus } from '@/interfaces/class.interface';
-import { ITuition } from '@/interfaces/tuition.interface';
-import { IAttendance } from '@/interfaces/attendance.interface';
+import { ITuitionFee, ETuitionStatus } from '@/interfaces/tuition.interface';
+import {
+  IAttendance,
+  EAttendanceStatus,
+} from '@/interfaces/attendance.interface';
 import StudentService from '@/services/student.service';
 import ClassService from '@/services/class.service';
 import TuitionService from '@/services/tuition.service';
 import AttendanceService from '@/services/attendance.service';
+import { getAvatarUrl } from '@/constants/avatar';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import Pagination from '@/components/ui/Pagination';
 
@@ -50,7 +54,7 @@ interface StudentDetailProps {
 
 interface StudentClassInfo {
   class: IClass;
-  tuition: ITuition[];
+  tuition: ITuitionFee[];
   totalPaid: number;
   totalUnpaid: number;
   isLate: boolean;
@@ -106,11 +110,11 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
         );
 
         const totalPaid = tuitions
-          .filter(t => t.status === 'PAID')
+          .filter(t => t.status === ETuitionStatus.PAID)
           .reduce((sum, t) => sum + t.amount, 0);
 
         const totalUnpaid = tuitions
-          .filter(t => t.status === 'UNPAID')
+          .filter(t => t.status === ETuitionStatus.PENDING)
           .reduce((sum, t) => sum + t.amount, 0);
 
         // Kiểm tra trễ học phí (tháng hiện tại và quá khứ chưa đóng)
@@ -121,7 +125,7 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
           const tuitionMonth = tuitionDate.getMonth() + 1;
           const tuitionYear = tuitionDate.getFullYear();
           return (
-            t.status === 'UNPAID' &&
+            t.status === ETuitionStatus.PENDING &&
             (tuitionYear < currentYear ||
               (tuitionYear === currentYear && tuitionMonth <= currentMonth))
           );
@@ -262,9 +266,21 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <Avatar
-            src={student.avatar}
+            src={getAvatarUrl(
+              student.gender,
+              student.fullName.replace(/\s+/g, '')
+            )}
             alt={student.fullName}
             sx={{ width: 80, height: 80, fontSize: 32 }}
+            onError={e => {
+              // Fallback to text avatar if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const avatarElement = target.parentElement;
+              if (avatarElement) {
+                avatarElement.style.display = 'flex';
+              }
+            }}
           >
             {student.fullName?.charAt(0) || '?'}
           </Avatar>
@@ -308,59 +324,70 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
           </Alert>
         )}
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Tên lớp</TableCell>
-                <TableCell>Trạng thái</TableCell>
-                <TableCell>Đã đóng</TableCell>
-                <TableCell>Chưa đóng</TableCell>
-                <TableCell>Tình trạng</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {studentClasses.map(studentClass => (
-                <TableRow key={studentClass.class.id}>
-                  <TableCell>
-                    <Typography fontWeight={600}>
-                      {studentClass.class.name}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getClassStatus(studentClass.class.status)}
-                      color={getClassStatusColor(studentClass.class.status)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography color="success.main" fontWeight={600}>
-                      {studentClass.totalPaid.toLocaleString()} đ
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography color="error.main" fontWeight={600}>
-                      {studentClass.totalUnpaid.toLocaleString()} đ
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {studentClass.isLate ? (
-                      <Chip
-                        label="Trễ học phí"
-                        color="error"
-                        size="small"
-                        icon={<Warning />}
-                      />
-                    ) : (
-                      <Chip label="Đúng hạn" color="success" size="small" />
-                    )}
-                  </TableCell>
+        {studentClasses.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography color="text.secondary" variant="body1">
+              Chưa có thông tin học phí nào cho học sinh này.
+            </Typography>
+            <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
+              Học sinh chưa tham gia lớp học nào hoặc chưa có dữ liệu học phí.
+            </Typography>
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Tên lớp</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell>Đã đóng</TableCell>
+                  <TableCell>Chưa đóng</TableCell>
+                  <TableCell>Tình trạng</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {studentClasses.map(studentClass => (
+                  <TableRow key={studentClass.class.id}>
+                    <TableCell>
+                      <Typography fontWeight={600}>
+                        {studentClass.class.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={getClassStatus(studentClass.class.status)}
+                        color={getClassStatusColor(studentClass.class.status)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography color="success.main" fontWeight={600}>
+                        {studentClass.totalPaid.toLocaleString()} đ
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography color="error.main" fontWeight={600}>
+                        {studentClass.totalUnpaid.toLocaleString()} đ
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {studentClass.isLate ? (
+                        <Chip
+                          label="Trễ học phí"
+                          color="error"
+                          size="small"
+                          icon={<Warning />}
+                        />
+                      ) : (
+                        <Chip label="Đúng hạn" color="success" size="small" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Paper>
 
       {/* Danh sách lớp học */}
@@ -375,77 +402,88 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
           Danh sách lớp học đang tham gia
         </Typography>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Tên lớp</TableCell>
-                <TableCell>Lịch học</TableCell>
-                <TableCell>Ngày bắt đầu</TableCell>
-                <TableCell>Ngày kết thúc</TableCell>
-                <TableCell>Trạng thái</TableCell>
-                <TableCell>Tổng thiếu</TableCell>
-                <TableCell>Hành động</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {studentClasses.map(studentClass => (
-                <TableRow key={studentClass.class.id}>
-                  <TableCell>
-                    <Typography fontWeight={600}>
-                      {studentClass.class.name}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {studentClass.class.schedules?.map((schedule, idx) => (
-                      <Chip
-                        key={idx}
-                        label={schedule}
-                        size="small"
-                        sx={{ mr: 0.5, mb: 0.5 }}
-                      />
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    {studentClass.class.startDate
-                      ? new Date(
-                          studentClass.class.startDate
-                        ).toLocaleDateString('vi-VN')
-                      : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {studentClass.class.endDate
-                      ? new Date(studentClass.class.endDate).toLocaleDateString(
-                          'vi-VN'
-                        )
-                      : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getClassStatus(studentClass.class.status)}
-                      color={getClassStatusColor(studentClass.class.status)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography color="error.main" fontWeight={600}>
-                      {studentClass.totalUnpaid.toLocaleString()} đ
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleClassSelect(studentClass.class)}
-                    >
-                      Xem chi tiết
-                    </Button>
-                  </TableCell>
+        {studentClasses.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography color="text.secondary" variant="body1">
+              Học sinh chưa tham gia lớp học nào.
+            </Typography>
+            <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
+              Vui lòng thêm học sinh vào lớp học để xem thông tin chi tiết.
+            </Typography>
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Tên lớp</TableCell>
+                  <TableCell>Lịch học</TableCell>
+                  <TableCell>Ngày bắt đầu</TableCell>
+                  <TableCell>Ngày kết thúc</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell>Tổng thiếu</TableCell>
+                  <TableCell>Hành động</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {studentClasses.map(studentClass => (
+                  <TableRow key={studentClass.class.id}>
+                    <TableCell>
+                      <Typography fontWeight={600}>
+                        {studentClass.class.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {studentClass.class.schedules?.map((schedule, idx) => (
+                        <Chip
+                          key={idx}
+                          label={schedule}
+                          size="small"
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
+                      ))}
+                    </TableCell>
+                    <TableCell>
+                      {studentClass.class.startDate
+                        ? new Date(
+                            studentClass.class.startDate
+                          ).toLocaleDateString('vi-VN')
+                        : '-'}
+                    </TableCell>
+                    <TableCell>
+                      {studentClass.class.endDate
+                        ? new Date(
+                            studentClass.class.endDate
+                          ).toLocaleDateString('vi-VN')
+                        : '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={getClassStatus(studentClass.class.status)}
+                        color={getClassStatusColor(studentClass.class.status)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography color="error.main" fontWeight={600}>
+                        {studentClass.totalUnpaid.toLocaleString()} đ
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleClassSelect(studentClass.class)}
+                      >
+                        Xem chi tiết
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Paper>
 
       {/* Chi tiết lớp học được chọn */}
@@ -523,48 +561,65 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
             Danh sách buổi học
           </Typography>
 
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Ngày học</TableCell>
-                  <TableCell>Điểm danh</TableCell>
-                  <TableCell>Ghi chú</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {attendances.map(attendanceInfo => (
-                  <TableRow key={attendanceInfo.attendance.id}>
-                    <TableCell>
-                      {attendanceInfo.attendance.date
-                        ? new Date(
-                            attendanceInfo.attendance.date
-                          ).toLocaleDateString('vi-VN')
-                        : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          attendanceInfo.attendance.status === 'PRESENT'
-                            ? 'Có mặt'
-                            : 'Vắng'
-                        }
-                        color={
-                          attendanceInfo.attendance.status === 'PRESENT'
-                            ? 'success'
-                            : 'error'
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {attendanceInfo.attendance.note || '-'}
-                    </TableCell>
+          {attendances.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography color="text.secondary" variant="body1">
+                Chưa có dữ liệu điểm danh cho học sinh này.
+              </Typography>
+              <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
+                Dữ liệu điểm danh sẽ được hiển thị khi có buổi học được ghi
+                nhận.
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Ngày học</TableCell>
+                    <TableCell>Điểm danh</TableCell>
+                    <TableCell>Ghi chú</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {attendances.map(attendanceInfo => (
+                    <TableRow key={attendanceInfo.attendance.id}>
+                      <TableCell>
+                        {attendanceInfo.attendance.sessionDate
+                          ? new Date(
+                              attendanceInfo.attendance.sessionDate
+                            ).toLocaleDateString('vi-VN')
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={
+                            attendanceInfo.attendance.attendanceRecords?.[0]
+                              ?.status === EAttendanceStatus.PRESENT
+                              ? 'Có mặt'
+                              : 'Vắng'
+                          }
+                          color={
+                            attendanceInfo.attendance.attendanceRecords?.[0]
+                              ?.status === EAttendanceStatus.PRESENT
+                              ? 'success'
+                              : 'error'
+                          }
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {attendanceInfo.attendance.attendanceRecords?.[0]
+                          ?.note ||
+                          attendanceInfo.attendance.notes ||
+                          '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
 
           {/* Pagination cho điểm danh */}
           {attendanceTotal > 0 && (

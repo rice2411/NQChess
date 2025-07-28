@@ -262,6 +262,7 @@ export default function CreatePostModal({
         onClose={onClose}
         maxWidth="lg"
         fullWidth
+        disableScrollLock
         PaperProps={{
           sx: { height: '90vh' },
         }}

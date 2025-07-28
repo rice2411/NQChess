@@ -1,12 +1,14 @@
 'use client';
+import { use } from 'react';
 import StudentDetail from '@/components/pages/admin/student/StudentDetail';
 
 interface StudentDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function StudentDetailPage({ params }: StudentDetailPageProps) {
-  return <StudentDetail studentId={params.id} />;
+  const { id } = use(params);
+  return <StudentDetail studentId={id} />;
 }

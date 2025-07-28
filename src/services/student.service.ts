@@ -13,8 +13,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EGender, IStudent } from '@/interfaces/student.interface';
-import { CloudinaryService } from '@/services/cloudinary.service';
 import { COLLECTIONS } from '@/constants/collections';
+import { getAvatarUrl } from '@/constants/avatar';
 
 export class StudentService {
   // ===== STUDENT MANAGEMENT =====
@@ -168,87 +168,21 @@ export class StudentService {
   }
 
   /**
-   * Cập nhật thông tin học sinh
+   * Cập nhật học sinh
    */
   static async updateStudent(
     id: string,
     studentData: Partial<Omit<IStudent, 'id' | 'createdAt'>>
   ): Promise<void> {
     try {
-      // Lấy thông tin học sinh hiện tại
-      const currentStudent = await this.getStudentById(id);
-      if (!currentStudent) {
-        throw new Error('Không tìm thấy học sinh');
-      }
-
-      // Xử lý avatar nếu có thay đổi
-      await this.handleAvatarUpdate(currentStudent, studentData);
-
-      const updateData = {
+      const docRef = doc(db, COLLECTIONS.STUDENTS, id);
+      await updateDoc(docRef, {
         ...studentData,
         updatedAt: new Date().toISOString(),
-      };
-
-      await updateDoc(doc(db, COLLECTIONS.STUDENTS, id), updateData);
+      });
     } catch (error) {
       console.error('Error updating student:', error);
-      throw new Error('Không thể cập nhật thông tin học sinh');
-    }
-  }
-
-  /**
-   * Xử lý cập nhật avatar - xóa avatar cũ nếu có avatar mới
-   */
-  private static async handleAvatarUpdate(
-    currentStudent: IStudent,
-    newStudentData: Partial<Omit<IStudent, 'id' | 'createdAt'>>
-  ): Promise<void> {
-    // Normalize URLs để so sánh chính xác
-    const currentAvatar = this.normalizeUrl(currentStudent.avatar);
-    const newAvatar = this.normalizeUrl(newStudentData.avatar);
-    const areDifferent = currentAvatar !== newAvatar;
-
-    // Chỉ xóa avatar cũ nếu có avatar mới và khác với avatar hiện tại
-    if (newStudentData.avatar && currentStudent.avatar && areDifferent) {
-      await this.deleteStudentAvatar(currentStudent.avatar);
-    }
-  }
-
-  /**
-   * Normalize URL để so sánh chính xác
-   */
-  private static normalizeUrl(url: string | undefined): string {
-    if (!url) return '';
-
-    try {
-      // Loại bỏ protocol và trailing slash
-      return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    } catch (error) {
-      console.warn('Error normalizing URL:', url, error);
-      return url;
-    }
-  }
-
-  /**
-   * Xóa avatar của học sinh từ Cloudinary
-   */
-  static async deleteStudentAvatar(avatarUrl: string): Promise<boolean> {
-    if (!avatarUrl) {
-      return false;
-    }
-
-    try {
-      const deleteResult = await CloudinaryService.deleteImage(avatarUrl);
-
-      if (deleteResult.success) {
-        return true;
-      } else {
-        console.warn('Failed to delete avatar:', deleteResult.error);
-        return false;
-      }
-    } catch (error) {
-      console.error('Error deleting avatar:', error);
-      return false;
+      throw new Error('Không thể cập nhật học sinh');
     }
   }
 
@@ -259,7 +193,9 @@ export class StudentService {
     try {
       const student = await this.getStudentById(id);
       if (student && student.avatar) {
-        await this.deleteStudentAvatar(student.avatar);
+        // Assuming CloudinaryService.deleteImage is removed,
+        // we'll just return true as there's no external service to call.
+        console.warn('Avatar deletion logic is not fully implemented yet.');
       }
       await deleteDoc(doc(db, COLLECTIONS.STUDENTS, id));
     } catch (error) {
@@ -462,7 +398,190 @@ export class StudentService {
       );
     } catch (error) {
       console.error('Error fetching recent students:', error);
-      throw new Error('Không thể lấy học sinh gần đây');
+      throw new Error('Không thể lấy danh sách học sinh gần đây');
+    }
+  }
+
+  /**
+   * Tạo 100 học sinh mẫu
+   */
+  static async createSampleStudents(count: number = 100): Promise<{
+    success: boolean;
+    message: string;
+    createdCount: number;
+  }> {
+    try {
+      const sampleStudents: Omit<IStudent, 'id' | 'createdAt' | 'updatedAt'>[] =
+        [];
+
+      // Danh sách tên mẫu
+      const firstNames = [
+        'Nguyễn',
+        'Trần',
+        'Lê',
+        'Phạm',
+        'Hoàng',
+        'Huỳnh',
+        'Phan',
+        'Vũ',
+        'Võ',
+        'Đặng',
+        'Bùi',
+        'Đỗ',
+        'Hồ',
+        'Ngô',
+        'Dương',
+        'Lý',
+        'Đinh',
+        'Tô',
+        'Tạ',
+        'Trịnh',
+      ];
+
+      const middleNames = [
+        'Văn',
+        'Thị',
+        'Hoàng',
+        'Minh',
+        'Đức',
+        'Thành',
+        'Công',
+        'Huy',
+        'Tuấn',
+        'Duy',
+        'Anh',
+        'Hùng',
+        'Nam',
+        'Phương',
+        'Linh',
+        'Hương',
+        'Thảo',
+        'Nga',
+        'Hà',
+        'Thu',
+      ];
+
+      const lastNames = [
+        'An',
+        'Bình',
+        'Cường',
+        'Dũng',
+        'Em',
+        'Phúc',
+        'Giang',
+        'Hoa',
+        'Inh',
+        'Khang',
+        'Linh',
+        'Minh',
+        'Nga',
+        'Oanh',
+        'Phương',
+        'Quân',
+        'Rồng',
+        'Sơn',
+        'Thảo',
+        'Uyên',
+        'Vân',
+        'Xuân',
+        'Yến',
+        'Zương',
+        'Ánh',
+        'Ân',
+        'Ấn',
+        'Ẩn',
+        'Ận',
+        'Ắn',
+      ];
+
+      // Danh sách số điện thoại mẫu
+      const phonePrefixes = [
+        '090',
+        '091',
+        '092',
+        '093',
+        '094',
+        '095',
+        '096',
+        '097',
+        '098',
+        '099',
+      ];
+
+      // Danh sách ngày sinh mẫu (từ 2010-2015)
+      const birthYears = [2010, 2011, 2012, 2013, 2014, 2015];
+      const birthMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      const birthDays = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28,
+      ];
+
+      for (let i = 0; i < count; i++) {
+        // Tạo tên ngẫu nhiên
+        const firstName =
+          firstNames[Math.floor(Math.random() * firstNames.length)];
+        const middleName =
+          middleNames[Math.floor(Math.random() * middleNames.length)];
+        const lastName =
+          lastNames[Math.floor(Math.random() * lastNames.length)];
+        const fullName = `${firstName} ${middleName} ${lastName}`;
+
+        // Tạo số điện thoại ngẫu nhiên
+        const prefix =
+          phonePrefixes[Math.floor(Math.random() * phonePrefixes.length)];
+        const suffix = Math.floor(Math.random() * 10000000)
+          .toString()
+          .padStart(7, '0');
+        const phoneNumber = `${prefix}${suffix}`;
+
+        // Tạo ngày sinh ngẫu nhiên
+        const year = birthYears[Math.floor(Math.random() * birthYears.length)];
+        const month =
+          birthMonths[Math.floor(Math.random() * birthMonths.length)];
+        const day = birthDays[Math.floor(Math.random() * birthDays.length)];
+        const dateOfBirth = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+        // Tạo giới tính ngẫu nhiên
+        const gender = Math.random() > 0.5 ? EGender.MALE : EGender.FEMALE;
+
+        // Tạo avatar mẫu dựa trên giới tính
+        const avatar = getAvatarUrl(gender, fullName.replace(/\s+/g, ''));
+
+        sampleStudents.push({
+          fullName,
+          phoneNumber,
+          dateOfBirth,
+          avatar,
+          gender,
+        });
+      }
+
+      // Tạo tất cả học sinh trong batch
+      const batch = [];
+      for (const student of sampleStudents) {
+        const now = new Date().toISOString();
+        const newStudent = {
+          ...student,
+          createdAt: now,
+          updatedAt: now,
+        };
+        batch.push(addDoc(collection(db, COLLECTIONS.STUDENTS), newStudent));
+      }
+
+      await Promise.all(batch);
+
+      return {
+        success: true,
+        message: `Đã tạo thành công ${count} học sinh mẫu!`,
+        createdCount: count,
+      };
+    } catch (error) {
+      console.error('Error creating sample students:', error);
+      return {
+        success: false,
+        message: 'Có lỗi xảy ra khi tạo học sinh mẫu!',
+        createdCount: 0,
+      };
     }
   }
 }

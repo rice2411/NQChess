@@ -192,6 +192,7 @@ export default function AttendanceModal({
       onClose={onClose}
       maxWidth="lg"
       fullWidth
+      disableScrollLock
       PaperProps={{
         sx: {
           maxHeight: '90vh',

@@ -37,35 +37,6 @@ export default function NavbarAdmin() {
         >
           Admin Overview
         </Typography>
-        <Paper
-          component="form"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            width: 240,
-            px: 1,
-            py: 0.5,
-            borderRadius: 2,
-            boxShadow: 'none',
-            bgcolor: theme.palette.grey[100],
-          }}
-          elevation={0}
-        >
-          <Search color="action" sx={{ mr: 1 }} />
-          <InputBase placeholder="Search..." sx={{ flex: 1, fontSize: 15 }} />
-        </Paper>
-        <IconButton>
-          <CalendarToday color="action" />
-        </IconButton>
-        <IconButton>
-          <Badge color="error" variant="dot">
-            <Notifications color="action" />
-          </Badge>
-        </IconButton>
-        <Avatar
-          src="https://randomuser.me/api/portraits/women/44.jpg"
-          sx={{ width: 32, height: 32, ml: 2 }}
-        />
       </Toolbar>
     </AppBar>
   );

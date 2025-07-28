@@ -19,7 +19,14 @@ import {
   InputAdornment,
   Tooltip,
 } from '@mui/material';
-import { Add, Edit, Delete, Search, Visibility } from '@mui/icons-material';
+import {
+  Add,
+  Edit,
+  Delete,
+  Search,
+  Visibility,
+  GroupAdd,
+} from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { EGender, IStudent } from '@/interfaces/student.interface';
 import StudentService from '@/services/student.service';
@@ -29,17 +36,22 @@ import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import StudentFormModal from './Modal/StudentFormModal';
 import { useModalConfirm } from '@/hooks/useModalConfirm';
 import { useRouter } from 'next/navigation';
+import { getAvatarUrl } from '@/constants/avatar';
 
 export default function StudentManagement() {
   const [students, setStudents] = useState<IStudent[]>([]);
   const [search, setSearch] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [editing, setEditing] = useState<IStudent | null>(null);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    fullName: string;
+    phoneNumber: string;
+    dateOfBirth: string;
+    gender: EGender;
+  }>({
     fullName: '',
     phoneNumber: '',
     dateOfBirth: '',
-    avatar: '',
     gender: EGender.MALE,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
@@ -109,14 +121,12 @@ export default function StudentManagement() {
             fullName: student.fullName,
             phoneNumber: student.phoneNumber,
             dateOfBirth: student.dateOfBirth,
-            avatar: student.avatar,
             gender: student.gender,
           }
         : {
             fullName: '',
             phoneNumber: '',
             dateOfBirth: '',
-            avatar: '',
             gender: EGender.MALE,
           }
     );
@@ -130,7 +140,6 @@ export default function StudentManagement() {
       fullName: '',
       phoneNumber: '',
       dateOfBirth: '',
-      avatar: '',
       gender: EGender.MALE,
     });
   }
@@ -189,6 +198,36 @@ export default function StudentManagement() {
 
   function handleViewDetail(student: IStudent) {
     router.push(`/students/${student.id}`);
+  }
+
+  async function handleAddSampleStudents() {
+    try {
+      setGlobalLoading(true);
+
+      const result = await StudentService.createSampleStudents(100);
+
+      if (result.success) {
+        setSnackbar({
+          open: true,
+          message: result.message,
+        });
+        // Refresh danh sách
+        fetchStudents(search, true);
+      } else {
+        setSnackbar({
+          open: true,
+          message: result.message,
+        });
+      }
+    } catch (error) {
+      console.error('Error adding sample students:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi tạo học sinh mẫu!',
+      });
+    } finally {
+      setGlobalLoading(false);
+    }
   }
 
   // Không render cho đến khi mounted
@@ -254,6 +293,14 @@ export default function StudentManagement() {
         >
           Thêm học sinh
         </Button>
+        <Button
+          variant="contained"
+          startIcon={<GroupAdd />}
+          onClick={handleAddSampleStudents}
+          sx={{ height: '40px' }}
+        >
+          Thêm 100 học sinh
+        </Button>
       </Box>
 
       <TableContainer component={Paper}>
@@ -273,7 +320,10 @@ export default function StudentManagement() {
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
-                      src={student.avatar}
+                      src={getAvatarUrl(
+                        student.gender,
+                        student.fullName.replace(/\s+/g, '')
+                      )}
                       alt={student.fullName}
                       sx={{ width: 40, height: 40 }}
                     >

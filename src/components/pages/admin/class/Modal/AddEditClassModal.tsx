@@ -300,7 +300,13 @@ export default function AddEditClassModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      disableScrollLock
+    >
       <DialogTitle>
         <Typography variant="h6" gutterBottom>
           {editing ? `Chỉnh sửa lớp: ${editing.name}` : 'Thêm lớp học mới'}

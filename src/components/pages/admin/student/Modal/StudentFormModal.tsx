@@ -20,9 +20,9 @@ import {
 import { PhotoCamera } from '@mui/icons-material';
 import { EGender, IStudent } from '@/interfaces/student.interface';
 import { useForm, Controller } from 'react-hook-form';
-import { CloudinaryService } from '@/services/cloudinary.service';
 import { StudentService } from '@/services/student.service';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
+import { getAvatarUrl } from '@/constants/avatar';
 
 interface StudentFormModalProps {
   open: boolean;
@@ -31,7 +31,6 @@ interface StudentFormModalProps {
     fullName: string;
     phoneNumber: string;
     dateOfBirth: string;
-    avatar: string;
     gender: EGender;
   };
   onClose: () => void;
@@ -43,7 +42,6 @@ type FormValues = {
   fullName: string;
   phoneNumber: string;
   dateOfBirth: string;
-  avatar: string;
   gender: EGender;
 };
 
@@ -54,12 +52,7 @@ export default function StudentFormModal({
   onClose,
   onSave,
 }: StudentFormModalProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const loading = useGlobalLoadingStore(state => state.loading);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>(
-    form?.avatar || ''
-  );
 
   const {
     control,
@@ -71,69 +64,53 @@ export default function StudentFormModal({
     defaultValues: form,
   });
 
+  const watchedGender = watch('gender');
+  const watchedFullName = watch('fullName');
+
   useEffect(() => {
     reset(form);
-    setAvatarPreview(form?.avatar || '');
-    setAvatarFile(null);
   }, [open, form, reset]);
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+  // Tự động tạo avatar dựa trên giới tính và tên
+  const generateAvatar = (gender: EGender, fullName: string) => {
+    return getAvatarUrl(gender, fullName.replace(/\s+/g, ''));
   };
 
   const onSubmit = async (values: FormValues) => {
     useGlobalLoadingStore.getState().setLoading(true);
     try {
-      let avatarUrl = values?.avatar;
+      // Tự động tạo avatar dựa trên giới tính và tên
+      const avatarUrl = generateAvatar(values.gender, values.fullName);
 
-      // Upload avatar nếu có file mới
-      if (avatarFile) {
-        const uploadResult = await CloudinaryService.uploadImage(avatarFile);
-        if (uploadResult.success && uploadResult.url) {
-          avatarUrl = uploadResult.url;
-        } else {
-          throw new Error(uploadResult.error || 'Không thể upload hình ảnh');
-        }
-      }
-
-      // Chuẩn bị dữ liệu học sinh
-      const studentData = {
-        fullName: values.fullName,
-        phoneNumber: values.phoneNumber,
-        dateOfBirth: values.dateOfBirth,
-        avatar: avatarUrl,
-        gender: values.gender,
-      };
-
-      // Tạo hoặc cập nhật học sinh
       if (editing) {
-        await StudentService.updateStudent(editing.id, studentData);
+        await StudentService.updateStudent(editing.id, {
+          ...values,
+          avatar: avatarUrl,
+        });
       } else {
-        await StudentService.createStudent(studentData);
+        await StudentService.createStudent({
+          ...values,
+          avatar: avatarUrl,
+        });
       }
 
-      // Ẩn GlobalLoading trước khi gọi callback
       useGlobalLoadingStore.getState().setLoading(false);
-
-      // Gọi callback để refresh danh sách và đóng modal
       onSave(avatarUrl);
       onClose();
     } catch (error) {
       console.error('Error saving student:', error);
-      // Có thể hiển thị thông báo lỗi ở đây
       useGlobalLoadingStore.getState().setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      disableScrollLock
+    >
       <DialogTitle>
         {editing ? 'Cập nhật học sinh' : 'Thêm học sinh'}
       </DialogTitle>
@@ -155,30 +132,31 @@ export default function StudentFormModal({
             }}
           >
             <Avatar
-              src={avatarPreview}
-              alt={watch('fullName')}
+              src={generateAvatar(watchedGender, watchedFullName)}
+              alt={watchedFullName}
               sx={{ width: 80, height: 80, mb: 1, fontSize: 32 }}
+              onError={e => {
+                // Fallback to text avatar if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const avatarElement = target.parentElement;
+                if (avatarElement) {
+                  avatarElement.style.display = 'flex';
+                }
+              }}
             >
-              {watch('fullName')?.charAt(0) || '?'}
+              {watchedFullName?.charAt(0) || '?'}
             </Avatar>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-            <IconButton
-              color="primary"
-              component="span"
-              onClick={handleAvatarClick}
-              disabled={loading}
-              sx={{ position: 'relative' }}
+            <Typography variant="caption" color="text.secondary" align="center">
+              Ảnh đại diện tự động tạo
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              align="center"
+              sx={{ fontSize: '0.7rem' }}
             >
-              <PhotoCamera />
-            </IconButton>
-            <Typography variant="caption" color="text.secondary">
-              Ảnh đại diện
+              Dựa trên giới tính và tên học sinh
             </Typography>
           </Box>
           <Controller

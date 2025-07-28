@@ -101,7 +101,13 @@ export default function ResetDataModal({ open, onClose }: ResetDataModalProps) {
   );
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      disableScrollLock
+    >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Warning color="error" />
         Reset Toàn Bộ Data
