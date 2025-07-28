@@ -6,6 +6,7 @@ import {
   Chip,
   IconButton,
   Typography,
+  Alert,
 } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -21,6 +22,7 @@ interface StepSchedulesProps {
   scheduleFields: any[];
   appendSchedule: ({ label }: { label: string }) => void;
   removeSchedule: (index: number) => void;
+  canModify?: boolean;
 }
 
 export default function StepSchedules({
@@ -28,6 +30,7 @@ export default function StepSchedules({
   scheduleFields,
   appendSchedule,
   removeSchedule,
+  canModify = true,
 }: StepSchedulesProps) {
   const weekdays = [
     'Thứ 2',
@@ -77,6 +80,16 @@ export default function StepSchedules({
         </Typography>
       </Box>
 
+      {/* Warning khi không thể thay đổi */}
+      {!canModify && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            ℹ️ Lớp học này đang học hoặc đã kết thúc. Không thể thay đổi lịch
+            học để tránh ảnh hưởng đến dữ liệu điểm danh và học phí.
+          </Typography>
+        </Alert>
+      )}
+
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <Controller
@@ -95,6 +108,7 @@ export default function StepSchedules({
                 }
                 ampm={false}
                 sx={{ width: 140 }}
+                disabled={!canModify}
               />
             )}
           />
@@ -114,6 +128,7 @@ export default function StepSchedules({
                 }
                 ampm={false}
                 sx={{ width: 140 }}
+                disabled={!canModify}
               />
             )}
           />
@@ -129,6 +144,7 @@ export default function StepSchedules({
                 onChange={field.onChange}
                 sx={{ width: 120 }}
                 InputLabelProps={{ shrink: true }}
+                disabled={!canModify}
               >
                 {weekdays.map(w => (
                   <MenuItem key={w} value={w}>
@@ -141,20 +157,26 @@ export default function StepSchedules({
           <IconButton
             onClick={handleAddSchedule}
             disabled={
-              scheduleFields.length >= 2 || !startTime || !endTime || !weekday
+              !canModify ||
+              scheduleFields.length >= 2 ||
+              !startTime ||
+              !endTime ||
+              !weekday
             }
             color="primary"
             sx={{ mt: 1 }}
             title={
-              !startTime
-                ? 'Vui lòng chọn giờ bắt đầu'
-                : !endTime
-                  ? 'Vui lòng chọn giờ kết thúc'
-                  : !weekday
-                    ? 'Vui lòng chọn thứ'
-                    : scheduleFields.length >= 2
-                      ? 'Đã đủ 2 buổi học'
-                      : 'Thêm buổi học'
+              !canModify
+                ? 'Không thể thay đổi lịch học'
+                : !startTime
+                  ? 'Vui lòng chọn giờ bắt đầu'
+                  : !endTime
+                    ? 'Vui lòng chọn giờ kết thúc'
+                    : !weekday
+                      ? 'Vui lòng chọn thứ'
+                      : scheduleFields.length >= 2
+                        ? 'Đã đủ 2 buổi học'
+                        : 'Thêm buổi học'
             }
           >
             <Add />
@@ -171,10 +193,10 @@ export default function StepSchedules({
                 ? field.label
                 : String(field.label)
             }
-            onDelete={() => handleRemoveSchedule(index)}
+            onDelete={canModify ? () => handleRemoveSchedule(index) : undefined}
             color="primary"
             sx={{ mb: 1 }}
-            deleteIcon={<Delete />}
+            deleteIcon={canModify ? <Delete /> : undefined}
           />
         ))}
         {scheduleFields.length === 0 && (
@@ -194,7 +216,7 @@ export default function StepSchedules({
       )}
 
       {/* Helper text cho điều kiện thêm buổi học */}
-      {(!startTime || !endTime || !weekday) && (
+      {(!startTime || !endTime || !weekday) && canModify && (
         <Typography variant="body2" color="warning.main">
           Vui lòng chọn đầy đủ giờ bắt đầu, giờ kết thúc và thứ để thêm buổi học
         </Typography>

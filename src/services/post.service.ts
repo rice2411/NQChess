@@ -15,12 +15,7 @@ import {
 import { db } from '@/lib/firebase';
 import { Post } from '@/interfaces/post.interface';
 import { CloudinaryService } from '@/services/cloudinary.service';
-
-// Collection names
-const COLLECTIONS = {
-  POSTS: 'posts',
-  USERS: 'users',
-} as const;
+import { COLLECTIONS } from '@/constants/collections';
 
 export class PostService {
   // ===== POST MANAGEMENT =====

@@ -32,6 +32,7 @@ export type ClassSchedule = string;
 export interface IClass extends IBaseEntity {
   name: string;
   startDate: string;
+  endDate?: string; // Ngày kết thúc lớp học
   students: IStudentClass[];
   schedules: ClassSchedule[];
   status: EClassStatus;

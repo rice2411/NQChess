@@ -14,12 +14,7 @@ import {
 import { db } from '@/lib/firebase';
 import { EGender, IStudent } from '@/interfaces/student.interface';
 import { CloudinaryService } from '@/services/cloudinary.service';
-
-// Collection names
-const COLLECTIONS = {
-  STUDENTS: 'students',
-  USERS: 'users',
-} as const;
+import { COLLECTIONS } from '@/constants/collections';
 
 export class StudentService {
   // ===== STUDENT MANAGEMENT =====
@@ -81,6 +76,45 @@ export class StudentService {
       return snapshot.docs.map(
         doc => ({ id: doc.id, ...doc.data() }) as IStudent
       );
+    } catch (error) {
+      console.error('Error searching students:', error);
+      throw new Error('Không thể tìm kiếm học sinh');
+    }
+  }
+
+  /**
+   * Tìm kiếm học sinh theo tên và số điện thoại
+   */
+  static async searchStudentsByNameAndPhone(
+    searchText: string
+  ): Promise<IStudent[]> {
+    try {
+      if (!searchText.trim()) {
+        return this.getAllStudents();
+      }
+
+      const searchLower = searchText.toLowerCase().trim();
+
+      // Lấy tất cả học sinh và filter ở client side
+      const q = query(
+        collection(db, COLLECTIONS.STUDENTS),
+        orderBy('fullName')
+      );
+      const snapshot = await getDocs(q);
+
+      const allStudents = snapshot.docs.map(
+        doc => ({ id: doc.id, ...doc.data() }) as IStudent
+      );
+
+      // Filter theo tên hoặc số điện thoại
+      return allStudents.filter(student => {
+        const fullName = student.fullName?.toLowerCase() || '';
+        const phoneNumber = student.phoneNumber?.toLowerCase() || '';
+
+        return (
+          fullName.includes(searchLower) || phoneNumber.includes(searchLower)
+        );
+      });
     } catch (error) {
       console.error('Error searching students:', error);
       throw new Error('Không thể tìm kiếm học sinh');
@@ -248,33 +282,32 @@ export class StudentService {
     hasMore: boolean;
   }> {
     try {
-      const constraints: QueryConstraint[] = [];
+      let allStudents: IStudent[] = [];
 
-      // Thêm điều kiện tìm kiếm
+      // Nếu có search text, sử dụng function search mới
       if (searchText?.trim()) {
-        constraints.push(where('fullName', '>=', searchText));
-        constraints.push(where('fullName', '<=', searchText + '\uf8ff'));
+        allStudents = await this.searchStudentsByNameAndPhone(searchText);
+      } else {
+        // Lấy tất cả học sinh nếu không có search
+        const q = query(
+          collection(db, COLLECTIONS.STUDENTS),
+          orderBy('fullName')
+        );
+        const snapshot = await getDocs(q);
+        allStudents = snapshot.docs.map(
+          doc => ({ id: doc.id, ...doc.data() }) as IStudent
+        );
       }
 
-      // Thêm điều kiện giới tính
+      // Filter theo giới tính nếu có
       if (gender) {
-        constraints.push(where('gender', '==', gender));
+        allStudents = allStudents.filter(student => student.gender === gender);
       }
 
-      // Sắp xếp
-      constraints.push(orderBy('fullName'));
+      const total = allStudents.length;
 
       // Tính offset cho traditional pagination
       const offset = (page - 1) * pageSize;
-
-      // Lấy tất cả documents để tính total và slice
-      const q = query(collection(db, COLLECTIONS.STUDENTS), ...constraints);
-      const snapshot = await getDocs(q);
-
-      const allStudents = snapshot.docs.map(
-        doc => ({ id: doc.id, ...doc.data() }) as IStudent
-      );
-      const total = allStudents.length;
 
       // Slice để lấy trang hiện tại
       const startIndex = offset;
@@ -302,21 +335,29 @@ export class StudentService {
     gender?: EGender
   ): Promise<number> {
     try {
-      const constraints: QueryConstraint[] = [];
+      let allStudents: IStudent[] = [];
 
+      // Nếu có search text, sử dụng function search mới
       if (searchText?.trim()) {
-        constraints.push(where('fullName', '>=', searchText));
-        constraints.push(where('fullName', '<=', searchText + '\uf8ff'));
+        allStudents = await this.searchStudentsByNameAndPhone(searchText);
+      } else {
+        // Lấy tất cả học sinh nếu không có search
+        const q = query(
+          collection(db, COLLECTIONS.STUDENTS),
+          orderBy('fullName')
+        );
+        const snapshot = await getDocs(q);
+        allStudents = snapshot.docs.map(
+          doc => ({ id: doc.id, ...doc.data() }) as IStudent
+        );
       }
 
+      // Filter theo giới tính nếu có
       if (gender) {
-        constraints.push(where('gender', '==', gender));
+        allStudents = allStudents.filter(student => student.gender === gender);
       }
 
-      const q = query(collection(db, COLLECTIONS.STUDENTS), ...constraints);
-      const snapshot = await getDocs(q);
-
-      return snapshot.docs.length;
+      return allStudents.length;
     } catch (error) {
       console.error('Error getting total students:', error);
       return 0;

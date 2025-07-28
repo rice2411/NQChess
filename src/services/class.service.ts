@@ -19,8 +19,7 @@ import { AttendanceService } from './attendance.service';
 import { TuitionService } from './tuition.service';
 import { calculateClassDates } from '@/utils/dateUtils';
 import { EAttendanceStatus } from '@/interfaces/attendance.interface';
-
-const COLLECTION = 'classes';
+import { COLLECTIONS } from '@/constants/collections';
 
 export class ClassService {
   // Tạo lớp học mới
@@ -34,7 +33,7 @@ export class ClassService {
       createdAt: now,
       updatedAt: now,
     };
-    const docRef = await addDoc(collection(db, COLLECTION), newClass);
+    const docRef = await addDoc(collection(db, COLLECTIONS.CLASSES), newClass);
     const createdClass = { id: docRef.id, ...newClass } as IClass;
 
     // Tự động tạo buổi điểm danh cho các ngày học từ startDate đến ngày hiện tại
@@ -61,7 +60,10 @@ export class ClassService {
     page = 1,
     pageSize = 10
   ): Promise<{ classes: IClass[]; total: number; hasMore: boolean }> {
-    const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'));
+    const q = query(
+      collection(db, COLLECTIONS.CLASSES),
+      orderBy('createdAt', 'desc')
+    );
     const snapshot = await getDocs(q);
     const all = snapshot.docs.map(
       doc => ({ id: doc.id, ...doc.data() }) as IClass
@@ -79,10 +81,32 @@ export class ClassService {
 
   // Lấy chi tiết lớp học
   static async getClassById(id: string): Promise<IClass | null> {
-    const docRef = doc(db, COLLECTION, id);
+    const docRef = doc(db, COLLECTIONS.CLASSES, id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return null;
     return { id: docSnap.id, ...docSnap.data() } as IClass;
+  }
+
+  // Lấy các lớp học của một học sinh
+  static async getClassesByStudent(studentId: string): Promise<IClass[]> {
+    try {
+      const q = query(
+        collection(db, COLLECTIONS.CLASSES),
+        orderBy('createdAt', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      const allClasses = snapshot.docs.map(
+        doc => ({ id: doc.id, ...doc.data() }) as IClass
+      );
+
+      // Filter các lớp có học sinh này
+      return allClasses.filter(cls =>
+        cls.students?.some(student => student.studentId === studentId)
+      );
+    } catch (error) {
+      console.error('Error fetching classes by student:', error);
+      throw new Error('Không thể lấy danh sách lớp học của học sinh');
+    }
   }
 
   // Cập nhật lớp học
@@ -95,7 +119,7 @@ export class ClassService {
       ...data,
       updatedAt: new Date().toISOString(),
     };
-    await updateDoc(doc(db, COLLECTION, id), updateData);
+    await updateDoc(doc(db, COLLECTIONS.CLASSES, id), updateData);
 
     // Nếu cập nhật schedule, tạo buổi điểm danh cho các ngày học mới
     if (data.schedules) {
@@ -122,7 +146,7 @@ export class ClassService {
     const classDates = calculateClassDates(
       classDoc.startDate,
       classDoc.schedules,
-      currentDate.toISOString().split('T')[0]
+      classDoc.endDate || currentDate.toISOString().split('T')[0]
     );
 
     // Lọc ra các ngày học từ ngày hiện tại trở đi
@@ -160,7 +184,7 @@ export class ClassService {
 
   // Xóa lớp học
   static async deleteClass(id: string): Promise<void> {
-    await deleteDoc(doc(db, COLLECTION, id));
+    await deleteDoc(doc(db, COLLECTIONS.CLASSES, id));
   }
 
   // Thêm nhiều học sinh vào lớp
@@ -179,7 +203,7 @@ export class ClassService {
       ),
       ...students,
     ];
-    await updateDoc(doc(db, COLLECTION, classId), {
+    await updateDoc(doc(db, COLLECTIONS.CLASSES, classId), {
       students: merged,
       updatedAt: new Date().toISOString(),
     });
@@ -205,7 +229,7 @@ export class ClassService {
     const filtered = (classDoc.students || []).filter(
       s => s.studentId !== studentId
     );
-    await updateDoc(doc(db, COLLECTION, classId), {
+    await updateDoc(doc(db, COLLECTIONS.CLASSES, classId), {
       students: filtered,
       updatedAt: new Date().toISOString(),
     });
@@ -223,14 +247,15 @@ export class ClassService {
   // Tạo danh sách tháng cần tạo học phí
   private static generateMonthsToCreate(
     startDate: string,
+    endDate?: string,
     includeNextMonth = true
   ): string[] {
     const start = new Date(startDate);
-    const current = new Date();
+    const end = endDate ? new Date(endDate) : new Date();
 
-    // Tạo danh sách từ tháng bắt đầu đến tháng hiện tại
+    // Tạo danh sách từ tháng bắt đầu đến tháng kết thúc hoặc tháng hiện tại
     const startMonth = new Date(start.getFullYear(), start.getMonth(), 1);
-    const endMonth = new Date(current.getFullYear(), current.getMonth(), 1);
+    const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
 
     const months: string[] = [];
     const currentMonth = new Date(startMonth);
@@ -244,9 +269,9 @@ export class ClassService {
       currentMonth.setMonth(currentMonth.getMonth() + 1);
     }
 
-    // Thêm tháng tiếp theo nếu cần
-    if (includeNextMonth) {
-      const nextMonth = new Date(current);
+    // Thêm tháng tiếp theo nếu cần và không có endDate
+    if (includeNextMonth && !endDate) {
+      const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       const nextMonthStr =
         nextMonth.getFullYear() +
@@ -270,6 +295,7 @@ export class ClassService {
     // Tạo danh sách tháng cần tạo học phí
     const monthsToCreate = this.generateMonthsToCreate(
       classData.startDate,
+      classData.endDate,
       true
     );
 
@@ -349,10 +375,11 @@ export class ClassService {
       return;
     }
 
-    // Tính toán các ngày học từ startDate đến ngày hiện tại
+    // Tính toán các ngày học từ startDate đến endDate hoặc ngày hiện tại
     const classDates = calculateClassDates(
       classData.startDate,
-      classData.schedules
+      classData.schedules,
+      classData.endDate
     );
 
     // Tạo buổi điểm danh cho từng ngày học

@@ -12,6 +12,7 @@ import {
   Card,
   Container,
   useTheme,
+  Alert,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import ClassIcon from '@mui/icons-material/Class';
@@ -20,6 +21,9 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { useState } from 'react';
+import ResetDataModal from '@/components/pages/admin/dashboard/Modal/ResetDataModal';
 
 const stats = [
   {
@@ -74,6 +78,15 @@ const recentPosts = [
 
 export default function DashboardPage() {
   const theme = useTheme();
+  const [openResetModal, setOpenResetModal] = useState(false);
+
+  const handleOpenResetModal = () => {
+    setOpenResetModal(true);
+  };
+
+  const handleCloseResetModal = () => {
+    setOpenResetModal(false);
+  };
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', pt: 0 }}>
@@ -81,6 +94,29 @@ export default function DashboardPage() {
         <Typography variant="h4" fontWeight={700} color="primary" mb={3}>
           Tổng quan quản trị lớp học cờ vua
         </Typography>
+
+        {/* Alert cảnh báo về nút reset */}
+        <Alert
+          severity="warning"
+          sx={{ mb: 3 }}
+          action={
+            <Button
+              color="error"
+              size="small"
+              variant="outlined"
+              startIcon={<DeleteForeverIcon />}
+              onClick={handleOpenResetModal}
+            >
+              Reset Data
+            </Button>
+          }
+        >
+          <Typography variant="body2">
+            <strong>Cảnh báo:</strong> Nút "Reset Data" sẽ xóa toàn bộ dữ liệu
+            trong hệ thống (trừ dữ liệu người dùng). Chỉ sử dụng khi cần thiết!
+          </Typography>
+        </Alert>
+
         <Grid container spacing={3}>
           {stats.map(stat => (
             <Grid
@@ -189,6 +225,7 @@ export default function DashboardPage() {
           </Grid>
         </Grid>
       </Container>
+      <ResetDataModal open={openResetModal} onClose={handleCloseResetModal} />
     </Box>
   );
 }

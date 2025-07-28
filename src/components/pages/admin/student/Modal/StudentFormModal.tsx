@@ -119,13 +119,15 @@ export default function StudentFormModal({
         await StudentService.createStudent(studentData);
       }
 
+      // Ẩn GlobalLoading trước khi gọi callback
+      useGlobalLoadingStore.getState().setLoading(false);
+
       // Gọi callback để refresh danh sách và đóng modal
       onSave(avatarUrl);
       onClose();
     } catch (error) {
       console.error('Error saving student:', error);
       // Có thể hiển thị thông báo lỗi ở đây
-    } finally {
       useGlobalLoadingStore.getState().setLoading(false);
     }
   };

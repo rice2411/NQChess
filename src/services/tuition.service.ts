@@ -28,8 +28,7 @@ import {
   endOfMonth,
   parseISO,
 } from 'date-fns';
-
-const COLLECTION = 'tuitions';
+import { COLLECTIONS } from '@/constants/collections';
 
 export class TuitionService {
   // Tính số buổi học trong tháng dựa trên startDate và schedules
@@ -208,7 +207,7 @@ export class TuitionService {
 
     // Lưu tất cả học phí vào database
     for (const tuitionFee of tuitionFees) {
-      await addDoc(collection(db, COLLECTION), {
+      await addDoc(collection(db, COLLECTIONS.TUITIONS), {
         ...tuitionFee,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -256,7 +255,7 @@ export class TuitionService {
     month: string
   ): Promise<ITuitionFee[]> {
     const q = query(
-      collection(db, COLLECTION),
+      collection(db, COLLECTIONS.TUITIONS),
       where('classId', '==', classId),
       where('month', '==', month)
     );
@@ -269,16 +268,42 @@ export class TuitionService {
 
   // Lấy học phí theo học sinh
   static async getTuitionByStudent(studentId: string): Promise<ITuitionFee[]> {
-    const q = query(
-      collection(db, COLLECTION),
-      where('studentId', '==', studentId),
-      orderBy('month', 'desc')
-    );
+    try {
+      const q = query(
+        collection(db, COLLECTIONS.TUITIONS),
+        where('studentId', '==', studentId),
+        orderBy('month', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(
+        doc => ({ id: doc.id, ...doc.data() }) as ITuitionFee
+      );
+    } catch (error) {
+      console.error('Error fetching tuition by student:', error);
+      throw new Error('Không thể lấy thông tin học phí của học sinh');
+    }
+  }
 
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(
-      doc => ({ id: doc.id, ...doc.data() }) as ITuitionFee
-    );
+  // Lấy học phí của một học sinh trong một lớp cụ thể
+  static async getTuitionsByStudentAndClass(
+    studentId: string,
+    classId: string
+  ): Promise<ITuitionFee[]> {
+    try {
+      const q = query(
+        collection(db, COLLECTIONS.TUITIONS),
+        where('studentId', '==', studentId),
+        where('classId', '==', classId),
+        orderBy('month', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(
+        doc => ({ id: doc.id, ...doc.data() }) as ITuitionFee
+      );
+    } catch (error) {
+      console.error('Error fetching tuition by student and class:', error);
+      throw new Error('Không thể lấy thông tin học phí của học sinh trong lớp');
+    }
   }
 
   // Cập nhật trạng thái học phí
@@ -308,7 +333,7 @@ export class TuitionService {
       updateData.note = note;
     }
 
-    await updateDoc(doc(db, COLLECTION, tuitionId), updateData);
+    await updateDoc(doc(db, COLLECTIONS.TUITIONS, tuitionId), updateData);
   }
 
   // Lấy tổng kết học phí theo lớp và tháng
@@ -362,7 +387,7 @@ export class TuitionService {
 
   // Xóa học phí
   static async deleteTuition(tuitionId: string): Promise<void> {
-    await deleteDoc(doc(db, COLLECTION, tuitionId));
+    await deleteDoc(doc(db, COLLECTIONS.TUITIONS, tuitionId));
   }
 }
 

@@ -4,8 +4,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Autocomplete,
-  TextField,
   RadioGroup,
   FormControlLabel,
   Radio,
@@ -18,8 +16,27 @@ import {
   IconButton,
   Chip,
   MenuItem,
+  Divider,
+  Alert,
+  Checkbox,
+  TextField,
+  ListItemIcon,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
-import { PersonAdd, PersonRemove, Person } from '@mui/icons-material';
+import {
+  PersonAdd,
+  PersonRemove,
+  Person,
+  Search,
+  Clear,
+  ExpandMore,
+  CheckBox,
+  CheckBoxOutlineBlank,
+  IndeterminateCheckBox,
+  DeleteSweep,
+} from '@mui/icons-material';
 import {
   IStudentClass,
   EStudentClassType,
@@ -39,6 +56,7 @@ interface StepStudentsProps {
   errors: any;
   setValue: any;
   getValues: any;
+  canRemoveStudents?: boolean;
 }
 
 export default function StepStudents({
@@ -46,6 +64,7 @@ export default function StepStudents({
   appendStudent,
   removeStudent,
   getValues,
+  canRemoveStudents = true,
 }: StepStudentsProps) {
   const [allStudents, setAllStudents] = React.useState<IStudent[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -56,6 +75,8 @@ export default function StepStudents({
     EStudentClassType.FULL
   );
   const [addSession, setAddSession] = React.useState<string>('');
+  const [showQuickSelect, setShowQuickSelect] = React.useState(true);
+  const [searchText, setSearchText] = React.useState('');
 
   // Lấy schedules từ form
   const [sessionOptions, setSessionOptions] = React.useState<
@@ -111,6 +132,15 @@ export default function StepStudents({
       !(studentFields || []).some(field => field.studentId === student.id)
   );
 
+  // Filter students based on search text
+  const filteredStudents = availableStudents.filter(student => {
+    if (!searchText) return true;
+    const searchLower = searchText.toLowerCase();
+    const fullName = (student.fullName || '').toLowerCase();
+    const phoneNumber = (student.phoneNumber || '').toLowerCase();
+    return fullName.includes(searchLower) || phoneNumber.includes(searchLower);
+  });
+
   const handleAddStudents = () => {
     if (!selectedStudents || selectedStudents.length === 0) return;
 
@@ -135,10 +165,19 @@ export default function StepStudents({
     setSelectedStudents([]);
     setAddType(EStudentClassType.FULL);
     setAddSession('');
+    setSearchText('');
   };
 
   const handleRemoveStudent = (index: number) => {
     removeStudent(index);
+  };
+
+  const handleRemoveAllStudents = () => {
+    // Xóa tất cả học sinh bằng cách gọi removeStudent cho từng index
+    // Xóa từ cuối lên để tránh lỗi index
+    for (let i = studentFields.length - 1; i >= 0; i--) {
+      removeStudent(i);
+    }
   };
 
   const getStudentById = (studentId: string) => {
@@ -147,11 +186,36 @@ export default function StepStudents({
 
   const getSessionName = (sessionId?: string) => {
     if (!sessionId) return 'Full buổi';
-
-    // sessionId bây giờ là string của schedule (ví dụ: "08:00 - 09:00 Thứ 2")
-    // Không cần parse index nữa, trả về trực tiếp
     return sessionId;
   };
+
+  const handleClearSelection = () => {
+    setSelectedStudents([]);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedStudents.length === filteredStudents.length) {
+      setSelectedStudents([]);
+    } else {
+      setSelectedStudents([...filteredStudents]);
+    }
+  };
+
+  const handleSelectStudent = (student: IStudent) => {
+    const isSelected = selectedStudents.some(s => s.id === student.id);
+    if (isSelected) {
+      setSelectedStudents(selectedStudents.filter(s => s.id !== student.id));
+    } else {
+      setSelectedStudents([...selectedStudents, student]);
+    }
+  };
+
+  const isAllSelected =
+    filteredStudents.length > 0 &&
+    selectedStudents.length === filteredStudents.length;
+  const isIndeterminate =
+    selectedStudents.length > 0 &&
+    selectedStudents.length < filteredStudents.length;
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -159,86 +223,159 @@ export default function StepStudents({
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Typography variant="h6" mb={2}>
-            Thêm học sinh
+            {canRemoveStudents
+              ? 'Thêm học sinh vào lớp'
+              : 'Quản lý học sinh trong lớp'}
           </Typography>
-          <Autocomplete
-            multiple
-            options={availableStudents}
-            getOptionLabel={option =>
-              option
-                ? `${option.fullName || ''} - ${option.phoneNumber || ''}`
-                : ''
-            }
-            value={selectedStudents}
-            onChange={(_, newValue) => setSelectedStudents(newValue)}
-            renderOption={(props, option) => (
-              <Box component="li" {...props}>
-                <Avatar
-                  src={option?.avatar}
-                  sx={{ width: 24, height: 24, mr: 1 }}
-                >
-                  <Person sx={{ fontSize: 14 }} />
-                </Avatar>
-                {option?.fullName || ''} - {option?.phoneNumber || ''}
-              </Box>
-            )}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Chọn học sinh"
-                size="small"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={loading}
-                multiline
-                minRows={2}
-                maxRows={6}
-                inputProps={{
-                  ...params.inputProps,
-                  placeholder:
-                    !selectedStudents || selectedStudents.length === 0
-                      ? loading
-                        ? 'Đang tải...'
-                        : 'Chọn một hoặc nhiều học sinh'
-                      : '',
-                }}
-              />
-            )}
-            renderTags={(value, getTagProps) =>
-              (value || []).map((option, index) => {
-                const { key, ...chipProps } = getTagProps({ index });
-                return (
-                  <Chip
-                    key={key}
-                    label={`${option?.fullName || ''} - ${option?.phoneNumber || ''}`}
+
+          {/* Helper text */}
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              💡 <strong>Hướng dẫn:</strong> Chọn học sinh từ danh sách bên
+              dưới:
+              <br />• Sử dụng ô tìm kiếm để lọc học sinh
+              <br />• Click checkbox "Chọn tất cả" để chọn tất cả học sinh hiện
+              tại
+              <br />• Hoặc click từng checkbox để chọn học sinh cụ thể
+              <br />• Sau đó cấu hình loại học và thêm vào lớp
+              {!canRemoveStudents && (
+                <>
+                  <br />• ⚠️ <strong>Lưu ý:</strong> Không thể xóa học sinh khi
+                  lớp đang học hoặc đã kết thúc
+                </>
+              )}
+            </Typography>
+          </Alert>
+
+          {/* Student Selection Section */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+              🎯 Chọn học sinh ({availableStudents.length} học sinh có sẵn)
+            </Typography>
+
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Tìm kiếm học sinh theo tên hoặc số điện thoại..."
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <Search sx={{ color: 'text.secondary', mr: 1 }} />
+                ),
+                endAdornment: selectedStudents.length > 0 && (
+                  <IconButton
                     size="small"
-                    avatar={
-                      <Avatar
-                        src={option?.avatar}
-                        sx={{ width: 20, height: 20 }}
-                      >
-                        <Person sx={{ fontSize: 12 }} />
-                      </Avatar>
-                    }
-                    {...chipProps}
-                  />
-                );
-              })
-            }
-            sx={{
-              mb: 2,
-              '& .MuiAutocomplete-inputRoot': {
-                minHeight: '80px',
-                alignItems: 'flex-start',
-                paddingTop: '8px',
-                paddingBottom: '8px',
-              },
-              '& .MuiAutocomplete-tag': {
-                margin: '2px',
-              },
-            }}
-            loading={loading}
-          />
+                    onClick={handleClearSelection}
+                    sx={{ mr: 1 }}
+                  >
+                    <Clear />
+                  </IconButton>
+                ),
+              }}
+              sx={{ mb: 2 }}
+              helperText={
+                selectedStudents.length > 0
+                  ? `Đã chọn ${selectedStudents.length} học sinh`
+                  : `${filteredStudents.length} học sinh có sẵn`
+              }
+            />
+
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Checkbox
+                checked={isAllSelected}
+                indeterminate={isIndeterminate}
+                onChange={handleSelectAll}
+                icon={<CheckBoxOutlineBlank />}
+                checkedIcon={<CheckBox />}
+                indeterminateIcon={<IndeterminateCheckBox />}
+              />
+              <Typography variant="body2">
+                {isAllSelected
+                  ? `Bỏ chọn tất cả (${filteredStudents.length})`
+                  : `Chọn tất cả (${filteredStudents.length})`}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                maxHeight: '400px',
+                overflow: 'auto',
+                border: '1px solid #e0e0e0',
+                borderRadius: 1,
+                backgroundColor: 'background.paper',
+              }}
+            >
+              {loading ? (
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Đang tải danh sách học sinh...
+                  </Typography>
+                </Box>
+              ) : filteredStudents.length === 0 ? (
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {searchText
+                      ? 'Không tìm thấy học sinh nào'
+                      : 'Không có học sinh nào có sẵn'}
+                  </Typography>
+                </Box>
+              ) : (
+                filteredStudents.map(student => {
+                  const isSelected = selectedStudents.some(
+                    s => s.id === student.id
+                  );
+                  return (
+                    <ListItem
+                      key={student.id}
+                      dense
+                      component="div"
+                      onClick={() => handleSelectStudent(student)}
+                      sx={{
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: 'action.hover' },
+                        backgroundColor: isSelected
+                          ? 'action.selected'
+                          : 'transparent',
+                        borderBottom: '1px solid #f0f0f0',
+                        '&:last-child': { borderBottom: 'none' },
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Checkbox
+                          checked={isSelected}
+                          icon={<CheckBoxOutlineBlank />}
+                          checkedIcon={<CheckBox />}
+                        />
+                      </ListItemIcon>
+                      <ListItemAvatar>
+                        <Avatar
+                          src={student?.avatar}
+                          sx={{ width: 32, height: 32 }}
+                        >
+                          <Person sx={{ fontSize: 16 }} />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={student.fullName || ''}
+                        secondary={student.phoneNumber || ''}
+                        primaryTypographyProps={{
+                          fontWeight: isSelected ? 600 : 400,
+                        }}
+                      />
+                    </ListItem>
+                  );
+                })
+              )}
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle2" gutterBottom>
+            Cấu hình học tập cho học sinh đã chọn:
+          </Typography>
+
           <RadioGroup
             row
             value={addType}
@@ -275,6 +412,7 @@ export default function StepStudents({
                   fullWidth
                   sx={{ mb: 2 }}
                   InputLabelProps={{ shrink: true }}
+                  helperText="Chọn buổi học cụ thể cho học sinh nửa buổi"
                 >
                   {sessionOptions.map(
                     (option: { value: string; label: string }) => (
@@ -285,10 +423,12 @@ export default function StepStudents({
                   )}
                 </TextField>
               ) : (
-                <Typography variant="body2" color="warning.main" sx={{ mb: 2 }}>
-                  Chưa có buổi học nào được tạo. Vui lòng quay lại bước 2 để
-                  thêm buổi học.
-                </Typography>
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  <Typography variant="body2">
+                    Chưa có buổi học nào được tạo. Vui lòng quay lại bước 2 để
+                    thêm buổi học.
+                  </Typography>
+                </Alert>
               )}
             </>
           )}
@@ -304,6 +444,7 @@ export default function StepStudents({
                 (!addSession || sessionOptions.length === 0)) ||
               loading
             }
+            sx={{ mt: 1 }}
           >
             Thêm{' '}
             {selectedStudents && selectedStudents.length > 0
@@ -316,9 +457,30 @@ export default function StepStudents({
       {/* Danh sách học sinh trong lớp */}
       <Card>
         <CardContent>
-          <Typography variant="h6" mb={2}>
-            Học sinh trong lớp ({(studentFields || []).length})
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6">
+              Học sinh trong lớp ({(studentFields || []).length})
+            </Typography>
+            {canRemoveStudents && (studentFields || []).length > 0 && (
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<DeleteSweep />}
+                onClick={handleRemoveAllStudents}
+                sx={{ minWidth: 'auto' }}
+              >
+                Xóa tất cả
+              </Button>
+            )}
+          </Box>
           <List dense>
             {(studentFields || []).map(
               (studentClass: IStudentClass, index: number) => {
@@ -330,13 +492,15 @@ export default function StepStudents({
                     key={studentClass?.studentId || index}
                     divider
                     secondaryAction={
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleRemoveStudent(index)}
-                      >
-                        <PersonRemove />
-                      </IconButton>
+                      canRemoveStudents ? (
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveStudent(index)}
+                        >
+                          <PersonRemove />
+                        </IconButton>
+                      ) : null
                     }
                   >
                     <ListItemAvatar>

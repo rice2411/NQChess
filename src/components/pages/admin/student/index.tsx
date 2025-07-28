@@ -17,8 +17,9 @@ import {
   Avatar,
   TextField,
   InputAdornment,
+  Tooltip,
 } from '@mui/material';
-import { Add, Edit, Delete, Search } from '@mui/icons-material';
+import { Add, Edit, Delete, Search, Visibility } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { EGender, IStudent } from '@/interfaces/student.interface';
 import StudentService from '@/services/student.service';
@@ -27,6 +28,7 @@ import { usePagination } from '@/hooks/usePagination';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import StudentFormModal from './Modal/StudentFormModal';
 import { useModalConfirm } from '@/hooks/useModalConfirm';
+import { useRouter } from 'next/navigation';
 
 export default function StudentManagement() {
   const [students, setStudents] = useState<IStudent[]>([]);
@@ -42,6 +44,9 @@ export default function StudentManagement() {
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
   const [mounted, setMounted] = useState(false);
+
+  // Router
+  const router = useRouter();
 
   // Pagination hook
   const {
@@ -135,6 +140,7 @@ export default function StudentManagement() {
       setGlobalLoading(true);
 
       // Chỉ refresh danh sách, không tạo/cập nhật nữa vì đã làm trong modal
+      setGlobalLoading(false); // Ẩn GlobalLoading trước khi fetch lại
       fetchStudents(search, true); // Reset pagination khi thêm/sửa
       setSnackbar({
         open: true,
@@ -146,8 +152,7 @@ export default function StudentManagement() {
         open: true,
         message: 'Có lỗi xảy ra khi tải danh sách học sinh',
       });
-    } finally {
-      setGlobalLoading(false);
+      setGlobalLoading(false); // Ẩn GlobalLoading khi có lỗi
     }
   }
 
@@ -159,6 +164,7 @@ export default function StudentManagement() {
         setGlobalLoading(true);
         await StudentService.deleteStudent(student.id);
         setSnackbar({ open: true, message: 'Đã xóa học sinh!' });
+        setGlobalLoading(false); // Ẩn GlobalLoading trước khi fetch lại
         fetchStudents(search, true); // Reset pagination khi xóa
       },
       {
@@ -179,6 +185,10 @@ export default function StudentManagement() {
 
   function handleFormChange(field: string, value: string | EGender) {
     setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  function handleViewDetail(student: IStudent) {
+    router.push(`/students/${student.id}`);
   }
 
   // Không render cho đến khi mounted
@@ -213,7 +223,7 @@ export default function StudentManagement() {
         sx={{ display: 'flex', gap: 2, mb: 2, height: '40px' }}
       >
         <TextField
-          placeholder="Tìm kiếm theo tên..."
+          placeholder="Tìm kiếm theo tên hoặc số điện thoại..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           sx={{
@@ -273,20 +283,33 @@ export default function StudentManagement() {
                   </Box>
                 </TableCell>
                 <TableCell>{student.phoneNumber}</TableCell>
-                <TableCell>{student.dateOfBirth}</TableCell>
+                <TableCell>
+                  {student.dateOfBirth
+                    ? new Date(student.dateOfBirth).toLocaleDateString('vi-VN')
+                    : ''}
+                </TableCell>
                 <TableCell>
                   {student.gender === EGender.MALE ? 'Nam' : 'Nữ'}
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton onClick={() => handleOpenDialog(student)}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDeleteClick(student)}
-                  >
-                    <Delete />
-                  </IconButton>
+                  <Tooltip title="Xem chi tiết">
+                    <IconButton onClick={() => handleViewDetail(student)}>
+                      <Visibility />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Chỉnh sửa">
+                    <IconButton onClick={() => handleOpenDialog(student)}>
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Xóa học sinh">
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDeleteClick(student)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}

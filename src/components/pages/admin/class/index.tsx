@@ -16,6 +16,11 @@ import {
   Snackbar,
   Tooltip,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
 } from '@mui/material';
 import { Add, Edit, Delete, Group } from '@mui/icons-material';
 import ClassService from '@/services/class.service';
@@ -23,6 +28,68 @@ import { IClass, EClassStatus } from '@/interfaces/class.interface';
 import AddEditClassModal from './Modal/AddEditClassModal';
 import Pagination from '@/components/ui/Pagination';
 import { useModalConfirm } from '@/hooks/useModalConfirm';
+import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
+
+// Function để tính toán trạng thái lớp dựa trên ngày
+function getClassStatus(cls: IClass): EClassStatus {
+  // Luôn ưu tiên trạng thái từ database nếu có
+  if (cls.status) {
+    return cls.status;
+  }
+
+  // Chỉ tính toán tự động nếu không có trạng thái từ database
+  const now = new Date();
+  const startDate = cls.startDate ? new Date(cls.startDate) : null;
+  const endDate = cls.endDate ? new Date(cls.endDate) : null;
+
+  // Nếu có ngày kết thúc và đã qua ngày kết thúc
+  if (endDate && now > endDate) {
+    return EClassStatus.ENDED;
+  }
+
+  // Nếu có ngày bắt đầu và chưa đến ngày bắt đầu
+  if (startDate && now < startDate) {
+    return EClassStatus.NOT_STARTED;
+  }
+
+  // Nếu đang trong khoảng thời gian học
+  if (startDate && (!endDate || now <= endDate)) {
+    return EClassStatus.ACTIVE;
+  }
+
+  // Fallback về NOT_STARTED
+  return EClassStatus.NOT_STARTED;
+}
+
+// Function để lấy màu sắc cho trạng thái
+function getStatusColor(
+  status: EClassStatus
+): 'success' | 'warning' | 'default' {
+  switch (status) {
+    case EClassStatus.ACTIVE:
+      return 'success';
+    case EClassStatus.NOT_STARTED:
+      return 'warning';
+    case EClassStatus.ENDED:
+      return 'default';
+    default:
+      return 'default';
+  }
+}
+
+// Function để lấy label cho trạng thái
+function getStatusLabel(status: EClassStatus): string {
+  switch (status) {
+    case EClassStatus.ACTIVE:
+      return 'Đang học';
+    case EClassStatus.NOT_STARTED:
+      return 'Chưa bắt đầu';
+    case EClassStatus.ENDED:
+      return 'Đã kết thúc';
+    default:
+      return 'Không xác định';
+  }
+}
 
 export default function ClassManagement() {
   const [classes, setClasses] = useState<IClass[]>([]);
@@ -32,8 +99,17 @@ export default function ClassManagement() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLocalLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    title: '',
+    message: '',
+    action: null as (() => void) | null,
+  });
+
+  // Global loading store
+  const { setLoading } = useGlobalLoadingStore();
 
   // Confirm delete hook
   const modalConfirm = useModalConfirm();
@@ -51,7 +127,7 @@ export default function ClassManagement() {
 
   async function fetchClasses() {
     try {
-      setLoading(true);
+      setLocalLoading(true);
       const res = await ClassService.getClasses(page, pageSize);
       setClasses(res.classes);
       setTotal(res.total);
@@ -59,7 +135,7 @@ export default function ClassManagement() {
       console.error(error);
       setSnackbar({ open: true, message: 'Không thể tải danh sách lớp học' });
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   }
 
@@ -73,6 +149,35 @@ export default function ClassManagement() {
     setOpenModal(false);
   }
 
+  function showConfirmDialog(
+    title: string,
+    message: string,
+    action: () => void
+  ) {
+    setConfirmDialog({
+      open: true,
+      title,
+      message,
+      action,
+    });
+  }
+
+  function handleCloseConfirmDialog() {
+    setConfirmDialog({
+      open: false,
+      title: '',
+      message: '',
+      action: null,
+    });
+  }
+
+  function handleConfirmAction() {
+    if (confirmDialog.action) {
+      confirmDialog.action();
+    }
+    handleCloseConfirmDialog();
+  }
+
   async function handleSaveClass(data: Partial<IClass>) {
     try {
       setLoading(true);
@@ -84,23 +189,38 @@ export default function ClassManagement() {
         setSnackbar({ open: true, message: 'Thêm lớp thành công!' });
       }
       handleCloseModal();
+      setLoading(false); // Ẩn GlobalLoading trước khi fetch lại
       fetchClasses();
     } catch (error) {
       console.log(error);
       setSnackbar({ open: true, message: 'Có lỗi khi lưu lớp học' });
-    } finally {
-      setLoading(false);
+      setLoading(false); // Ẩn GlobalLoading khi có lỗi
     }
   }
 
   function handleDeleteClick(cls: IClass) {
     if (!mounted) return;
 
+    const calculatedStatus = getClassStatus(cls);
+
+    // Kiểm tra trạng thái trước khi cho phép xóa
+    if (
+      calculatedStatus === EClassStatus.ACTIVE ||
+      calculatedStatus === EClassStatus.ENDED
+    ) {
+      setSnackbar({
+        open: true,
+        message: 'Không thể xóa lớp đang hoạt động hoặc đã kết thúc!',
+      });
+      return;
+    }
+
     modalConfirm.confirm(
       async () => {
         setLoading(true);
         await ClassService.deleteClass(cls.id);
         setSnackbar({ open: true, message: 'Đã xóa lớp học!' });
+        setLoading(false); // Ẩn GlobalLoading trước khi fetch lại
         fetchClasses();
       },
       {
@@ -152,76 +272,92 @@ export default function ClassManagement() {
               <TableCell>Tên lớp</TableCell>
               <TableCell>Lịch học</TableCell>
               <TableCell>Học phí</TableCell>
+              <TableCell>Ngày bắt đầu</TableCell>
+              <TableCell>Ngày kết thúc</TableCell>
               <TableCell>Trạng thái</TableCell>
               <TableCell>Số học sinh</TableCell>
               <TableCell align="right">Hành động</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {classes.map(cls => (
-              <TableRow key={cls.id}>
-                <TableCell>
-                  <Typography fontWeight={600}>{cls.name}</Typography>
-                </TableCell>
-                <TableCell>
-                  {cls.schedules?.map((sch, idx) => (
+            {classes.map(cls => {
+              const calculatedStatus = getClassStatus(cls);
+              return (
+                <TableRow key={cls.id}>
+                  <TableCell>
+                    <Typography fontWeight={600}>{cls.name}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    {cls.schedules?.map((sch, idx) => (
+                      <Chip
+                        key={idx}
+                        label={sch}
+                        size="small"
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
+                  </TableCell>
+                  <TableCell>{cls.tuition?.toLocaleString()} đ</TableCell>
+                  <TableCell>
+                    {cls.startDate
+                      ? new Date(cls.startDate).toLocaleDateString('vi-VN')
+                      : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {cls.endDate
+                      ? new Date(cls.endDate).toLocaleDateString('vi-VN')
+                      : '-'}
+                  </TableCell>
+                  <TableCell>
                     <Chip
-                      key={idx}
-                      label={sch}
-                      size="small"
-                      sx={{ mr: 0.5, mb: 0.5 }}
-                    />
-                  ))}
-                </TableCell>
-                <TableCell>{cls.tuition?.toLocaleString()} đ</TableCell>
-                <TableCell>
-                  <Chip
-                    label={
-                      cls.status === EClassStatus.ACTIVE
-                        ? 'Đang học'
-                        : cls.status === EClassStatus.NOT_STARTED
-                          ? 'Chưa bắt đầu'
-                          : 'Đã kết thúc'
-                    }
-                    color={
-                      cls.status === EClassStatus.ACTIVE
-                        ? 'success'
-                        : cls.status === EClassStatus.NOT_STARTED
-                          ? 'warning'
-                          : 'default'
-                    }
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Tooltip title="Số học sinh">
-                    <Chip
-                      icon={<Group />}
-                      label={cls.students?.length || 0}
+                      label={getStatusLabel(calculatedStatus)}
+                      color={getStatusColor(calculatedStatus)}
                       size="small"
                     />
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right">
-                  <Tooltip title="Chỉnh sửa lớp học">
-                    <IconButton onClick={() => handleOpenModal(cls)}>
-                      <Edit />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Xóa lớp học">
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteClick(cls)}
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title="Số học sinh">
+                      <Chip
+                        icon={<Group />}
+                        label={cls.students?.length || 0}
+                        size="small"
+                      />
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Tooltip title="Chỉnh sửa lớp học">
+                      <IconButton onClick={() => handleOpenModal(cls)}>
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip
+                      title={
+                        calculatedStatus === EClassStatus.ACTIVE ||
+                        calculatedStatus === EClassStatus.ENDED
+                          ? 'Không thể xóa lớp đang hoạt động hoặc đã kết thúc'
+                          : 'Xóa lớp học'
+                      }
                     >
-                      <Delete />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
+                      <span>
+                        <IconButton
+                          color="error"
+                          disabled={
+                            calculatedStatus === EClassStatus.ACTIVE ||
+                            calculatedStatus === EClassStatus.ENDED
+                          }
+                          onClick={() => handleDeleteClick(cls)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
             {classes.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={8} align="center">
                   Không có lớp học nào.
                 </TableCell>
               </TableRow>
@@ -252,6 +388,29 @@ export default function ClassManagement() {
         onSave={handleSaveClass}
         loading={loading}
       />
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={handleCloseConfirmDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{confirmDialog.title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {confirmDialog.message}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog} color="inherit">
+            Hủy
+          </Button>
+          <Button onClick={handleConfirmAction} variant="contained" autoFocus>
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}

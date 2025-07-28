@@ -7,7 +7,7 @@ import { Controller, Control, FieldErrors } from 'react-hook-form';
 import { EClassStatus } from '@/interfaces/class.interface';
 import { ClassFormValues } from '../AddEditClassModal';
 import { formatVND, parseVND, validateVND } from '@/utils/format';
-import { isValid } from 'date-fns';
+import { isValid, isAfter, isBefore } from 'date-fns';
 
 interface StepClassInfoProps {
   control: Control<ClassFormValues>;
@@ -110,6 +110,50 @@ export default function StepClassInfo({ control, errors }: StepClassInfoProps) {
                   helperText: errors.startDate?.message,
                   InputLabelProps: { shrink: true },
                   placeholder: 'Chọn ngày bắt đầu...',
+                },
+              }}
+            />
+          )}
+        />
+        <Controller
+          name="endDate"
+          control={control}
+          rules={{
+            validate: value => {
+              if (!value) return true; // Ngày kết thúc không bắt buộc
+              if (!isValid(value)) return 'Ngày không hợp lệ';
+
+              // Lấy ngày bắt đầu từ form để so sánh
+              const startDate = control._formValues.startDate;
+              if (
+                startDate &&
+                isValid(startDate) &&
+                isBefore(value, startDate)
+              ) {
+                return 'Ngày kết thúc phải sau ngày bắt đầu';
+              }
+
+              return true;
+            },
+          }}
+          render={({ field }) => (
+            <DatePicker
+              label="Ngày kết thúc lớp học (tùy chọn)"
+              value={
+                field.value instanceof Date && isValid(field.value)
+                  ? field.value
+                  : null
+              }
+              onChange={field.onChange}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  error: !!errors.endDate,
+                  helperText:
+                    errors.endDate?.message ||
+                    'Để trống nếu chưa xác định ngày kết thúc',
+                  InputLabelProps: { shrink: true },
+                  placeholder: 'Chọn ngày kết thúc...',
                 },
               }}
             />

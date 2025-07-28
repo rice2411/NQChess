@@ -20,8 +20,7 @@ import {
   EAttendanceStatus,
 } from '@/interfaces/attendance.interface';
 import { ClassService } from './class.service';
-
-const COLLECTION = 'attendance';
+import { COLLECTIONS } from '@/constants/collections';
 
 export class AttendanceService {
   // Tạo buổi điểm danh mới
@@ -36,7 +35,10 @@ export class AttendanceService {
       createdAt: now,
       updatedAt: now,
     };
-    const docRef = await addDoc(collection(db, COLLECTION), newAttendance);
+    const docRef = await addDoc(
+      collection(db, COLLECTIONS.ATTENDANCE),
+      newAttendance
+    );
     return { id: docRef.id, ...newAttendance } as IAttendance;
   }
 
@@ -60,7 +62,7 @@ export class AttendanceService {
       constraints.push(where('sessionDate', '<=', filters.endDate));
     }
 
-    const q = query(collection(db, COLLECTION), ...constraints);
+    const q = query(collection(db, COLLECTIONS.ATTENDANCE), ...constraints);
     const snapshot = await getDocs(q);
     const all = snapshot.docs.map(
       doc => ({ id: doc.id, ...doc.data() }) as IAttendance
@@ -80,7 +82,7 @@ export class AttendanceService {
 
   // Lấy chi tiết buổi điểm danh
   static async getAttendanceById(id: string): Promise<IAttendance | null> {
-    const docRef = doc(db, COLLECTION, id);
+    const docRef = doc(db, COLLECTIONS.ATTENDANCE, id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return null;
     return { id: docSnap.id, ...docSnap.data() } as IAttendance;
@@ -98,12 +100,12 @@ export class AttendanceService {
         : new Date(0)
       ).toISOString(),
     };
-    await updateDoc(doc(db, COLLECTION, id), updateData);
+    await updateDoc(doc(db, COLLECTIONS.ATTENDANCE, id), updateData);
   }
 
   // Xóa buổi điểm danh
   static async deleteAttendance(id: string): Promise<void> {
-    await deleteDoc(doc(db, COLLECTION, id));
+    await deleteDoc(doc(db, COLLECTIONS.ATTENDANCE, id));
   }
 
   // Tạo buổi điểm danh cho tháng mới
@@ -238,7 +240,7 @@ export class AttendanceService {
     pageSize = 10
   ): Promise<{ attendance: IAttendance[]; total: number; hasMore: boolean }> {
     const q = query(
-      collection(db, COLLECTION),
+      collection(db, COLLECTIONS.ATTENDANCE),
       where('classId', '==', classId),
       orderBy('sessionDate', 'desc')
     );
@@ -259,37 +261,90 @@ export class AttendanceService {
     };
   }
 
-  // Lấy danh sách điểm danh theo học sinh
+  // Lấy điểm danh theo học sinh
   static async getAttendanceByStudent(
     studentId: string,
     classId?: string,
     page = 1,
     pageSize = 10
   ): Promise<{ attendance: IAttendance[]; total: number; hasMore: boolean }> {
-    const constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
+    try {
+      const constraints: QueryConstraint[] = [orderBy('sessionDate', 'desc')];
 
-    if (classId) {
-      constraints.push(where('classId', '==', classId));
-    }
+      if (classId) {
+        constraints.push(where('classId', '==', classId));
+      }
 
-    const q = query(collection(db, COLLECTION), ...constraints);
-    const snapshot = await getDocs(q);
-    const all = snapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }) as IAttendance)
-      .filter(att =>
-        att.attendanceRecords.some(record => record.studentId === studentId)
+      const q = query(collection(db, COLLECTIONS.ATTENDANCE), ...constraints);
+      const snapshot = await getDocs(q);
+      const all = snapshot.docs.map(
+        doc => ({ id: doc.id, ...doc.data() }) as IAttendance
       );
 
-    const total = all.length;
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    const attendance = all.slice(start, end);
+      // Filter theo studentId (vì attendance records chứa thông tin của tất cả học sinh)
+      const filteredAttendance = all.filter(attendance =>
+        attendance.attendanceRecords?.some(
+          record => record.studentId === studentId
+        )
+      );
 
-    return {
-      attendance,
-      total,
-      hasMore: end < total,
-    };
+      const total = filteredAttendance.length;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const attendance = filteredAttendance.slice(start, end);
+
+      return {
+        attendance,
+        total,
+        hasMore: end < total,
+      };
+    } catch (error) {
+      console.error('Error fetching attendance by student:', error);
+      throw new Error('Không thể lấy thông tin điểm danh của học sinh');
+    }
+  }
+
+  // Lấy điểm danh của một học sinh trong một lớp cụ thể với phân trang
+  static async getAttendancesByStudentAndClass(
+    studentId: string,
+    classId: string,
+    page = 1,
+    pageSize = 10
+  ): Promise<{ attendances: IAttendance[]; total: number; hasMore: boolean }> {
+    try {
+      const q = query(
+        collection(db, COLLECTIONS.ATTENDANCE),
+        where('classId', '==', classId),
+        orderBy('sessionDate', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      const all = snapshot.docs.map(
+        doc => ({ id: doc.id, ...doc.data() }) as IAttendance
+      );
+
+      // Filter theo studentId và chỉ lấy các buổi có điểm danh của học sinh này
+      const filteredAttendance = all.filter(attendance =>
+        attendance.attendanceRecords?.some(
+          record => record.studentId === studentId
+        )
+      );
+
+      const total = filteredAttendance.length;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const attendances = filteredAttendance.slice(start, end);
+
+      return {
+        attendances,
+        total,
+        hasMore: end < total,
+      };
+    } catch (error) {
+      console.error('Error fetching attendances by student and class:', error);
+      throw new Error(
+        'Không thể lấy thông tin điểm danh của học sinh trong lớp'
+      );
+    }
   }
 
   // Cập nhật trạng thái điểm danh của học sinh
@@ -316,7 +371,7 @@ export class AttendanceService {
     // Tính toán lại thống kê
     const stats = this.calculateAttendanceStats(updatedRecords);
 
-    await updateDoc(doc(db, COLLECTION, attendanceId), {
+    await updateDoc(doc(db, COLLECTIONS.ATTENDANCE, attendanceId), {
       attendanceRecords: updatedRecords,
       ...stats,
       updatedAt: (typeof window !== 'undefined'
@@ -432,7 +487,7 @@ export class AttendanceService {
       constraints.push(where('classId', '==', classId));
     }
 
-    const q = query(collection(db, COLLECTION), ...constraints);
+    const q = query(collection(db, COLLECTIONS.ATTENDANCE), ...constraints);
     const snapshot = await getDocs(q);
     const allAttendance = snapshot.docs.map(
       doc => ({ id: doc.id, ...doc.data() }) as IAttendance
@@ -534,7 +589,7 @@ export class AttendanceService {
     sessionDate: string
   ): Promise<boolean> {
     const q = query(
-      collection(db, COLLECTION),
+      collection(db, COLLECTIONS.ATTENDANCE),
       where('classId', '==', classId),
       where('sessionNumber', '==', sessionNumber),
       where('sessionDate', '==', sessionDate)

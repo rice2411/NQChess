@@ -9,6 +9,8 @@ import {
   Step,
   StepLabel,
   Typography,
+  Alert,
+  Box,
 } from '@mui/material';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import dynamic from 'next/dynamic';
@@ -24,7 +26,7 @@ import { format, parse } from 'date-fns';
  * Modal quản lý lớp học đa bước (Stepper)
  *
  * Cấu trúc 3 bước:
- * 1. StepClassInfo: Thông tin cơ bản của lớp (tên, học phí, trạng thái, ngày bắt đầu)
+ * 1. StepClassInfo: Thông tin cơ bản của lớp (tên, học phí, trạng thái, ngày bắt đầu, ngày kết thúc)
  * 2. StepSchedules: Quản lý lịch học (giờ bắt đầu, kết thúc, thứ, buổi học)
  * 3. StepStudents: Quản lý học sinh trong lớp (thêm/xóa/cập nhật học sinh)
  *
@@ -34,7 +36,8 @@ import { format, parse } from 'date-fns';
  * - UI/UX hiện đại với Material-UI
  * - Không cho phép skip step, chỉ điều hướng bằng nút
  * - Responsive design
- * - DatePicker cho ngày bắt đầu lớp học
+ * - DatePicker cho ngày bắt đầu và kết thúc lớp học
+ * - Validation cho việc sửa lớp học (không cho phép thay đổi schedule khi lớp đang học/đã kết thúc)
  */
 
 export interface ClassFormValues {
@@ -42,6 +45,7 @@ export interface ClassFormValues {
   tuition: string;
   status: EClassStatus;
   startDate: Date;
+  endDate?: Date;
   startTime: Date;
   endTime: Date;
   weekday: string;
@@ -93,6 +97,7 @@ export default function AddEditClassModal({
       tuition: '',
       status: EClassStatus.NOT_STARTED,
       startDate: typeof window !== 'undefined' ? new Date() : new Date(0),
+      endDate: undefined,
       startTime: new Date(0, 0, 0, 0, 0), // 00:00
       endTime: new Date(0, 0, 0, 23, 59), // 23:59
       weekday: 'Thứ 2',
@@ -105,7 +110,7 @@ export default function AddEditClassModal({
   // Watch form values để trigger re-render khi values thay đổi
   const watchedValues = useWatch({
     control,
-    name: ['name', 'tuition', 'startDate', 'schedules'],
+    name: ['name', 'tuition', 'startDate', 'endDate', 'schedules'],
   });
   const {
     fields: scheduleFields,
@@ -143,6 +148,17 @@ export default function AddEditClassModal({
         setValue('startDate', startDate);
       }
 
+      // Set end date
+      if (editing.endDate) {
+        const endDate =
+          typeof editing.endDate === 'string'
+            ? parse(editing.endDate, 'yyyy-MM-dd', new Date())
+            : editing.endDate;
+        setValue('endDate', endDate);
+      } else {
+        setValue('endDate', undefined);
+      }
+
       // Set schedules
       if (editing.schedules && editing.schedules.length > 0) {
         const scheduleFields = editing.schedules.map(schedule => ({
@@ -167,6 +183,7 @@ export default function AddEditClassModal({
         'startDate',
         typeof window !== 'undefined' ? new Date() : new Date(0)
       );
+      setValue('endDate', undefined);
       setValue('schedules', []);
       setValue('students', []);
       setActiveStep(0);
@@ -175,7 +192,12 @@ export default function AddEditClassModal({
 
   const handleNext = async () => {
     if (activeStep === 0) {
-      const isValid = await trigger(['name', 'tuition', 'startDate']);
+      const isValid = await trigger([
+        'name',
+        'tuition',
+        'startDate',
+        'endDate',
+      ]);
       if (!isValid) {
         return;
       }
@@ -192,16 +214,16 @@ export default function AddEditClassModal({
   // Kiểm tra xem bước hiện tại có thể chuyển tiếp không
   const canProceed = useMemo(() => {
     if (activeStep === 0) {
-      const [name, tuition, startDate] = watchedValues;
+      const [name, tuition, startDate, endDate] = watchedValues;
       const requiredFieldsValid =
-        !errors.name && !errors.tuition && !errors.startDate;
+        !errors.name && !errors.tuition && !errors.startDate && !errors.endDate;
       const hasRequiredValues = name?.trim() && tuition && startDate;
 
       return requiredFieldsValid && hasRequiredValues;
     }
 
     if (activeStep === 1) {
-      const schedules = watchedValues[3]; // schedules là index thứ 4
+      const schedules = watchedValues[4]; // schedules là index thứ 5
       return schedules && schedules.length > 0;
     }
 
@@ -212,9 +234,22 @@ export default function AddEditClassModal({
     errors.name,
     errors.tuition,
     errors.startDate,
+    errors.endDate,
   ]);
 
   const handleBack = () => setActiveStep(prev => prev - 1);
+
+  // Kiểm tra xem có thể thay đổi schedule không
+  const canModifySchedule = useMemo(() => {
+    if (!editing) return true; // Tạo mới thì được thay đổi
+    return editing.status === EClassStatus.NOT_STARTED;
+  }, [editing]);
+
+  // Kiểm tra xem có thể xóa học sinh không
+  const canRemoveStudents = useMemo(() => {
+    if (!editing) return true; // Tạo mới thì được xóa
+    return editing.status === EClassStatus.NOT_STARTED;
+  }, [editing]);
 
   const onSubmit = (data: ClassFormValues) => {
     const tuitionValue =
@@ -237,7 +272,7 @@ export default function AddEditClassModal({
     });
 
     // Loại bỏ các field undefined để tránh lỗi Firebase
-    const cleanData = {
+    const cleanData: Partial<IClass> = {
       name: data.name,
       tuition: tuitionValue,
       startDate: format(data.startDate, 'yyyy-MM-dd'),
@@ -246,6 +281,11 @@ export default function AddEditClassModal({
       students: cleanStudents,
     };
 
+    // Thêm endDate nếu có
+    if (data.endDate) {
+      cleanData.endDate = format(data.endDate, 'yyyy-MM-dd');
+    }
+
     // Filter out undefined values
     const filteredData = Object.fromEntries(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -253,6 +293,10 @@ export default function AddEditClassModal({
     );
 
     onSave(filteredData);
+  };
+
+  const handleCancel = () => {
+    onClose();
   };
 
   return (
@@ -272,6 +316,19 @@ export default function AddEditClassModal({
       <DialogContent
         sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}
       >
+        {/* Warning for editing active/ended classes */}
+        {editing && editing.status !== EClassStatus.NOT_STARTED && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              ⚠️ <strong>Lưu ý:</strong> Lớp học này đang{' '}
+              {editing.status === EClassStatus.ACTIVE ? 'học' : 'đã kết thúc'}.
+              {!canModifySchedule && ' Không thể thay đổi lịch học.'}
+              {!canRemoveStudents &&
+                ' Không thể xóa học sinh (chỉ được thêm mới).'}
+            </Typography>
+          </Alert>
+        )}
+
         {activeStep === 0 && isClient && (
           <DynamicStepClassInfo control={control} errors={errors} />
         )}
@@ -282,6 +339,7 @@ export default function AddEditClassModal({
             scheduleFields={scheduleFields}
             appendSchedule={appendSchedule}
             removeSchedule={removeSchedule}
+            canModify={canModifySchedule}
           />
         )}
         {activeStep === 2 && isClient && (
@@ -294,11 +352,16 @@ export default function AddEditClassModal({
             updateStudent={updateStudent}
             setValue={setValue}
             getValues={getValues}
+            canRemoveStudents={canRemoveStudents}
           />
         )}
       </DialogContent>
       <DialogActions>
         {activeStep > 0 && <Button onClick={handleBack}>Quay lại</Button>}
+        <Box sx={{ flex: 1 }} />
+        <Button onClick={handleCancel} color="inherit">
+          Hủy
+        </Button>
         {activeStep < steps.length - 1 && (
           <Button
             onClick={handleNext}
@@ -320,7 +383,6 @@ export default function AddEditClassModal({
           </Button>
         )}
       </DialogActions>
-      {/* Helper text cho validation */}
     </Dialog>
   );
 }
