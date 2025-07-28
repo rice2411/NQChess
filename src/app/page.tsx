@@ -27,87 +27,14 @@ import {
   LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import { postService } from '@/services/post.service';
-
-// Mock data cho giáo viên
-const mockTeachers = [
-  {
-    id: '1',
-    name: 'Nguyễn Văn An',
-    avatar:
-      'https://ui-avatars.com/api/?name=Nguyen+Van+An&background=4CAF50&color=fff',
-    subject: 'Toán học',
-    experience: '5 năm',
-    rating: 4.8,
-    students: 45,
-  },
-  {
-    id: '2',
-    name: 'Trần Thị Bình',
-    avatar:
-      'https://ui-avatars.com/api/?name=Tran+Thi+Binh&background=2196F3&color=fff',
-    subject: 'Văn học',
-    experience: '3 năm',
-    rating: 4.6,
-    students: 38,
-  },
-  {
-    id: '3',
-    name: 'Lê Văn Cường',
-    avatar:
-      'https://ui-avatars.com/api/?name=Le+Van+Cuong&background=FF9800&color=fff',
-    subject: 'Vật lý',
-    experience: '7 năm',
-    rating: 4.9,
-    students: 52,
-  },
-];
-
-// Mock data cho lớp học
-const mockClasses = [
-  {
-    id: '1',
-    name: 'Lớp 10A1',
-    subject: 'Toán học',
-    teacher: 'Nguyễn Văn An',
-    students: 35,
-    schedule: 'Thứ 2, 4, 6 - 19:00-21:00',
-    location: 'Phòng 101',
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: 'Lớp 11B2',
-    subject: 'Văn học',
-    teacher: 'Trần Thị Bình',
-    students: 28,
-    schedule: 'Thứ 3, 5, 7 - 18:00-20:00',
-    location: 'Phòng 205',
-    status: 'active',
-  },
-  {
-    id: '3',
-    name: 'Lớp 12C3',
-    subject: 'Vật lý',
-    teacher: 'Lê Văn Cường',
-    students: 32,
-    schedule: 'Thứ 2, 4, 6 - 20:00-22:00',
-    location: 'Phòng 301',
-    status: 'active',
-  },
-  {
-    id: '4',
-    name: 'Lớp 10A2',
-    subject: 'Hóa học',
-    teacher: 'Phạm Thị Dung',
-    students: 30,
-    schedule: 'Thứ 3, 5, 7 - 19:00-21:00',
-    location: 'Phòng 102',
-    status: 'active',
-  },
-];
+import { UserService } from '@/services/user.service';
+import { ClassService } from '@/services/class.service';
+import { EUserRole } from '@/interfaces/user.interface';
 
 export default function HomePage() {
   const [posts, setPosts] = useState<PostData[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -118,21 +45,18 @@ export default function HomePage() {
 
   useEffect(() => {
     if (mounted) {
-      fetchPosts();
+      fetchData();
     }
   }, [mounted]);
 
-  const fetchPosts = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Lấy tất cả bài viết đã xuất bản
+      // Fetch posts
       const firebasePosts = await postService.getAllPosts();
-
-      // Chuyển đổi từ Post interface sang PostData
       const convertedPosts: PostData[] = firebasePosts
-        // .filter(post => post.status === 'published') // Chỉ hiển thị bài viết đã xuất bản
         .map(post => ({
           id: post.id,
           author: {
@@ -142,30 +66,84 @@ export default function HomePage() {
           },
           content: post.content,
           images:
-            post.images || (post.featuredImage ? [post.featuredImage] : []), // Sử dụng images nếu có, fallback về featuredImage
+            post.images || (post.featuredImage ? [post.featuredImage] : []),
           createdAt: post.createdAt,
-          likes: 0, // TODO: Implement likes system
-          comments: 0, // TODO: Implement comments system
-          shares: 0, // TODO: Implement shares system
+          likes: 0,
+          comments: 0,
+          shares: 0,
           isLiked: false,
           tags: post.tags || [],
         }))
         .sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ); // Sắp xếp theo thời gian mới nhất
+        );
 
       setPosts(convertedPosts);
+
+      // Fetch teachers từ bảng users
+      const allUsers = await UserService.getAllUsers();
+      const teacherUsers = allUsers.filter(
+        user => user.role === EUserRole.TEACHER
+      );
+
+      // Fetch classes để tính toán thống kê
+      const allClasses = await ClassService.getClasses(1, 1000); // Lấy tất cả classes
+
+      // Tạo data cho teachers với thống kê từ classes
+      const teachersData = teacherUsers.map(teacher => {
+        // Tính số lớp học của giáo viên này
+        const teacherClasses = allClasses.classes.filter(
+          cls => cls.teacherId === teacher.id
+        );
+        const totalStudents = teacherClasses.reduce(
+          (sum, cls) => sum + (cls.students?.length || 0),
+          0
+        );
+
+        return {
+          id: teacher.id,
+          name: teacher.fullName,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.fullName)}&background=random`,
+          subject: 'Cờ vua', // Môn học mặc định
+          experience: '2 năm', // Kinh nghiệm mặc định
+          rating: 4.5 + Math.random() * 0.5, // Rating ngẫu nhiên 4.5-5.0
+          students: totalStudents,
+        };
+      });
+
+      setTeachers(teachersData);
+
+      // Tạo data cho classes
+      const classesData = allClasses.classes
+        .slice(0, 4) // Chỉ hiển thị 4 lớp đầu tiên
+        .map(cls => {
+          // Tìm tên giáo viên
+          const teacher = teacherUsers.find(t => t.id === cls.teacherId);
+
+          return {
+            id: cls.id,
+            name: cls.name,
+            subject: 'Cờ vua',
+            teacher: teacher ? teacher.fullName : 'Chưa phân công',
+            students: cls.students?.length || 0,
+            schedule: cls.schedules?.join(', ') || 'Chưa có lịch',
+            location: 'Phòng học chính',
+            status: 'active',
+          };
+        });
+
+      setClasses(classesData);
     } catch (error) {
-      console.error('Error fetching posts:', error);
-      setError('Không thể tải bài viết. Vui lòng thử lại sau.');
+      console.error('Error fetching data:', error);
+      setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleRefresh = () => {
-    fetchPosts();
+    fetchData();
   };
 
   if (!mounted) return null;
@@ -197,47 +175,56 @@ export default function HomePage() {
             </Box>
 
             <List sx={{ p: 0 }}>
-              {mockTeachers.map((teacher, index) => (
-                <Box key={teacher.id}>
-                  <ListItem sx={{ px: 0, py: 1 }}>
-                    <ListItemAvatar>
-                      <Avatar src={teacher.avatar} alt={teacher.name} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={teacher.name}
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {teacher.subject}
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              mt: 0.5,
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ mr: 1 }}
-                            >
-                              {teacher.experience} • {teacher.students} học sinh
+              {teachers.length > 0 ? (
+                teachers.map((teacher, index) => (
+                  <Box key={teacher.id}>
+                    <ListItem sx={{ px: 0, py: 1 }}>
+                      <ListItemAvatar>
+                        <Avatar src={teacher.avatar} alt={teacher.name} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={teacher.name}
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {teacher.subject}
                             </Typography>
-                            <Chip
-                              label={`${teacher.rating}⭐`}
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                            />
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                mt: 0.5,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ mr: 1 }}
+                              >
+                                {teacher.experience} • {teacher.students} học
+                                sinh
+                              </Typography>
+                              <Chip
+                                label={`${teacher.rating.toFixed(1)}⭐`}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            </Box>
                           </Box>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  {index < mockTeachers.length - 1 && <Divider />}
+                        }
+                      />
+                    </ListItem>
+                    {index < teachers.length - 1 && <Divider />}
+                  </Box>
+                ))
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 2 }}>
+                  <Typography color="text.secondary" variant="body2">
+                    {loading ? 'Đang tải...' : 'Chưa có giáo viên nào'}
+                  </Typography>
                 </Box>
-              ))}
+              )}
             </List>
           </Paper>
         </Box>
@@ -306,66 +293,74 @@ export default function HomePage() {
             </Box>
 
             <List sx={{ p: 0 }}>
-              {mockClasses.map((classItem, index) => (
-                <Box key={classItem.id}>
-                  <ListItem sx={{ px: 0, py: 1.5 }}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        <GroupIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={classItem.name}
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {classItem.subject} • {classItem.teacher}
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              mt: 0.5,
-                            }}
-                          >
-                            <ScheduleIcon
-                              fontSize="small"
-                              sx={{ mr: 0.5, color: 'text.secondary' }}
-                            />
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ mr: 1 }}
-                            >
-                              {classItem.schedule}
+              {classes.length > 0 ? (
+                classes.map((classItem, index) => (
+                  <Box key={classItem.id}>
+                    <ListItem sx={{ px: 0, py: 1.5 }}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                          <GroupIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={classItem.name}
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {classItem.subject} • {classItem.teacher}
                             </Typography>
-                          </Box>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              mt: 0.5,
-                            }}
-                          >
-                            <LocationIcon
-                              fontSize="small"
-                              sx={{ mr: 0.5, color: 'text.secondary' }}
-                            />
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                mt: 0.5,
+                              }}
                             >
-                              {classItem.location} • {classItem.students} học
-                              sinh
-                            </Typography>
+                              <ScheduleIcon
+                                fontSize="small"
+                                sx={{ mr: 0.5, color: 'text.secondary' }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ mr: 1 }}
+                              >
+                                {classItem.schedule}
+                              </Typography>
+                            </Box>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                mt: 0.5,
+                              }}
+                            >
+                              <LocationIcon
+                                fontSize="small"
+                                sx={{ mr: 0.5, color: 'text.secondary' }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {classItem.location} • {classItem.students} học
+                                sinh
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  {index < mockClasses.length - 1 && <Divider />}
+                        }
+                      />
+                    </ListItem>
+                    {index < classes.length - 1 && <Divider />}
+                  </Box>
+                ))
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 2 }}>
+                  <Typography color="text.secondary" variant="body2">
+                    {loading ? 'Đang tải...' : 'Chưa có lớp học nào'}
+                  </Typography>
                 </Box>
-              ))}
+              )}
             </List>
           </Paper>
         </Box>

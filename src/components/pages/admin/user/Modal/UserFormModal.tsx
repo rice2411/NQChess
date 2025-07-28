@@ -28,6 +28,7 @@ interface UserFormModalProps {
   form: {
     username: string;
     password: string;
+    fullName: string;
     role: EUserRole;
   };
   onClose: () => void;
@@ -38,6 +39,7 @@ interface UserFormModalProps {
 type FormValues = {
   username: string;
   password: string;
+  fullName: string;
   role: EUserRole;
 };
 
@@ -57,6 +59,7 @@ export default function UserFormModal({
     defaultValues: {
       username: '',
       password: '',
+      fullName: '',
       role: EUserRole.TEACHER,
     },
   });
@@ -68,14 +71,16 @@ export default function UserFormModal({
   useEffect(() => {
     if (editing) {
       reset({
-        username: editing.username,
+        username: editing.username || '',
         password: '',
+        fullName: editing.fullName || '',
         role: editing.role,
       });
     } else {
       reset({
         username: '',
         password: '',
+        fullName: '',
         role: EUserRole.TEACHER,
       });
     }
@@ -89,6 +94,7 @@ export default function UserFormModal({
         // Cập nhật user
         await UserService.updateUser(editing.id, {
           username: values.username,
+          fullName: values.fullName,
           role: values.role,
         });
       } else {
@@ -96,6 +102,7 @@ export default function UserFormModal({
         await UserService.createUser({
           username: values.username,
           password: values.password,
+          fullName: values.fullName,
           role: values.role,
         });
       }
@@ -154,12 +161,41 @@ export default function UserFormModal({
                 label="Tên đăng nhập"
                 fullWidth
                 required
+                value={field.value || ''}
                 error={!!errors.username}
                 helperText={errors.username?.message}
                 disabled={editing?.role === EUserRole.ADMIN}
                 onChange={e => {
                   field.onChange(e);
                   handleFormChange('username', e.target.value);
+                }}
+              />
+            )}
+          />
+
+          <Controller
+            name="fullName"
+            control={control}
+            rules={{
+              required: 'Họ tên là bắt buộc',
+              minLength: {
+                value: 2,
+                message: 'Họ tên phải có ít nhất 2 ký tự',
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Họ tên"
+                fullWidth
+                required
+                value={field.value || ''}
+                error={!!errors.fullName}
+                helperText={errors.fullName?.message}
+                disabled={editing?.role === EUserRole.ADMIN}
+                onChange={e => {
+                  field.onChange(e);
+                  handleFormChange('fullName', e.target.value);
                 }}
               />
             )}
@@ -183,6 +219,7 @@ export default function UserFormModal({
                   type="password"
                   fullWidth
                   required
+                  value={field.value || ''}
                   error={!!errors.password}
                   helperText={errors.password?.message}
                   onChange={e => {

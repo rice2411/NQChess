@@ -46,6 +46,7 @@ export interface ClassFormValues {
   status: EClassStatus;
   startDate: Date;
   endDate?: Date;
+  teacherId: string; // ID của giáo viên đảm nhiệm
   startTime: Date;
   endTime: Date;
   weekday: string;
@@ -98,6 +99,7 @@ export default function AddEditClassModal({
       status: EClassStatus.NOT_STARTED,
       startDate: typeof window !== 'undefined' ? new Date() : new Date(0),
       endDate: undefined,
+      teacherId: '', // Default to empty string
       startTime: new Date(0, 0, 0, 0, 0), // 00:00
       endTime: new Date(0, 0, 0, 23, 59), // 23:59
       weekday: 'Thứ 2',
@@ -138,6 +140,7 @@ export default function AddEditClassModal({
       setValue('name', editing.name || '');
       setValue('tuition', editing.tuition?.toString() || '');
       setValue('status', editing.status || EClassStatus.NOT_STARTED);
+      setValue('teacherId', editing.teacherId || ''); // Populate teacherId
 
       // Set start date
       if (editing.startDate) {
@@ -179,6 +182,7 @@ export default function AddEditClassModal({
       setValue('name', '');
       setValue('tuition', '');
       setValue('status', EClassStatus.NOT_STARTED);
+      setValue('teacherId', ''); // Reset teacherId
       setValue(
         'startDate',
         typeof window !== 'undefined' ? new Date() : new Date(0)
@@ -277,6 +281,7 @@ export default function AddEditClassModal({
       tuition: tuitionValue,
       startDate: format(data.startDate, 'yyyy-MM-dd'),
       status: data.status,
+      teacherId: data.teacherId, // Add teacherId to cleanData
       schedules: schedulesStrings,
       students: cleanStudents,
     };

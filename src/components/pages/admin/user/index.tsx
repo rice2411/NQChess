@@ -46,10 +46,12 @@ export default function UserManagement() {
   const [form, setForm] = useState<{
     username: string;
     password: string;
+    fullName: string;
     role: EUserRole;
   }>({
     username: '',
     password: '',
+    fullName: '',
     role: EUserRole.TEACHER,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
@@ -84,8 +86,10 @@ export default function UserManagement() {
 
       // Filter theo search text
       const filteredUsers = searchText.trim()
-        ? allUsers.filter(user =>
-            user.username.toLowerCase().includes(searchText.toLowerCase())
+        ? allUsers.filter(
+            user =>
+              user.username.toLowerCase().includes(searchText.toLowerCase()) ||
+              user.fullName.toLowerCase().includes(searchText.toLowerCase())
           )
         : allUsers;
 
@@ -105,11 +109,13 @@ export default function UserManagement() {
         ? {
             username: user.username,
             password: '',
+            fullName: user.fullName,
             role: user.role,
           }
         : {
             username: '',
             password: '',
+            fullName: '',
             role: EUserRole.TEACHER,
           }
     );
@@ -122,6 +128,7 @@ export default function UserManagement() {
     setForm({
       username: '',
       password: '',
+      fullName: '',
       role: EUserRole.TEACHER,
     });
   }
@@ -266,7 +273,7 @@ export default function UserManagement() {
         sx={{ display: 'flex', gap: 2, mb: 2, height: '40px' }}
       >
         <TextField
-          placeholder="Tìm kiếm theo tên đăng nhập..."
+          placeholder="Tìm kiếm theo tên hoặc tên đăng nhập..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           sx={{
@@ -317,7 +324,12 @@ export default function UserManagement() {
                     <Avatar sx={{ width: 40, height: 40 }}>
                       {getRoleIcon(user.role)}
                     </Avatar>
-                    <Typography fontWeight={600}>{user.username}</Typography>
+                    <Box>
+                      <Typography fontWeight={600}>{user.fullName}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        @{user.username}
+                      </Typography>
+                    </Box>
                   </Box>
                 </TableCell>
                 <TableCell>

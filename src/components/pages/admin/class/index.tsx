@@ -24,7 +24,9 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Group } from '@mui/icons-material';
 import ClassService from '@/services/class.service';
+import { UserService } from '@/services/user.service';
 import { IClass, EClassStatus } from '@/interfaces/class.interface';
+import { EUserRole } from '@/interfaces/user.interface';
 import AddEditClassModal from './Modal/AddEditClassModal';
 import Pagination from '@/components/ui/Pagination';
 import { useModalConfirm } from '@/hooks/useModalConfirm';
@@ -93,6 +95,9 @@ function getStatusLabel(status: EClassStatus): string {
 
 export default function ClassManagement() {
   const [classes, setClasses] = useState<IClass[]>([]);
+  const [teachers, setTeachers] = useState<
+    Array<{ id: string; fullName: string }>
+  >([]);
   const [openModal, setOpenModal] = useState(false);
   const [editing, setEditing] = useState<IClass | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '' });
@@ -114,6 +119,59 @@ export default function ClassManagement() {
   // Confirm delete hook
   const modalConfirm = useModalConfirm();
 
+  // Lấy danh sách giáo viên
+  async function fetchTeachers() {
+    try {
+      const allUsers = await UserService.getAllUsers();
+      const teacherUsers = allUsers.filter(
+        user => user.role === EUserRole.TEACHER
+      );
+      setTeachers(
+        teacherUsers.map(user => ({ id: user.id, fullName: user.fullName }))
+      );
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách giáo viên:', error);
+    }
+  }
+
+  // Lấy tên giáo viên theo ID
+  function getTeacherName(teacherId: string): string {
+    const teacher = teachers.find(t => t.id === teacherId);
+    return teacher ? teacher.fullName : 'Chưa phân công';
+  }
+
+  // Cập nhật các lớp học hiện có với teacherId mặc định
+  async function updateExistingClassesWithDefaultTeacher() {
+    try {
+      const allUsers = await UserService.getAllUsers();
+      const teacherUsers = allUsers.filter(
+        user => user.role === EUserRole.TEACHER
+      );
+
+      if (teacherUsers.length === 0) {
+        console.warn('Không có giáo viên nào trong hệ thống');
+        return;
+      }
+
+      // Lấy giáo viên đầu tiên làm mặc định
+      const defaultTeacherId = teacherUsers[0].id;
+
+      // Cập nhật các lớp học chưa có teacherId
+      for (const cls of classes) {
+        if (!cls.teacherId) {
+          await ClassService.updateClass(cls.id, {
+            teacherId: defaultTeacherId,
+          });
+        }
+      }
+
+      // Refresh danh sách lớp học
+      await fetchClasses();
+    } catch (error) {
+      console.error('Lỗi khi cập nhật lớp học:', error);
+    }
+  }
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -121,6 +179,7 @@ export default function ClassManagement() {
   useEffect(() => {
     if (mounted) {
       fetchClasses();
+      fetchTeachers(); // Gọi fetchTeachers khi component được mount
     }
     // eslint-disable-next-line
   }, [page, mounted]);
@@ -245,6 +304,13 @@ export default function ClassManagement() {
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <Box flexGrow={1} />
         <Button
+          variant="outlined"
+          onClick={updateExistingClassesWithDefaultTeacher}
+          disabled={classes.length === 0}
+        >
+          Cập nhật giáo viên mặc định
+        </Button>
+        <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => handleOpenModal()}
@@ -257,6 +323,7 @@ export default function ClassManagement() {
           <TableHead>
             <TableRow>
               <TableCell>Tên lớp</TableCell>
+              <TableCell>Giáo viên đảm nhiệm</TableCell>
               <TableCell>Lịch học</TableCell>
               <TableCell>Học phí</TableCell>
               <TableCell>Ngày bắt đầu</TableCell>
@@ -273,6 +340,16 @@ export default function ClassManagement() {
                 <TableRow key={cls.id}>
                   <TableCell>
                     <Typography fontWeight={600}>{cls.name}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    {cls.teacherId ? (
+                      <Chip
+                        label={getTeacherName(cls.teacherId)}
+                        size="small"
+                      />
+                    ) : (
+                      'Chưa phân công'
+                    )}
                   </TableCell>
                   <TableCell>
                     {cls.schedules?.map((sch, idx) => (
@@ -344,7 +421,7 @@ export default function ClassManagement() {
             })}
             {classes.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} align="center">
+                <TableCell colSpan={9} align="center">
                   Không có lớp học nào.
                 </TableCell>
               </TableRow>

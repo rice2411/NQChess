@@ -73,13 +73,14 @@ export class UserService {
 
       // Cập nhật display name
       await updateProfile(userCredential.user, {
-        displayName: userData.username,
+        displayName: userData.fullName,
       });
 
       // Tạo document trong Firestore
       const now = new Date().toISOString();
       const newUser = {
         username: userData.username,
+        fullName: userData.fullName,
         role: userData.role,
         createdAt: now,
         updatedAt: now,

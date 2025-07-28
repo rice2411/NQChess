@@ -33,6 +33,7 @@ export interface IClass extends IBaseEntity {
   name: string;
   startDate: string;
   endDate?: string; // Ngày kết thúc lớp học
+  teacherId: string; // ID của giáo viên đảm nhiệm
   students: IStudentClass[];
   schedules: ClassSchedule[];
   status: EClassStatus;

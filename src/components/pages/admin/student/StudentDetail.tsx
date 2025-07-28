@@ -39,6 +39,8 @@ import StudentService from '@/services/student.service';
 import ClassService from '@/services/class.service';
 import TuitionService from '@/services/tuition.service';
 import AttendanceService from '@/services/attendance.service';
+import { UserService } from '@/services/user.service';
+import { EUserRole } from '@/interfaces/user.interface';
 import { getAvatarUrl } from '@/constants/avatar';
 import { useGlobalLoadingStore } from '@/store/useGlobalLoadingStore';
 import Pagination from '@/components/ui/Pagination';
@@ -67,6 +69,9 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
   const [student, setStudent] = useState<IStudent | null>(null);
   const [studentClasses, setStudentClasses] = useState<StudentClassInfo[]>([]);
   const [attendances, setAttendances] = useState<StudentAttendanceInfo[]>([]);
+  const [teachers, setTeachers] = useState<
+    Array<{ id: string; fullName: string }>
+  >([]);
   const [selectedClass, setSelectedClass] = useState<IClass | null>(null);
   const [attendancePage, setAttendancePage] = useState(1);
   const [attendanceTotal, setAttendanceTotal] = useState(0);
@@ -82,6 +87,27 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
     }
   }, [mounted, studentId]);
 
+  // Lấy danh sách giáo viên
+  async function fetchTeachers() {
+    try {
+      const allUsers = await UserService.getAllUsers();
+      const teacherUsers = allUsers.filter(
+        user => user.role === EUserRole.TEACHER
+      );
+      setTeachers(
+        teacherUsers.map(user => ({ id: user.id, fullName: user.fullName }))
+      );
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách giáo viên:', error);
+    }
+  }
+
+  // Lấy tên giáo viên theo ID
+  function getTeacherName(teacherId: string): string {
+    const teacher = teachers.find(t => t.id === teacherId);
+    return teacher ? teacher.fullName : 'Chưa phân công';
+  }
+
   async function fetchStudentDetail() {
     try {
       setLoading(true);
@@ -92,6 +118,9 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
         throw new Error('Không tìm thấy học sinh');
       }
       setStudent(studentData);
+
+      // Fetch danh sách giáo viên
+      await fetchTeachers();
 
       // Fetch các lớp học của học sinh
       const classes = await ClassService.getClassesByStudent(studentId);
@@ -339,6 +368,7 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
                 <TableHead>
                   <TableRow>
                     <TableCell>Tên lớp</TableCell>
+                    <TableCell>Giáo viên đảm nhiệm</TableCell>
                     <TableCell>Trạng thái</TableCell>
                     <TableCell>Đã đóng</TableCell>
                     <TableCell>Chưa đóng</TableCell>
@@ -351,6 +381,11 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
                       <TableCell>
                         <Typography fontWeight={600}>
                           {studentClass.class.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography color="text.secondary">
+                          {getTeacherName(studentClass.class.teacherId)}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -403,6 +438,11 @@ export default function StudentDetail({ studentId }: StudentDetailProps) {
                     color="primary"
                   >
                     {studentClass.class.name}
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary" mb={2}>
+                    Giáo viên đảm nhiệm:{' '}
+                    {getTeacherName(studentClass.class.teacherId)}
                   </Typography>
 
                   {studentClass.tuition.length === 0 ? (

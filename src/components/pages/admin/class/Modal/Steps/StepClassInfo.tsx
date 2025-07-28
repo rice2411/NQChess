@@ -5,9 +5,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Controller, Control, FieldErrors } from 'react-hook-form';
 import { EClassStatus } from '@/interfaces/class.interface';
+import { EUserRole } from '@/interfaces/user.interface';
+import { UserService } from '@/services/user.service';
 import { ClassFormValues } from '../AddEditClassModal';
 import { formatVND, parseVND, validateVND } from '@/utils/format';
 import { isValid, isBefore } from 'date-fns';
+import { useEffect, useState } from 'react';
 
 interface StepClassInfoProps {
   control: Control<ClassFormValues>;
@@ -15,6 +18,33 @@ interface StepClassInfoProps {
 }
 
 export default function StepClassInfo({ control, errors }: StepClassInfoProps) {
+  const [teachers, setTeachers] = useState<
+    Array<{ id: string; fullName: string }>
+  >([]);
+  const [loading, setLoading] = useState(true);
+
+  // Lấy danh sách giáo viên
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        setLoading(true);
+        const allUsers = await UserService.getAllUsers();
+        const teacherUsers = allUsers.filter(
+          user => user.role === EUserRole.TEACHER
+        );
+        setTeachers(
+          teacherUsers.map(user => ({ id: user.id, fullName: user.fullName }))
+        );
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách giáo viên:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box display="flex" flexDirection="column" gap={3} sx={{ pt: 2 }}>
@@ -43,6 +73,35 @@ export default function StepClassInfo({ control, errors }: StepClassInfoProps) {
               InputLabelProps={{ shrink: true }}
               placeholder="Nhập tên lớp học..."
             />
+          )}
+        />
+
+        <Controller
+          name="teacherId"
+          control={control}
+          rules={{ required: 'Giáo viên đảm nhiệm là bắt buộc' }}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              label="Giáo viên đảm nhiệm"
+              fullWidth
+              required
+              error={!!errors.teacherId}
+              helperText={errors.teacherId?.message}
+              InputLabelProps={{ shrink: true }}
+              disabled={loading}
+              value={field.value || ''}
+            >
+              <MenuItem value="">
+                <em>Chọn giáo viên...</em>
+              </MenuItem>
+              {teachers.map(teacher => (
+                <MenuItem key={teacher.id} value={teacher.id}>
+                  {teacher.fullName}
+                </MenuItem>
+              ))}
+            </TextField>
           )}
         />
         <Controller
