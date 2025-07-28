@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -10,7 +10,7 @@ import {
   StepLabel,
   Typography,
 } from '@mui/material';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import dynamic from 'next/dynamic';
 import {
   EClassStatus,
@@ -86,7 +86,7 @@ export default function AddEditClassModal({
     setValue,
     getValues,
     trigger,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<ClassFormValues>({
     defaultValues: {
       name: '',
@@ -100,6 +100,12 @@ export default function AddEditClassModal({
       students: [],
     },
     mode: 'onChange', // Validate real-time
+  });
+
+  // Watch form values để trigger re-render khi values thay đổi
+  const watchedValues = useWatch({
+    control,
+    name: ['name', 'tuition', 'startDate', 'schedules'],
   });
   const {
     fields: scheduleFields,
@@ -184,26 +190,29 @@ export default function AddEditClassModal({
   };
 
   // Kiểm tra xem bước hiện tại có thể chuyển tiếp không
-  const canProceed = () => {
+  const canProceed = useMemo(() => {
     if (activeStep === 0) {
-      const currentValues = getValues();
+      const [name, tuition, startDate] = watchedValues;
       const requiredFieldsValid =
         !errors.name && !errors.tuition && !errors.startDate;
-      const hasRequiredValues =
-        currentValues.name?.trim() &&
-        currentValues.tuition &&
-        currentValues.startDate;
+      const hasRequiredValues = name?.trim() && tuition && startDate;
 
       return requiredFieldsValid && hasRequiredValues;
     }
 
     if (activeStep === 1) {
-      const currentValues = getValues();
-      return currentValues.schedules && currentValues.schedules.length > 0;
+      const schedules = watchedValues[3]; // schedules là index thứ 4
+      return schedules && schedules.length > 0;
     }
 
     return true;
-  };
+  }, [
+    activeStep,
+    watchedValues,
+    errors.name,
+    errors.tuition,
+    errors.startDate,
+  ]);
 
   const handleBack = () => setActiveStep(prev => prev - 1);
 
@@ -294,7 +303,7 @@ export default function AddEditClassModal({
           <Button
             onClick={handleNext}
             variant="contained"
-            disabled={!canProceed()}
+            disabled={!canProceed}
             sx={{ minWidth: 100 }}
           >
             Tiếp

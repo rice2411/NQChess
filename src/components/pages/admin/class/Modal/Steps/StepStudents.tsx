@@ -58,14 +58,32 @@ export default function StepStudents({
   const [addSession, setAddSession] = React.useState<string>('');
 
   // Lấy schedules từ form
-  const schedules =
-    typeof window !== 'undefined' && getValues
-      ? getValues('schedules') || []
-      : [];
-  const sessionOptions = schedules.map((schedule: any) => ({
-    value: schedule.label,
-    label: schedule.label,
-  }));
+  const [sessionOptions, setSessionOptions] = React.useState<
+    { value: string; label: string }[]
+  >([]);
+
+  // Watch schedules để cập nhật sessionOptions
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && getValues) {
+      const schedules = getValues('schedules') || [];
+      const options = schedules.map((schedule: any) => ({
+        value: schedule.label,
+        label: schedule.label,
+      }));
+      setSessionOptions(options);
+
+      // Reset addSession nếu session hiện tại không còn tồn tại trong options
+      if (
+        addSession &&
+        !options.find(
+          (option: { value: string; label: string }) =>
+            option.value === addSession
+        )
+      ) {
+        setAddSession('');
+      }
+    }
+  }, [getValues, addSession]);
 
   // Load danh sách học sinh từ Firebase
   useClientEffect(() => {
@@ -130,17 +148,9 @@ export default function StepStudents({
   const getSessionName = (sessionId?: string) => {
     if (!sessionId) return 'Full buổi';
 
-    const schedules =
-      typeof window !== 'undefined' && getValues
-        ? getValues('schedules') || []
-        : [];
-    const sessionIndex = parseInt(sessionId.split('-')[1]);
-
-    if (sessionIndex >= 0 && schedules && sessionIndex < schedules.length) {
-      return schedules[sessionIndex].label;
-    }
-
-    return 'Full buổi';
+    // sessionId bây giờ là string của schedule (ví dụ: "08:00 - 09:00 Thứ 2")
+    // Không cần parse index nữa, trả về trực tiếp
+    return sessionId;
   };
 
   return (
@@ -232,7 +242,14 @@ export default function StepStudents({
           <RadioGroup
             row
             value={addType}
-            onChange={e => setAddType(e.target.value as EStudentClassType)}
+            onChange={e => {
+              const newType = e.target.value as EStudentClassType;
+              setAddType(newType);
+              // Reset addSession khi chuyển sang Full buổi
+              if (newType === EStudentClassType.FULL) {
+                setAddSession('');
+              }
+            }}
             sx={{ mb: 2 }}
           >
             <FormControlLabel
@@ -247,24 +264,33 @@ export default function StepStudents({
             />
           </RadioGroup>
           {addType === EStudentClassType.HALF && (
-            <TextField
-              select
-              label="Chọn buổi học"
-              value={addSession}
-              onChange={e => setAddSession(e.target.value)}
-              size="small"
-              fullWidth
-              sx={{ mb: 2 }}
-              InputLabelProps={{ shrink: true }}
-            >
-              {(sessionOptions || []).map(
-                (option: { value: string; label: string }) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                )
+            <>
+              {sessionOptions.length > 0 ? (
+                <TextField
+                  select
+                  label="Chọn buổi học"
+                  value={addSession}
+                  onChange={e => setAddSession(e.target.value)}
+                  size="small"
+                  fullWidth
+                  sx={{ mb: 2 }}
+                  InputLabelProps={{ shrink: true }}
+                >
+                  {sessionOptions.map(
+                    (option: { value: string; label: string }) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    )
+                  )}
+                </TextField>
+              ) : (
+                <Typography variant="body2" color="warning.main" sx={{ mb: 2 }}>
+                  Chưa có buổi học nào được tạo. Vui lòng quay lại bước 2 để
+                  thêm buổi học.
+                </Typography>
               )}
-            </TextField>
+            </>
           )}
           <Button
             fullWidth
@@ -274,7 +300,8 @@ export default function StepStudents({
             disabled={
               !selectedStudents ||
               (selectedStudents && selectedStudents.length === 0) ||
-              (addType === EStudentClassType.HALF && !addSession) ||
+              (addType === EStudentClassType.HALF &&
+                (!addSession || sessionOptions.length === 0)) ||
               loading
             }
           >

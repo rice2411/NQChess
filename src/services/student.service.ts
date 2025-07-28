@@ -262,7 +262,7 @@ export class StudentService {
       }
 
       // Sắp xếp
-      constraints.push(orderBy('createdAt', 'desc'));
+      constraints.push(orderBy('fullName'));
 
       // Tính offset cho traditional pagination
       const offset = (page - 1) * pageSize;
