@@ -3,10 +3,7 @@
 import {
   AppBar,
   Toolbar,
-  Box,
   IconButton,
-  Stack,
-  Container,
   Typography,
   Button,
   Menu,
@@ -25,30 +22,13 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
 import { useState, useEffect } from 'react';
-import { useTheme, alpha } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { useAuthStore } from '@/store/useAuthStore';
 import { signOutUser } from '@/lib/firebase-auth';
 import { useRouter } from 'next/navigation';
 import { AccountCircle } from '@mui/icons-material';
 
-const NAV_ICONS = [
-  { label: 'Home', icon: <HomeIcon fontSize="inherit" />, key: 'home' },
-  {
-    label: 'Bạn bè',
-    icon: <PeopleAltIcon fontSize="inherit" />,
-    key: 'friends',
-  },
-  {
-    label: 'Video',
-    icon: <OndemandVideoIcon fontSize="inherit" />,
-    key: 'video',
-  },
-  { label: 'Chợ', icon: <StorefrontIcon fontSize="inherit" />, key: 'market' },
-  { label: 'Nhóm', icon: <GroupsIcon fontSize="inherit" />, key: 'groups' },
-];
-
 export default function Navbar() {
-  const [selected, setSelected] = useState('home');
   const theme = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -130,94 +110,6 @@ export default function Navbar() {
         >
           Như Quỳnh Chess
         </Typography>
-        <Container
-          maxWidth="sm"
-          disableGutters
-          // sx={{ py: 4, pt: { xs: 10, sm: 12 }, px: 0 }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <Box sx={{ flexGrow: 1 }}>
-              <Stack
-                direction="row"
-                spacing={0}
-                alignItems="center"
-                sx={{
-                  height: { xs: 44, sm: 52 },
-                  width: '100%',
-                  justifyContent: 'space-between',
-                  px: 0,
-                  position: 'relative',
-                  zIndex: 2,
-                  '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    bottom: 0,
-                    left: `calc(${(NAV_ICONS.findIndex(item => item.key === selected) * 90) / NAV_ICONS.length}% + ${15 * NAV_ICONS.findIndex(item => item.key === selected)}px)`,
-                    width: `${90 / NAV_ICONS.length}%`,
-                    height: '3px',
-                    backgroundColor: theme.palette.primary.main,
-                    transition: 'left 0.3s ease-in-out',
-                    zIndex: 1,
-                  },
-                }}
-              >
-                {NAV_ICONS.map(item => {
-                  const isActive = selected === item.key;
-                  return (
-                    <Tooltip
-                      key={item.key}
-                      title={item.label}
-                      placement="bottom"
-                      arrow
-                      enterDelay={500}
-                      leaveDelay={0}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          width: `${90 / NAV_ICONS.length}% `,
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          backgroundColor: 'transparent',
-                          transition: 'background 0.2s',
-                          '&:hover': {
-                            backgroundColor: alpha(
-                              theme.palette.primary.main,
-                              0.06
-                            ),
-                          },
-                          borderRadius: 0,
-                          p: 1,
-                          height: '100%',
-                        }}
-                        onClick={() => setSelected(item.key)}
-                      >
-                        <IconButton
-                          color={isActive ? 'primary' : 'default'}
-                          sx={{
-                            fontSize: { xs: 22, sm: 28 },
-                            borderRadius: 0,
-                            color: isActive
-                              ? theme.palette.primary.main
-                              : undefined,
-                            background: 'transparent',
-                            '&:hover': {
-                              backgroundColor: 'transparent',
-                            },
-                          }}
-                        >
-                          {item.icon}
-                        </IconButton>
-                      </Box>
-                    </Tooltip>
-                  );
-                })}
-              </Stack>
-            </Box>
-          </Box>
-        </Container>
         {user ? (
           <>
             <Tooltip title="Tài khoản" placement="bottom" arrow>
@@ -242,13 +134,17 @@ export default function Navbar() {
                 vertical: 'top',
                 horizontal: 'right',
               }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    marginTop: 1,
+                    minWidth: 200,
+                  },
+                },
+              }}
+              disableScrollLock={true}
+              keepMounted={false}
             >
-              <MenuItem onClick={() => router.push('/profile')}>
-                <ListItemIcon>
-                  <PersonIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Hồ sơ</ListItemText>
-              </MenuItem>
               <MenuItem onClick={() => router.push('/dashboard')}>
                 <ListItemIcon>
                   <DashboardIcon fontSize="small" />

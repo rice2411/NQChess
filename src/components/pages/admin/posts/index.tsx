@@ -33,6 +33,7 @@ import {
   Publish as PublishIcon,
   Archive as ArchiveIcon,
   Search as SearchIcon,
+  AddCircle as AddCircleIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -75,6 +76,7 @@ export default function PostsPageComponent() {
     severity: 'success' | 'error' | 'info';
   }>({ open: false, message: '', severity: 'success' });
   const [mounted, setMounted] = useState(false);
+  const [isAddingBulkPosts, setIsAddingBulkPosts] = useState(false);
 
   // Pagination hook
   const {
@@ -163,6 +165,87 @@ export default function PostsPageComponent() {
 
   function handleCloseCreateDialog() {
     setIsCreateModalOpen(false);
+  }
+
+  // Hàm tạo 100 bài post mẫu
+  async function handleAddBulkPosts() {
+    if (!mounted || !modalConfirm) return;
+
+    modalConfirm.confirm(
+      async () => {
+        setIsAddingBulkPosts(true);
+        setGlobalLoading(true);
+
+        try {
+          const categories = [
+            'Công nghệ',
+            'Giáo dục',
+            'Thể thao',
+            'Giải trí',
+            'Kinh doanh',
+          ];
+          const statuses: Post['status'][] = ['draft', 'published'];
+
+          for (let i = 1; i <= 100; i++) {
+            const randomCategory =
+              categories[Math.floor(Math.random() * categories.length)];
+            const randomStatus =
+              statuses[Math.floor(Math.random() * statuses.length)];
+
+            const postData = {
+              title: `Bài viết mẫu số ${i}`,
+              slug: `bai-viet-mau-so-${i}`,
+              excerpt: `Đây là phần tóm tắt của bài viết mẫu số ${i}. Bài viết này chứa nội dung mẫu để test hệ thống.`,
+              content: `<h2>Tiêu đề chính</h2><p>Đây là nội dung chi tiết của bài viết mẫu số ${i}. Bài viết này được tạo tự động để test hệ thống quản lý bài viết.</p><h3>Phần 1</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p><h3>Phần 2</h3><p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>`,
+              category: randomCategory,
+              status: randomStatus,
+              tags: [`tag-${i}`, 'mẫu', 'test'],
+              featuredImage:
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
+              images: [
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
+              ],
+              authorId: 'system',
+            };
+
+            await postService.createPost(postData);
+
+            // Hiển thị progress mỗi 10 bài viết
+            if (i % 10 === 0) {
+              setSnackbar({
+                open: true,
+                message: `Đã tạo ${i}/100 bài viết...`,
+                severity: 'info',
+              });
+            }
+          }
+
+          setSnackbar({
+            open: true,
+            message: 'Đã tạo thành công 100 bài viết mẫu!',
+            severity: 'success',
+          });
+
+          // Refresh danh sách bài viết
+          fetchPosts(search, true);
+        } catch (error) {
+          console.error('Error creating bulk posts:', error);
+          setSnackbar({
+            open: true,
+            message: 'Có lỗi xảy ra khi tạo bài viết hàng loạt',
+            severity: 'error',
+          });
+        } finally {
+          setIsAddingBulkPosts(false);
+          setGlobalLoading(false);
+        }
+      },
+      {
+        message:
+          'Bạn có chắc chắn muốn tạo 100 bài viết mẫu? Hành động này sẽ tạo ra nhiều bài viết test trong hệ thống.',
+      }
+    );
   }
 
   async function handleSave() {
@@ -394,6 +477,15 @@ export default function PostsPageComponent() {
               onClick={handleOpenCreateDialog}
             >
               Thêm bài viết
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<AddCircleIcon />}
+              onClick={handleAddBulkPosts}
+              disabled={isAddingBulkPosts}
+            >
+              {isAddingBulkPosts ? 'Đang tạo...' : 'Thêm 100 bài viết mẫu'}
             </Button>
           </Box>
         </CardContent>

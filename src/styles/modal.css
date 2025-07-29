@@ -14,31 +14,48 @@
   position: relative !important;
 }
 
-/* Auto-disable body scroll when any modal is open */
-.MuiModal-root ~ body,
-.MuiModal-root ~ html {
+/* Auto-disable body scroll when Dialog/Modal is open (not Menu) */
+.MuiDialog-root ~ body,
+.MuiDialog-root ~ html {
   overflow: hidden !important;
 }
 
 /* Alternative: Use CSS-only approach with :has() selector (modern browsers) */
-html:has(.MuiModal-root) {
+html:has(.MuiDialog-root) {
   overflow: hidden !important;
 }
 
-body:has(.MuiModal-root) {
+body:has(.MuiDialog-root) {
   overflow: hidden !important;
   position: fixed !important;
   width: 100% !important;
 }
 
 /* Fallback for older browsers */
-.MuiModal-root {
+.MuiDialog-root {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   z-index: 1300 !important;
+}
+
+/* Prevent layout shift by always showing scrollbar */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Prevent Menu from causing layout shift */
+.MuiMenu-root {
+  position: fixed !important;
+  z-index: 1300 !important;
+}
+
+.MuiMenu-paper {
+  position: absolute !important;
+  margin: 0 !important;
+  overflow: visible !important;
 }
 
 /* Ensure body scroll is disabled when modal is open */

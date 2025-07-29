@@ -159,10 +159,19 @@ export default function HomePage() {
           display: 'flex',
           gap: 3,
           flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'center',
         }}
       >
         {/* Cột trái - Thông tin giáo viên */}
-        <Box sx={{ width: { xs: '100%', md: '25%' }, minWidth: { md: 280 } }}>
+        <Box
+          sx={{
+            width: { xs: '100%', md: '25%' },
+            minWidth: { md: 280 },
+            position: 'fixed',
+            left: 10,
+            top: 70,
+          }}
+        >
           <Paper
             elevation={2}
             sx={{ p: 2, height: 'fit-content', position: 'sticky', top: 20 }}
@@ -186,7 +195,11 @@ export default function HomePage() {
                         primary={teacher.name}
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              component="span"
+                            >
                               {teacher.subject}
                             </Typography>
                             <Box
@@ -199,6 +212,7 @@ export default function HomePage() {
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
+                                component="span"
                                 sx={{ mr: 1 }}
                               >
                                 {teacher.experience} • {teacher.students} học
@@ -230,7 +244,7 @@ export default function HomePage() {
         </Box>
 
         {/* Cột giữa - Bài viết */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ flex: 1, maxWidth: '40%' }}>
           <Box
             sx={{
               display: 'flex',
@@ -280,7 +294,15 @@ export default function HomePage() {
         </Box>
 
         {/* Cột phải - Thông tin lớp học */}
-        <Box sx={{ width: { xs: '100%', md: '25%' }, minWidth: { md: 280 } }}>
+        <Box
+          sx={{
+            width: { xs: '100%', md: '25%' },
+            minWidth: { md: 280 },
+            position: 'fixed',
+            top: 70,
+            right: 10,
+          }}
+        >
           <Paper
             elevation={2}
             sx={{ p: 2, height: 'fit-content', position: 'sticky', top: 20 }}
@@ -306,7 +328,11 @@ export default function HomePage() {
                         primary={classItem.name}
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              component="span"
+                            >
                               {classItem.subject} • {classItem.teacher}
                             </Typography>
                             <Box
@@ -323,6 +349,7 @@ export default function HomePage() {
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
+                                component="span"
                                 sx={{ mr: 1 }}
                               >
                                 {classItem.schedule}
@@ -342,6 +369,7 @@ export default function HomePage() {
                               <Typography
                                 variant="caption"
                                 color="text.secondary"
+                                component="span"
                               >
                                 {classItem.location} • {classItem.students} học
                                 sinh
