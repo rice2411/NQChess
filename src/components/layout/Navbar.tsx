@@ -13,14 +13,8 @@ import {
   Divider,
   Tooltip,
 } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import GroupsIcon from '@mui/icons-material/Groups';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import PersonIcon from '@mui/icons-material/Person';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useAuthStore } from '@/store/useAuthStore';

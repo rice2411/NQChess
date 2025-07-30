@@ -20,15 +20,9 @@ import {
   Fab,
   Zoom,
   TextField,
-  InputAdornment,
   Card,
   CardContent,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material';
-import { Grid } from '@mui/material';
 import {
   Refresh as RefreshIcon,
   School as SchoolIcon,
@@ -39,7 +33,6 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   Search as SearchIcon,
   PersonSearch as PersonSearchIcon,
-  School as SchoolSearchIcon,
 } from '@mui/icons-material';
 import { postService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
@@ -57,7 +50,6 @@ export default function HomePageComponent() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // State cho tìm kiếm học sinh
   const [searchForm, setSearchForm] = useState({
