@@ -102,7 +102,6 @@ export default function StudentManagement() {
           pageSize,
           searchText
         );
-
         setStudents(result.students);
         paginationActions.setHasMore(result.hasMore);
         paginationActions.setTotal(result.total);
@@ -340,11 +339,7 @@ export default function StudentManagement() {
                   </Box>
                 </TableCell>
                 <TableCell>{student.phoneNumber}</TableCell>
-                <TableCell>
-                  {student.dateOfBirth
-                    ? new Date(student.dateOfBirth).toLocaleDateString('vi-VN')
-                    : ''}
-                </TableCell>
+                <TableCell>{student.dateOfBirth}</TableCell>
                 <TableCell>
                   {student.gender === EGender.MALE ? 'Nam' : 'Nữ'}
                 </TableCell>

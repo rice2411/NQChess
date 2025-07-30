@@ -123,6 +123,62 @@ export class StudentService {
   }
 
   /**
+   * Tìm kiếm học sinh theo đầy đủ thông tin (fullName, phoneNumber, dateOfBirth)
+   * Sử dụng cho form tìm kiếm của phụ huynh
+   */
+  static async searchStudentByFullInfo(
+    fullName: string,
+    phoneNumber: string,
+    dateOfBirth: string
+  ): Promise<IStudent | null> {
+    try {
+      // Validate input
+      if (!fullName.trim() || !phoneNumber.trim() || !dateOfBirth.trim()) {
+        throw new Error('Vui lòng nhập đầy đủ thông tin tìm kiếm');
+      }
+
+      // Chuẩn hóa dữ liệu
+      const normalizedFullName = fullName.trim().toLowerCase();
+      const normalizedPhoneNumber = phoneNumber.trim();
+
+      // Query theo số điện thoại trước (vì số điện thoại thường unique hơn)
+      const phoneQuery = query(
+        collection(db, COLLECTIONS.STUDENTS),
+        where('phoneNumber', '==', normalizedPhoneNumber)
+      );
+      const phoneSnapshot = await getDocs(phoneQuery);
+
+      if (phoneSnapshot.empty) {
+        return null;
+      }
+
+      // Filter kết quả theo tên và ngày sinh
+      const matchingStudents = phoneSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }) as IStudent)
+        .filter(student => {
+          const studentFullName = student.fullName?.toLowerCase() || '';
+          const studentDateOfBirth = student.dateOfBirth || '';
+
+          // Kiểm tra tên (cho phép tìm kiếm một phần tên)
+          const nameMatch =
+            studentFullName.includes(normalizedFullName) ||
+            normalizedFullName.includes(studentFullName);
+
+          // Kiểm tra ngày sinh (chính xác)
+          const dateMatch = studentDateOfBirth === dateOfBirth;
+
+          return nameMatch && dateMatch;
+        });
+
+      // Trả về học sinh đầu tiên nếu tìm thấy
+      return matchingStudents.length > 0 ? matchingStudents[0] : null;
+    } catch (error) {
+      console.error('Error searching student by full info:', error);
+      throw new Error('Không thể tìm kiếm học sinh');
+    }
+  }
+
+  /**
    * Lọc học sinh theo giới tính
    */
   static async getStudentsByGender(gender: EGender): Promise<IStudent[]> {
@@ -544,7 +600,7 @@ export class StudentService {
         const month =
           birthMonths[Math.floor(Math.random() * birthMonths.length)];
         const day = birthDays[Math.floor(Math.random() * birthDays.length)];
-        const dateOfBirth = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const dateOfBirth = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
 
         // Tạo giới tính ngẫu nhiên
         const gender = Math.random() > 0.5 ? EGender.MALE : EGender.FEMALE;
