@@ -25,6 +25,7 @@ import { StudentService } from '@/services/student.service';
 import { AttendanceService } from '@/services/attendance.service';
 import { TuitionService } from '@/services/tuition.service';
 import { ClassService } from '@/services/class.service';
+import AttendanceHistory from './AttendanceHistory';
 
 interface SearchForm {
   fullName: string;
@@ -727,44 +728,13 @@ export default function SearchStudent() {
               </Box>
 
               {/* Lịch sử điểm danh gần đây */}
-              <Box>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Lịch sử điểm danh gần đây
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {studentInfo.recentAttendance.map((attendance, index) => (
-                    <Paper
-                      key={index}
-                      elevation={1}
-                      sx={{ p: 2, backgroundColor: 'grey.50' }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <Typography variant="body1" fontWeight={500}>
-                          {attendance.date}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {attendance.status}
-                        </Typography>
-                      </Box>
-                      {attendance.note && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mt: 1 }}
-                        >
-                          Ghi chú: {attendance.note}
-                        </Typography>
-                      )}
-                    </Paper>
-                  ))}
-                </Box>
-              </Box>
+              <AttendanceHistory
+                recentAttendance={studentInfo.recentAttendance}
+                className={studentInfo.classInfo?.name || 'Lớp cờ vua'}
+                classSchedule={
+                  studentInfo.classInfo?.schedule || 'Chưa có lịch'
+                }
+              />
             </Box>
           </Paper>
         </Box>

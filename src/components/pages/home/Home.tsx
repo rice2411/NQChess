@@ -41,6 +41,7 @@ import { StudentService } from '@/services/student.service';
 import { AttendanceService } from '@/services/attendance.service';
 import { TuitionService } from '@/services/tuition.service';
 import { EUserRole } from '@/interfaces/user.interface';
+import AttendanceHistory from './AttendanceHistory';
 
 export default function HomePageComponent() {
   const [posts, setPosts] = useState<PostData[]>([]);
@@ -1031,60 +1032,233 @@ export default function HomePageComponent() {
               <Typography variant="h6" fontWeight={600} gutterBottom>
                 Thống kê điểm danh
               </Typography>
-              <Paper elevation={1} sx={{ p: 2, backgroundColor: 'grey.50' }}>
+
+              {/* Progress Bar chính */}
+              <Box sx={{ mb: 3 }}>
                 <Box
                   sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr 1fr' },
-                    gap: 2,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1,
                   }}
                 >
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Tổng buổi học
-                    </Typography>
-                    <Typography variant="body1" fontWeight={500}>
-                      {studentInfo.attendance.totalSessions}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Có mặt
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      fontWeight={500}
-                      color="success.main"
-                    >
-                      {studentInfo.attendance.attendedSessions}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Vắng
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      fontWeight={500}
-                      color="error.main"
-                    >
-                      {studentInfo.attendance.absentSessions}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Tỷ lệ đi học
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      fontWeight={500}
-                      color="primary"
-                    >
-                      {studentInfo.attendance.attendanceRate}%
-                    </Typography>
-                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Tỷ lệ đi học
+                  </Typography>
+                  <Typography variant="h6" fontWeight={700} color="primary">
+                    {studentInfo.attendance.attendanceRate}%
+                  </Typography>
                 </Box>
-              </Paper>
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: 12,
+                    backgroundColor: 'grey.200',
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: `${studentInfo.attendance.attendanceRate}%`,
+                      height: '100%',
+                      background:
+                        'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
+                      borderRadius: 6,
+                      transition: 'width 0.8s ease-in-out',
+                      boxShadow: '0 2px 4px rgba(76, 175, 80, 0.3)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Cards thống kê */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' },
+                  gap: 2,
+                }}
+              >
+                {/* Tổng buổi học */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    background:
+                      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    borderRadius: 3,
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      width: 40,
+                      height: 40,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '50%',
+                    },
+                  }}
+                >
+                  <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {studentInfo.attendance.totalSessions}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Tổng buổi học
+                  </Typography>
+                </Paper>
+
+                {/* Có mặt */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    background:
+                      'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                    color: 'white',
+                    borderRadius: 3,
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      width: 40,
+                      height: 40,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '50%',
+                    },
+                  }}
+                >
+                  <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {studentInfo.attendance.attendedSessions}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Có mặt
+                  </Typography>
+                </Paper>
+
+                {/* Vắng */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    background:
+                      'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                    color: 'white',
+                    borderRadius: 3,
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      width: 40,
+                      height: 40,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '50%',
+                    },
+                  }}
+                >
+                  <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {studentInfo.attendance.absentSessions}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Vắng
+                  </Typography>
+                </Paper>
+
+                {/* Đi muộn */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    background:
+                      'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
+                    color: 'white',
+                    borderRadius: 3,
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      width: 40,
+                      height: 40,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '50%',
+                    },
+                  }}
+                >
+                  <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
+                    {studentInfo.attendance.lateSessions}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Đi muộn
+                  </Typography>
+                </Paper>
+              </Box>
+
+              {/* Chi tiết bổ sung */}
+              <Box sx={{ mt: 2 }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    backgroundColor: 'grey.50',
+                    borderRadius: 3,
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                      gap: 2,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: 'success.main',
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Có phép: {studentInfo.attendance.excusedSessions} buổi
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: 'warning.main',
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Đi muộn: {studentInfo.attendance.lateSessions} buổi
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Paper>
+              </Box>
             </Box>
 
             {/* Điểm số */}
@@ -1127,52 +1301,11 @@ export default function HomePageComponent() {
             </Box>
 
             {/* Lịch sử điểm danh gần đây */}
-            <Box>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
-                Lịch sử điểm danh gần đây
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {studentInfo.recentAttendance.map(
-                  (attendance: any, index: number) => (
-                    <Paper
-                      key={index}
-                      elevation={1}
-                      sx={{ p: 2, backgroundColor: 'grey.50' }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <Typography variant="body1" fontWeight={500}>
-                          {attendance.date}
-                        </Typography>
-                        <Chip
-                          label={attendance.status}
-                          color={
-                            attendance.status === 'Có mặt'
-                              ? 'success'
-                              : 'warning'
-                          }
-                          size="small"
-                        />
-                      </Box>
-                      {attendance.note && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mt: 1 }}
-                        >
-                          Ghi chú: {attendance.note}
-                        </Typography>
-                      )}
-                    </Paper>
-                  )
-                )}
-              </Box>
-            </Box>
+            <AttendanceHistory
+              recentAttendance={studentInfo.recentAttendance}
+              className={studentInfo.classInfo?.name || 'Lớp cờ vua'}
+              classSchedule={studentInfo.classInfo?.schedule || 'Chưa có lịch'}
+            />
           </Paper>
         </Box>
       )}
